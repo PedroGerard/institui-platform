@@ -3,11 +3,14 @@
 import { useEffect, useState } from 'react';
 import { AlertCircle, Download, FileSpreadsheet, FileText, RefreshCw } from 'lucide-react';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
+import { AssociationRequired } from '@/components/layout/AssociationRequired';
+import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
 import { api } from '@/services/api';
 import { TreasuryReportDTO, TreasuryReportType } from '@/types/dtos';
-import { DEFAULT_ASSOCIATION_ID, formatDate, treasuryReportTypeLabels } from '@/lib/institutional';
+import { formatDate, treasuryReportTypeLabels } from '@/lib/institutional';
 
 export default function TreasuryReportsPage() {
+    const { associationId, hasAssociation } = useActiveAssociation();
     const [reports, setReports] = useState<TreasuryReportDTO[]>([]);
     const [type, setType] = useState<TreasuryReportType | ''>('');
     const [loading, setLoading] = useState(true);
@@ -16,11 +19,17 @@ export default function TreasuryReportsPage() {
     const [success, setSuccess] = useState<string | null>(null);
 
     async function loadData() {
+        if (!associationId) {
+            setReports([]);
+            setLoading(false);
+            return;
+        }
+
         try {
             setLoading(true);
             setError(null);
             setReports(await api.listTreasuryReports({
-                associationId: DEFAULT_ASSOCIATION_ID,
+                associationId,
                 type: type || undefined
             }));
         } catch (err: unknown) {
@@ -32,14 +41,18 @@ export default function TreasuryReportsPage() {
 
     useEffect(() => {
         loadData();
-    }, [type]);
+    }, [associationId, type]);
 
     async function generate(format: 'PDF' | 'XLS') {
         try {
             setGenerating(format);
             setError(null);
             setSuccess(null);
-            const report = await api.generateTreasuryPaymentReport(format, DEFAULT_ASSOCIATION_ID);
+            if (!associationId) {
+                throw new Error('Defina a associacao ativa antes de gerar relatorio.');
+            }
+
+            const report = await api.generateTreasuryPaymentReport(format, associationId);
             setSuccess(`${report.title} gerado.`);
             await loadData();
         } catch (err: unknown) {
@@ -79,7 +92,7 @@ export default function TreasuryReportsPage() {
                         <button
                             type="button"
                             onClick={() => generate('PDF')}
-                            disabled={Boolean(generating)}
+                            disabled={Boolean(generating) || !hasAssociation}
                             className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
                         >
                             <FileText size={16} />
@@ -88,7 +101,7 @@ export default function TreasuryReportsPage() {
                         <button
                             type="button"
                             onClick={() => generate('XLS')}
-                            disabled={Boolean(generating)}
+                            disabled={Boolean(generating) || !hasAssociation}
                             className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-60"
                         >
                             <FileSpreadsheet size={16} />
@@ -109,6 +122,8 @@ export default function TreasuryReportsPage() {
                         {success}
                     </div>
                 )}
+
+                {!hasAssociation && <AssociationRequired />}
 
                 <div className="overflow-x-auto rounded-lg border border-slate-800 bg-slate-900">
                     <div className="min-w-[860px]">

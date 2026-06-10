@@ -25,8 +25,6 @@ import {
     TreasuryReportType
 } from "@/types/dtos";
 
-export const DEFAULT_ASSOCIATION_ID = "e2098492-4217-4348-9c60-a8019b16260a";
-
 export const memberTypeLabels: Record<MemberType, string> = {
     FOUNDER: "Fundador",
     EFFECTIVE: "Efetivo",

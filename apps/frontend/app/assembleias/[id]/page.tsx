@@ -3,6 +3,8 @@
 import { FormEvent, use, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
+import { AssociationRequired } from '@/components/layout/AssociationRequired';
+import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
 import { api } from '@/services/api';
 import { AssemblyDTO, GeneratedDocumentDTO, MemberDTO } from '@/types/dtos';
 import { assemblyStatusLabels, assemblyTypeLabels, formatDate } from '@/lib/institutional';
@@ -13,6 +15,7 @@ const labelClass = "mb-2 block text-xs font-semibold uppercase text-slate-500";
 
 export default function AssemblyDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
+    const { associationId, hasAssociation } = useActiveAssociation();
     const [assembly, setAssembly] = useState<AssemblyDTO | null>(null);
     const [members, setMembers] = useState<MemberDTO[]>([]);
     const [loading, setLoading] = useState(true);
@@ -48,10 +51,8 @@ export default function AssemblyDetailPage({ params }: { params: Promise<{ id: s
         try {
             setLoading(true);
             setError(null);
-            const [assemblyData, memberData] = await Promise.all([
-                api.getAssembly(id),
-                api.listMembers()
-            ]);
+            const assemblyData = await api.getAssembly(id);
+            const memberData = await api.listMembers(associationId || assemblyData.associationId);
             setAssembly(assemblyData);
             setMembers(memberData);
             setMinutesContent(assemblyData.minutesContent || '');
@@ -72,7 +73,7 @@ export default function AssemblyDetailPage({ params }: { params: Promise<{ id: s
 
     useEffect(() => {
         loadData();
-    }, [id]);
+    }, [associationId, id]);
 
     async function addAttendance(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -210,6 +211,8 @@ export default function AssemblyDetailPage({ params }: { params: Promise<{ id: s
                         </a>
                     </div>
                 )}
+
+                {!hasAssociation && <AssociationRequired message="A tela usa a associacao da assembleia para carregar os membros, mas defina a associacao ativa no topo para operar o modulo com consistencia." />}
 
                 {loading ? (
                     <div className="rounded-lg border border-slate-800 bg-slate-900 p-8 text-center text-sm text-slate-400">Carregando assembleia...</div>

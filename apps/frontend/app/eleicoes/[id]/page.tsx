@@ -3,6 +3,8 @@
 import { FormEvent, use, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
+import { AssociationRequired } from '@/components/layout/AssociationRequired';
+import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
 import { api } from '@/services/api';
 import { ElectionDTO, ElectionSlateDTO, GovernanceRole, MemberDTO } from '@/types/dtos';
 import { electionSlateStatusLabels, electionStatusLabels, formatDate, governanceRoleLabels, memberStatusLabels } from '@/lib/institutional';
@@ -13,6 +15,7 @@ const labelClass = "mb-2 block text-xs font-semibold uppercase text-slate-500";
 
 export default function ElectionDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
+    const { associationId, hasAssociation } = useActiveAssociation();
     const [election, setElection] = useState<ElectionDTO | null>(null);
     const [members, setMembers] = useState<MemberDTO[]>([]);
     const [loading, setLoading] = useState(true);
@@ -39,10 +42,8 @@ export default function ElectionDetailPage({ params }: { params: Promise<{ id: s
         try {
             setLoading(true);
             setError(null);
-            const [electionData, memberData] = await Promise.all([
-                api.getElection(id),
-                api.listMembers()
-            ]);
+            const electionData = await api.getElection(id);
+            const memberData = await api.listMembers(associationId || electionData.associationId);
             setElection(electionData);
             setMembers(memberData);
             setVotesBySlate(Object.fromEntries(electionData.slates.map((slate) => [slate.id, slate.votes ? String(slate.votes) : ''])));
@@ -59,7 +60,7 @@ export default function ElectionDetailPage({ params }: { params: Promise<{ id: s
 
     useEffect(() => {
         loadData();
-    }, [id]);
+    }, [associationId, id]);
 
     async function addSlate(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -167,6 +168,8 @@ export default function ElectionDetailPage({ params }: { params: Promise<{ id: s
                         {success}
                     </div>
                 )}
+
+                {!hasAssociation && <AssociationRequired message="A tela usa a associacao da eleicao para carregar membros, mas defina a associacao ativa no topo para operar eleicoes e mandatos com consistencia." />}
 
                 {loading ? (
                     <div className="rounded-lg border border-slate-800 bg-slate-900 p-8 text-center text-sm text-slate-400">Carregando eleicao...</div>

@@ -2,15 +2,14 @@
 "use client";
 
 import InstitutionalLayout from "@/components/layout/InstitutionalLayout";
+import { AssociationRequired } from "@/components/layout/AssociationRequired";
 import { CallAssemblyForm } from "@/components/assemblies/CallAssemblyForm";
+import { useActiveAssociation } from "@/contexts/ActiveAssociationContext";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
-
-const DEMO_ASSOCIATION_ID = "e87606f2-31eb-47d3-9f17-827471900b9a";
-
 export default function CallAssemblyPage() {
-
+    const { associationId, hasAssociation } = useActiveAssociation();
 
     return (
         <InstitutionalLayout>
@@ -27,13 +26,17 @@ export default function CallAssemblyPage() {
                 </div>
 
                 <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 md:p-8">
-                    <CallAssemblyForm
-                        associationId={DEMO_ASSOCIATION_ID}
-                        onSuccess={() => {
-                            // Optional: Redirect after delay or just show success message in form
-                            // router.push("/"); 
-                        }}
-                    />
+                    {!hasAssociation ? (
+                        <AssociationRequired message="Informe a associacao ativa no topo antes de convocar uma assembleia." />
+                    ) : (
+                        <CallAssemblyForm
+                            associationId={associationId}
+                            onSuccess={() => {
+                                // Optional: Redirect after delay or just show success message in form
+                                // router.push("/");
+                            }}
+                        />
+                    )}
                 </div>
             </div>
         </InstitutionalLayout>

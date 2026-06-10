@@ -3,12 +3,15 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
+import { AssociationRequired } from '@/components/layout/AssociationRequired';
+import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
 import { api } from '@/services/api';
 import { GovernanceBodyDTO } from '@/types/dtos';
 import { formatDate, governanceBodyCategoryLabels } from '@/lib/institutional';
 import { AlertCircle, Eye, Network, Plus, RefreshCw } from 'lucide-react';
 
 export default function GovernanceBodiesPage() {
+    const { associationId, hasAssociation } = useActiveAssociation();
     const [bodies, setBodies] = useState<GovernanceBodyDTO[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -19,10 +22,16 @@ export default function GovernanceBodiesPage() {
     );
 
     async function loadBodies() {
+        if (!associationId) {
+            setBodies([]);
+            setLoading(false);
+            return;
+        }
+
         try {
             setLoading(true);
             setError(null);
-            setBodies(await api.listGovernanceBodies());
+            setBodies(await api.listGovernanceBodies({ associationId }));
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : 'Erro ao carregar orgaos.');
         } finally {
@@ -32,7 +41,7 @@ export default function GovernanceBodiesPage() {
 
     useEffect(() => {
         loadBodies();
-    }, []);
+    }, [associationId]);
 
     return (
         <InstitutionalLayout title="Orgaos de governanca" activePath="/orgaos">
@@ -67,6 +76,8 @@ export default function GovernanceBodiesPage() {
                         {error}
                     </div>
                 )}
+
+                {!hasAssociation && <AssociationRequired />}
 
                 <div className="overflow-x-auto rounded-lg border border-slate-800 bg-slate-900">
                     <div className="min-w-[900px]">

@@ -5,8 +5,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AlertCircle, ArrowLeft, CheckCircle, Save } from 'lucide-react';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
+import { AssociationRequired } from '@/components/layout/AssociationRequired';
+import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
 import { api } from '@/services/api';
-import { DEFAULT_ASSOCIATION_ID } from '@/lib/institutional';
 import { FinancialAccount } from '@/types/financial';
 
 const inputClass = "w-full rounded-lg border border-slate-800 bg-slate-950 px-4 py-2.5 text-sm text-slate-100 outline-none focus:border-blue-500";
@@ -14,6 +15,7 @@ const labelClass = "mb-2 block text-xs font-semibold uppercase text-slate-500";
 
 export default function NewTransactionPage() {
     const router = useRouter();
+    const { associationId, hasAssociation } = useActiveAssociation();
     const [type, setType] = useState<'REVENUE' | 'EXPENSE'>('REVENUE');
     const [accounts, setAccounts] = useState<FinancialAccount[]>([]);
     const [loading, setLoading] = useState(false);
@@ -30,15 +32,20 @@ export default function NewTransactionPage() {
 
     useEffect(() => {
         async function fetchAccounts() {
+            if (!associationId) {
+                setAccounts([]);
+                return;
+            }
+
             try {
-                setAccounts(await api.listFinancialAccounts(DEFAULT_ASSOCIATION_ID));
+                setAccounts(await api.listFinancialAccounts(associationId));
             } catch (err: unknown) {
                 setError(err instanceof Error ? err.message : 'Erro ao carregar plano de contas.');
             }
         }
 
         fetchAccounts();
-    }, []);
+    }, [associationId]);
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -47,7 +54,11 @@ export default function NewTransactionPage() {
         setSuccess(false);
 
         try {
-            await api.createTreasuryTransaction(type, DEFAULT_ASSOCIATION_ID, {
+            if (!associationId) {
+                throw new Error('Defina a associacao ativa antes de registrar um lancamento.');
+            }
+
+            await api.createTreasuryTransaction(type, associationId, {
                 ...formData,
                 amount: Number(formData.amount),
                 date: new Date(`${formData.date}T00:00:00.000Z`).toISOString()
@@ -88,6 +99,8 @@ export default function NewTransactionPage() {
                         Lancamento registrado com sucesso.
                     </div>
                 )}
+
+                {!hasAssociation && <AssociationRequired message="Informe a associacao ativa no topo antes de registrar um lancamento financeiro." />}
 
                 <form onSubmit={handleSubmit} className="space-y-6 rounded-lg border border-slate-800 bg-slate-900 p-6">
                     <fieldset>
@@ -146,7 +159,7 @@ export default function NewTransactionPage() {
                     </div>
 
                     <div className="flex justify-end border-t border-slate-800 pt-6">
-                        <button type="submit" disabled={loading} className="app-primary-button inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60">
+                        <button type="submit" disabled={loading || !hasAssociation} className="app-primary-button inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60">
                             <Save size={16} aria-hidden="true" />
                             {loading ? 'Gravando...' : 'Gravar lancamento'}
                         </button>

@@ -3,12 +3,15 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
+import { AssociationRequired } from '@/components/layout/AssociationRequired';
+import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
 import { api } from '@/services/api';
 import { ElectionDTO, ElectionStatus } from '@/types/dtos';
 import { electionStatusLabels, formatDate } from '@/lib/institutional';
 import { AlertCircle, CheckCircle, Plus, RefreshCw, Vote } from 'lucide-react';
 
 export default function ElectionsPage() {
+    const { associationId, hasAssociation } = useActiveAssociation();
     const [elections, setElections] = useState<ElectionDTO[]>([]);
     const [status, setStatus] = useState<ElectionStatus | ''>('');
     const [loading, setLoading] = useState(true);
@@ -20,10 +23,16 @@ export default function ElectionsPage() {
     }), [elections]);
 
     async function loadData() {
+        if (!associationId) {
+            setElections([]);
+            setLoading(false);
+            return;
+        }
+
         try {
             setLoading(true);
             setError(null);
-            setElections(await api.listElections(status ? { status } : undefined));
+            setElections(await api.listElections({ associationId, ...(status ? { status } : {}) }));
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : 'Erro ao carregar eleicoes.');
         } finally {
@@ -33,7 +42,7 @@ export default function ElectionsPage() {
 
     useEffect(() => {
         loadData();
-    }, [status]);
+    }, [associationId, status]);
 
     return (
         <InstitutionalLayout title="Eleicoes" activePath="/eleicoes">
@@ -78,6 +87,8 @@ export default function ElectionsPage() {
                         {error}
                     </div>
                 )}
+
+                {!hasAssociation && <AssociationRequired />}
 
                 <div className="overflow-x-auto rounded-lg border border-slate-800 bg-slate-900">
                     <div className="min-w-[920px]">
