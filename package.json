@@ -1,0 +1,13 @@
+{
+    "name": "institui-plus-monorepo",
+    "private": true,
+    "workspaces": [
+        "apps/*",
+        "packages/*"
+    ],
+    "scripts": {
+        "dev:frontend": "npm run dev --workspace=apps/frontend",
+        "dev:api": "npm run dev --workspace=apps/api",
+        "build": "npm run build --workspace=apps/api && npm run build --workspace=apps/frontend"
+    }
+}

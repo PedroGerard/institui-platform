@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2400 320" role="img" aria-label="Padrao visual do Instituto Incentive">
+  <defs>
+    <style>
+      .teal { fill: #006871; }
+      .orange { fill: #ff9507; }
+      .surface { fill: #f6f6f6; }
+      .white { fill: #ffffff; }
+      .line-teal { fill: none; stroke: #006871; stroke-width: 12; stroke-linecap: round; }
+      .line-orange { fill: none; stroke: #ff9507; stroke-width: 12; stroke-linecap: round; }
+      .line-white { fill: none; stroke: #ffffff; stroke-width: 12; stroke-linecap: round; }
+      .thin-white { fill: none; stroke: #ffffff; stroke-width: 6; stroke-linecap: round; }
+    </style>
+  </defs>
+
+  <rect width="2400" height="320" class="surface" />
+
+  <g>
+    <rect x="0" y="0" width="240" height="320" class="teal" />
+    <circle cx="72" cy="118" r="28" class="orange" />
+    <rect x="116" y="74" width="84" height="18" rx="9" class="orange" />
+    <rect x="60" y="122" width="142" height="18" rx="9" class="orange" opacity="0.92" />
+    <text x="60" y="178" fill="#ff9507" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700">Incentive</text>
+    <text x="158" y="145" fill="#f6f6f6" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700">Instituto</text>
+  </g>
+
+  <g transform="translate(240 0)">
+    <rect width="240" height="320" class="surface" />
+    <circle cx="188" cy="-22" r="160" class="line-teal" />
+    <circle cx="188" cy="-22" r="114" class="line-teal" />
+    <circle cx="188" cy="-22" r="70" class="line-teal" />
+  </g>
+
+  <g transform="translate(480 0)">
+    <rect width="240" height="320" class="orange" />
+    <path d="M62 0 L240 178" class="thin-white" />
+    <path d="M86 0 L240 154" class="thin-white" />
+    <path d="M110 0 L240 130" class="thin-white" />
+    <path d="M134 0 L240 106" class="thin-white" />
+    <path d="M158 0 L240 82" class="thin-white" />
+  </g>
+
+  <g transform="translate(720 0)">
+    <rect width="240" height="320" class="teal" />
+    <path d="M87 205 C28 178 18 104 50 58 C110 82 134 147 87 205Z" class="orange" />
+    <path d="M87 205 C142 178 164 108 136 62 C74 83 47 145 87 205Z" class="white" />
+    <path d="M34 230 C82 250 134 248 186 226" class="line-white" opacity="0.75" />
+  </g>
+
+  <g transform="translate(960 0)">
+    <rect width="240" height="320" class="orange" />
+    <path d="M120 54 L198 226 H42 Z" class="line-teal" />
+    <path d="M120 98 L164 206 H76 Z" class="line-teal" />
+    <path d="M120 141 L139 190 H101 Z" class="line-teal" />
+  </g>
+
+  <g transform="translate(1200 0)">
+    <rect width="240" height="320" class="teal" />
+    <path d="M78 209 C18 184 14 106 49 60 C110 82 132 148 78 209Z" class="orange" />
+    <path d="M78 209 C141 181 165 108 136 60 C72 82 43 148 78 209Z" class="white" />
+    <path d="M16 252 H224" stroke="#ff9507" stroke-width="5" stroke-dasharray="8 14" />
+  </g>
+
+  <g transform="translate(1440 0)">
+    <rect width="240" height="320" class="surface" />
+    <path d="M78 58 L198 260" class="line-teal" />
+    <path d="M118 58 L238 260" class="line-teal" />
+    <path d="M158 58 L278 260" class="line-teal" />
+    <path d="M38 58 L158 260" class="line-teal" />
+  </g>
+
+  <g transform="translate(1680 0)">
+    <rect width="240" height="320" class="orange" />
+    <circle cx="120" cy="140" r="82" class="white" />
+    <path d="M83 80 L127 214" class="teal" />
+    <path d="M112 73 L157 207" class="teal" />
+    <rect x="141" y="72" width="20" height="20" rx="3" class="orange" />
+    <rect x="171" y="102" width="16" height="18" rx="3" class="orange" />
+  </g>
+
+  <g transform="translate(1920 0)">
+    <rect width="240" height="320" class="teal" />
+    <path d="M67 62 L151 146 L97 200 L13 116 Z" class="line-white" />
+    <path d="M105 45 L168 108" class="line-white" />
+    <path d="M34 151 L64 181" class="line-white" />
+    <path d="M121 76 L47 150" class="line-white" />
+  </g>
+
+  <g transform="translate(2160 0)">
+    <rect width="240" height="320" class="surface" />
+    <path d="M78 290 L208 60" class="line-orange" />
+    <path d="M126 306 L256 76" class="line-orange" />
+    <path d="M30 274 L160 44" class="line-orange" />
+  </g>
+
+  <rect y="312" width="2400" height="8" class="orange" />
+</svg>

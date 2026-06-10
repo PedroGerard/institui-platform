@@ -1,0 +1,1060 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- Domain: Association (Core) ---
+model Association {
+  id             String   @id @default(uuid())
+  name           String
+  cnpj           String   @unique
+  foundationDate DateTime
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  members       Member[]
+  mandates      Mandate[] // Antigo MemberRole
+  councils      Council[]
+  governanceBodies GovernanceBody[]
+  assemblies    Assembly[]
+  elections     Election[]
+  documents     Document[]
+  legalEvents   LegalEvent[]
+  users         User[]
+  
+  // Treasury Relations
+  financialAccounts FinancialAccount[]
+  funds             Fund[]
+  financialEntries  FinancialEntry[]
+  paymentRequests   PaymentRequest[]
+  treasuryReports   TreasuryReport[]
+  bankStatementEntries BankStatementEntry[]
+  suppliers         Supplier[]
+  procurementProcesses ProcurementProcess[]
+  procurementContracts ProcurementContract[]
+
+  // Accountability
+  accountabilityProjects AccountabilityProject[]
+  governanceDecisions    GovernanceDecision[]
+  auditLogs              AuditLog[]
+  generatedDocuments     GeneratedDocument[]
+
+  // Legacy/Other
+  activeStatute   Statute? @relation("ActiveStatute", fields: [activeStatuteId], references: [id])
+  activeStatuteId String?  @unique
+  statutes        Statute[] @relation("AssociationStatute")
+}
+
+// --- Domain: Identity & Access ---
+model User {
+  id            String   @id @default(uuid())
+  associationId String
+  name          String
+  email         String   @unique
+  role          String   // ENUM: ADM, MEMBER, AUDITOR
+  passwordHash  String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  association Association @relation(fields: [associationId], references: [id])
+  auditLogs   AuditLog[]
+  generatedDocuments GeneratedDocument[]
+  requestedPayments PaymentRequest[] @relation("PaymentRequester")
+  paymentApprovals PaymentApproval[]
+  treasuryReports TreasuryReport[]
+}
+
+// --- Domain: Membership (Consolidated) ---
+enum MemberType {
+  FOUNDER
+  EFFECTIVE
+  BENEFACTOR
+  COLLABORATOR
+  HONORARY
+}
+
+enum MemberStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  EXCLUDED
+}
+
+model Member {
+  id              String   @id @default(uuid())
+  associationId   String
+  fullName        String
+  cpf             String
+  rg              String?
+  birthDate       DateTime
+  email           String?
+  phone           String?
+
+  memberType      MemberType
+  status          MemberStatus
+  admissionDate   DateTime
+  resignationDate DateTime? // Date of exit/exclusion
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  association Association @relation(fields: [associationId], references: [id])
+  mandates    Mandate[]
+  governanceBodyMemberships GovernanceBodyMember[]
+  electionCandidates ElectionCandidate[]
+  assemblyAttendances AssemblyAttendance[]
+  chairedAssemblies Assembly[] @relation("AssemblyChair")
+  secretariedAssemblies Assembly[] @relation("AssemblySecretary")
+  
+  // Governance relations
+  approvedDecisions GovernanceDecision[]
+
+  @@unique([associationId, cpf])
+  @@index([associationId, status])
+}
+
+// --- Domain: Governance Roles & Mandates ---
+// Correspond to "MemberRole" in the requirements, but named Mandate for legal precision
+enum GovernanceRole { // Merged RoleType
+  DIRECTOR_PRESIDENT
+  ADMINISTRATIVE_FINANCIAL_DIRECTOR
+  TECHNICAL_DIRECTOR
+  PRESIDENT
+  VICE_PRESIDENT
+  TREASURER
+  SECRETARY
+  FISCAL_COUNCIL
+  FISCAL_COUNCIL_PRESIDENT
+  FISCAL_COUNCIL_MEMBER
+  FISCAL_COUNCIL_SUBSTITUTE
+  DIRECTOR
+}
+
+model Mandate {
+  id            String   @id @default(uuid())
+  associationId String
+  memberId      String
+  governanceBodyId String?
+  electionId    String?
+  sourceAssemblyId String?
+  role          GovernanceRole
+  roleName      String?
+  seatName      String?
+  startDate     DateTime
+  endDate       DateTime?
+  isActive      Boolean  @default(true)
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  association Association @relation(fields: [associationId], references: [id])
+  member      Member      @relation(fields: [memberId], references: [id])
+  governanceBody GovernanceBody? @relation(fields: [governanceBodyId], references: [id])
+  election    Election?   @relation(fields: [electionId], references: [id])
+  sourceAssembly Assembly? @relation("MandateSourceAssembly", fields: [sourceAssemblyId], references: [id])
+
+  @@index([associationId, role, isActive])
+  @@index([associationId, governanceBodyId, role, isActive])
+  @@index([memberId, isActive])
+  @@index([electionId])
+}
+
+// --- Domain: Council (Fiscal/Administrative) ---
+enum CouncilType {
+  FISCAL
+  ADMINISTRATIVO
+}
+
+enum CouncilRole {
+  PRESIDENT
+  MEMBER
+  SUBSTITUTE
+}
+
+model Council {
+  id            String   @id @default(uuid())
+  associationId String
+  type          CouncilType
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  association Association @relation(fields: [associationId], references: [id])
+  members     CouncilMember[]
+}
+
+model CouncilMember {
+  id        String   @id @default(uuid())
+  councilId String
+  userId    String // Linked to a system User or Member? Keeping as String (ID) for now per request, usually links to Member
+  role      CouncilRole
+  startDate DateTime
+  endDate   DateTime?
+
+  council   Council @relation(fields: [councilId], references: [id])
+}
+
+// --- Domain: Configurable Governance Bodies ---
+enum GovernanceBodyCategory {
+  GENERAL_ASSEMBLY
+  DIRECTOR_COUNCIL
+  EXECUTIVE_BOARD
+  EXECUTIVE_SECRETARIAT
+  FISCAL_COUNCIL
+  CONSULTATIVE_COUNCIL
+  SCIENTIFIC_COMMITTEE
+  TECHNICAL_COMMITTEE
+  PROJECT_COMMITTEE
+  RESEARCH_COMMITTEE
+  ETHICS_COMMITTEE
+  OTHER
+}
+
+enum GovernanceBodyMemberRole {
+  PRESIDENT
+  COORDINATOR
+  SECRETARY
+  RAPPORTEUR
+  MEMBER
+  SUBSTITUTE
+  ADVISOR
+  OTHER
+}
+
+model GovernanceBody {
+  id            String                 @id @default(uuid())
+  associationId String
+  name          String
+  category      GovernanceBodyCategory
+  description   String?
+  isStatutory   Boolean                @default(false)
+  isActive      Boolean                @default(true)
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+
+  association Association             @relation(fields: [associationId], references: [id])
+  members     GovernanceBodyMember[]
+  mandates    Mandate[]
+  elections   Election[]
+
+  @@unique([associationId, name])
+  @@index([associationId, category, isActive])
+}
+
+// --- Domain: Elections and Slates ---
+enum ElectionStatus {
+  DRAFT
+  REGISTERED
+  APPROVED
+  REJECTED
+  MANDATES_CREATED
+}
+
+enum ElectionSlateStatus {
+  REGISTERED
+  ELECTED
+  REJECTED
+}
+
+model Election {
+  id               String         @id @default(uuid())
+  associationId    String
+  assemblyId       String?
+  governanceBodyId String?
+  title            String
+  description      String?
+  status           ElectionStatus @default(DRAFT)
+  termStartDate    DateTime
+  termEndDate      DateTime?
+  approvedAt       DateTime?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  association    Association     @relation(fields: [associationId], references: [id])
+  assembly       Assembly?       @relation("AssemblyElections", fields: [assemblyId], references: [id])
+  governanceBody GovernanceBody? @relation(fields: [governanceBodyId], references: [id])
+  slates         ElectionSlate[]
+  mandates       Mandate[]
+
+  @@index([associationId, status])
+  @@index([assemblyId])
+  @@index([governanceBodyId])
+}
+
+model ElectionSlate {
+  id          String              @id @default(uuid())
+  electionId  String
+  name        String
+  number      String?
+  status      ElectionSlateStatus @default(REGISTERED)
+  votes       Int?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  election    Election            @relation(fields: [electionId], references: [id])
+  candidates  ElectionCandidate[]
+
+  @@unique([electionId, name])
+  @@index([electionId, status])
+}
+
+model ElectionCandidate {
+  id         String         @id @default(uuid())
+  slateId    String
+  memberId   String
+  role       GovernanceRole
+  roleName   String?
+  seatName   String?
+  sortOrder  Int            @default(0)
+  createdAt  DateTime       @default(now())
+
+  slate      ElectionSlate  @relation(fields: [slateId], references: [id])
+  member     Member         @relation(fields: [memberId], references: [id])
+
+  @@unique([slateId, memberId])
+  @@index([memberId])
+}
+
+model GovernanceBodyMember {
+  id               String                   @id @default(uuid())
+  governanceBodyId String
+  memberId         String?
+  externalName     String?
+  externalEmail    String?
+  role             GovernanceBodyMemberRole
+  roleName         String?
+  startDate        DateTime
+  endDate          DateTime?
+  isActive         Boolean                  @default(true)
+  createdAt        DateTime                 @default(now())
+  updatedAt        DateTime                 @updatedAt
+
+  governanceBody GovernanceBody @relation(fields: [governanceBodyId], references: [id])
+  member         Member?        @relation(fields: [memberId], references: [id])
+
+  @@index([governanceBodyId, isActive])
+  @@index([memberId, isActive])
+}
+
+// --- Domain: Governance Decisions ---
+enum GovernanceDecisionType {
+  BUDGET_APPROVAL
+  ACCOUNT_APPROVAL
+  STATUTE_CHANGE
+  CONTRACT_APPROVAL
+  ELECTION_RESULT
+}
+
+model GovernanceDecision {
+  id             String   @id @default(uuid())
+  associationId  String
+  type           GovernanceDecisionType
+  title          String
+  description    String
+  
+  approvedById   String
+  approvedBy     Member   @relation(fields: [approvedById], references: [id]) // Signatory
+  
+  decisionDate   DateTime
+  referenceDocId String?
+  createdAt      DateTime @default(now())
+
+  association    Association @relation(fields: [associationId], references: [id])
+}
+
+// --- Domain: Audit ---
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  APPROVE
+  REJECT
+}
+
+model AuditLog {
+  id            String      @id @default(uuid())
+  associationId String
+  entity        String
+  entityId      String
+  action        AuditAction
+  performedById String
+  
+  metadata      Json
+  createdAt     DateTime @default(now())
+
+  association   Association @relation(fields: [associationId], references: [id])
+  performedBy   User        @relation(fields: [performedById], references: [id])
+}
+
+// --- Domain: Official Generated Documents ---
+enum GeneratedDocumentType {
+  ATA
+  LISTA_PRESENCA
+  ESTATUTO
+  OFICIO
+  PARECER_FISCAL
+}
+
+model GeneratedDocument {
+  id            String                @id @default(uuid())
+  associationId String
+  type          GeneratedDocumentType
+  referenceId   String?
+  title         String
+  fileUrl       String
+  hash          String?
+  generatedById String
+  createdAt     DateTime              @default(now())
+
+  association Association @relation(fields: [associationId], references: [id])
+  generatedBy User        @relation(fields: [generatedById], references: [id])
+
+  @@index([associationId, type, createdAt])
+  @@index([referenceId])
+}
+
+// --- Domain: Accountability (Prestação de Contas) ---
+enum InstrumentType {
+  CONVENIO
+  TERMO_FOMENTO
+  TERMO_COLABORACAO
+  PDDE
+}
+
+enum AccountabilityStatus {
+  DRAFT
+  IN_EXECUTION
+  AWAITING_FISCAL
+  APPROVED
+  SUBMITTED
+}
+
+model AccountabilityProject {
+  id               String   @id @default(uuid())
+  associationId    String
+  name             String
+  grantor          String
+  instrumentType   InstrumentType
+  instrumentNumber String?
+  periodStart      DateTime
+  periodEnd        DateTime
+  bankAccountId    String? // Optional linkage to FinancialAccount
+  status           AccountabilityStatus @default(DRAFT)
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  association      Association @relation(fields: [associationId], references: [id])
+  documents        AccountabilityDocument[]
+  fiscalOpinions   FiscalOpinion[]
+  reports          AccountabilityReport[]
+  paymentRequests  PaymentRequest[]
+  procurementProcesses ProcurementProcess[]
+
+  @@index([associationId, status])
+  @@index([instrumentType])
+  @@index([periodStart, periodEnd])
+}
+
+enum DocumentType {
+  REX
+  OFICIO_ENCAMINHAMENTO
+  PESQUISA_PRECO
+  ATA_COTACAO
+  ATA_HOMOLOGACAO
+  CONTRATO
+  NOTA_FISCAL
+  RECIBO
+  EXTRATO_BANCARIO
+  CERTIDAO_NEGATIVA
+  RELACAO_BENS
+  OUTROS
+}
+
+model AccountabilityDocument {
+  id          String   @id @default(uuid())
+  projectId   String
+  type        DocumentType
+  fileUrl     String
+  isRequired  Boolean  @default(true)
+  validated   Boolean  @default(false)
+  uploadedAt  DateTime @default(now())
+
+  project     AccountabilityProject @relation(fields: [projectId], references: [id])
+
+  @@index([projectId, type])
+  @@index([projectId, validated])
+}
+
+enum FiscalOpinionType {
+  APPROVED
+  REJECTED
+}
+
+model FiscalOpinion {
+  id            String   @id @default(uuid())
+  projectId     String
+  councilUserId String // ID of the council member user
+  opinion       FiscalOpinionType
+  notes         String?
+  signedAt      DateTime
+
+  project       AccountabilityProject @relation(fields: [projectId], references: [id])
+
+  @@index([projectId, opinion])
+  @@index([councilUserId])
+}
+
+enum ReportType {
+  PDF
+  XLS
+}
+
+model AccountabilityReport {
+  id          String   @id @default(uuid())
+  projectId   String
+  type        ReportType
+  fileUrl     String
+  generatedAt DateTime @default(now())
+
+  project     AccountabilityProject @relation(fields: [projectId], references: [id])
+
+  @@index([projectId, type])
+}
+
+// --- Domain: Statute (Legacy/Support) ---
+model Statute {
+  id            String   @id @default(uuid())
+  associationId String
+  createdAt     DateTime @default(now())
+
+  association Association      @relation("AssociationStatute", fields: [associationId], references: [id])
+  activeFor   Association?     @relation("ActiveStatute")
+  versions    StatuteVersion[]
+}
+
+model StatuteVersion {
+  id                    String    @id @default(uuid())
+  statuteId             String
+  versionNumber         Int
+  approvalDate          DateTime
+  registrationDate      DateTime?
+  content               String    @db.Text
+  originatingAssemblyId String
+  isConsolidated        Boolean
+  createdAt             DateTime  @default(now())
+
+  statute Statute @relation(fields: [statuteId], references: [id])
+}
+
+// --- Domain: Assembly (Existing) ---
+model Assembly {
+  id             String   @id @default(uuid())
+  associationId  String
+  type           String
+  status         String
+  date           DateTime
+  scheduledDate  DateTime
+  callNoticeDays Int
+  agendaItemIds  String[]
+  title          String?
+  callDate       DateTime?
+  callMethod     String?
+  callNoticeText String? @db.Text
+  convenerType   String?
+  convenerMemberId String?
+  location       String?
+  address        String?
+  firstCallAt    DateTime?
+  secondCallAt   DateTime?
+  heldCallNumber Int?
+  totalVotingMembers Int?
+  presentVotingMembers Int?
+  quorumMet      Boolean?
+  chairMemberId  String?
+  secretaryMemberId String?
+  minutesContent String? @db.Text
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  association Association @relation(fields: [associationId], references: [id])
+  chairMember Member? @relation("AssemblyChair", fields: [chairMemberId], references: [id])
+  secretaryMember Member? @relation("AssemblySecretary", fields: [secretaryMemberId], references: [id])
+  attendances AssemblyAttendance[]
+  deliberations AssemblyDeliberation[]
+  elections Election[] @relation("AssemblyElections")
+  mandateOrigins Mandate[] @relation("MandateSourceAssembly")
+
+  @@index([associationId, status])
+  @@index([associationId, scheduledDate])
+}
+
+model AssemblyAttendance {
+  id          String   @id @default(uuid())
+  assemblyId  String
+  memberId    String?
+  externalName String?
+  hasVotingRight Boolean @default(false)
+  present     Boolean  @default(true)
+  signedAt    DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  assembly Assembly @relation(fields: [assemblyId], references: [id])
+  member   Member?  @relation(fields: [memberId], references: [id])
+
+  @@index([assemblyId, present])
+  @@index([memberId])
+}
+
+model AssemblyDeliberation {
+  id          String   @id @default(uuid())
+  assemblyId  String
+  agendaItem  String
+  decision    String   @db.Text
+  result      String
+  requiredQuorum String?
+  votesFor    Int?
+  votesAgainst Int?
+  abstentions Int?
+  createdAt   DateTime @default(now())
+
+  assembly Assembly @relation(fields: [assemblyId], references: [id])
+
+  @@index([assemblyId])
+}
+
+// --- Domain: Documents (Existing) ---
+model Document {
+  id                    String   @id @default(uuid())
+  associationId         String
+  title                 String
+  content               String   @db.Text
+  type                  String
+  status                String
+  originatingLegalActId String?
+  md5Hash               String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  association      Association      @relation(fields: [associationId], references: [id])
+  financialEntries FinancialEntry[]
+  paymentRequests  PaymentRequest[]
+}
+
+model LegalEvent {
+  id            String   @id @default(uuid())
+  associationId String
+  type          String
+  timestamp     DateTime
+  actorId       String?
+  payload       Json
+  createdAt     DateTime @default(now())
+
+  association Association @relation(fields: [associationId], references: [id])
+}
+
+// --- Domain: Treasury (Existing) ---
+enum AccountType {
+  ASSET
+  LIABILITY
+  EQUITY
+  REVENUE
+  EXPENSE
+}
+
+enum AccountNature {
+  DEBIT
+  CREDIT
+}
+
+model FinancialAccount {
+  id            String        @id @default(uuid())
+  associationId String
+  code          String
+  name          String
+  type          AccountType
+  nature        AccountNature
+  parentId      String?
+  isAnalytic    Boolean       @default(true)
+
+  association Association        @relation(fields: [associationId], references: [id])
+  parent      FinancialAccount?  @relation("AccountHierarchy", fields: [parentId], references: [id])
+  children    FinancialAccount[] @relation("AccountHierarchy")
+
+  debitEntries  FinancialEntry[] @relation("DebitAccount")
+  creditEntries FinancialEntry[] @relation("CreditAccount")
+  paymentDebitRequests PaymentRequest[] @relation("PaymentDebitAccount")
+  paymentCreditRequests PaymentRequest[] @relation("PaymentCreditAccount")
+  bankStatementEntries BankStatementEntry[] @relation("BankStatementAccount")
+}
+
+model Fund {
+  id            String  @id @default(uuid())
+  associationId String
+  name          String
+  description   String?
+  restricted    Boolean @default(false)
+
+  association Association      @relation(fields: [associationId], references: [id])
+  entries     FinancialEntry[]
+  paymentRequests PaymentRequest[]
+}
+
+model FinancialEntry {
+  id            String   @id @default(uuid())
+  associationId String
+  date          DateTime
+  description   String
+  amount        Decimal  @db.Decimal(19, 4)
+
+  debitAccountId  String
+  creditAccountId String
+
+  documentId   String?
+  fundId       String?
+  paymentRequestId String? @unique
+  actorId      String?
+  activityType String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  association   Association      @relation(fields: [associationId], references: [id])
+  debitAccount  FinancialAccount @relation("DebitAccount", fields: [debitAccountId], references: [id])
+  creditAccount FinancialAccount @relation("CreditAccount", fields: [creditAccountId], references: [id])
+  document      Document?        @relation(fields: [documentId], references: [id])
+  fund          Fund?            @relation(fields: [fundId], references: [id])
+  paymentRequest PaymentRequest? @relation(fields: [paymentRequestId], references: [id])
+  bankStatementEntry BankStatementEntry?
+}
+
+// --- Domain: Treasury Payment Workflow ---
+enum PaymentRequestStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+  PAID
+  CANCELED
+  BLOCKED
+}
+
+enum PaymentApprovalDecision {
+  APPROVED
+  REJECTED
+}
+
+enum PaymentApprovalRole {
+  DIRECTOR_PRESIDENT
+  ADMINISTRATIVE_FINANCIAL_DIRECTOR
+  TECHNICAL_DIRECTOR
+  FISCAL_COUNCIL
+  OTHER
+}
+
+enum TreasuryReportType {
+  PAYMENT_SUMMARY_PDF
+  PAYMENT_SUMMARY_XLS
+}
+
+enum BankStatementEntryType {
+  CREDIT
+  DEBIT
+}
+
+enum BankStatementEntryStatus {
+  PENDING
+  RECONCILED
+  IGNORED
+}
+
+model PaymentRequest {
+  id                           String               @id @default(uuid())
+  associationId                String
+  requestedById                String?
+  accountabilityProjectId       String?
+  documentId                   String?
+  fundId                       String?
+  debitAccountId               String
+  creditAccountId              String
+  payeeName                    String
+  description                  String
+  amount                       Decimal              @db.Decimal(19, 4)
+  dueDate                      DateTime?
+  status                       PaymentRequestStatus @default(DRAFT)
+  requiresContract             Boolean              @default(false)
+  contractFileUrl              String?
+  requiresNegativeCertificate  Boolean              @default(false)
+  negativeCertificateExpiresAt DateTime?
+  paidAt                       DateTime?
+  createdAt                    DateTime             @default(now())
+  updatedAt                    DateTime             @updatedAt
+
+  association           Association            @relation(fields: [associationId], references: [id])
+  requestedBy           User?                  @relation("PaymentRequester", fields: [requestedById], references: [id])
+  accountabilityProject AccountabilityProject? @relation(fields: [accountabilityProjectId], references: [id])
+  document              Document?              @relation(fields: [documentId], references: [id])
+  fund                  Fund?                  @relation(fields: [fundId], references: [id])
+  procurementContractId String?
+  procurementContract   ProcurementContract?   @relation(fields: [procurementContractId], references: [id])
+  debitAccount          FinancialAccount       @relation("PaymentDebitAccount", fields: [debitAccountId], references: [id])
+  creditAccount         FinancialAccount       @relation("PaymentCreditAccount", fields: [creditAccountId], references: [id])
+  financialEntry        FinancialEntry?
+  approvals             PaymentApproval[]
+
+  @@index([associationId, status])
+  @@index([accountabilityProjectId])
+  @@index([procurementContractId])
+  @@index([documentId])
+  @@index([dueDate])
+}
+
+model PaymentApproval {
+  id               String                  @id @default(uuid())
+  paymentRequestId String
+  approvedById     String
+  role             PaymentApprovalRole
+  decision         PaymentApprovalDecision
+  notes            String?
+  createdAt        DateTime                @default(now())
+
+  paymentRequest PaymentRequest @relation(fields: [paymentRequestId], references: [id])
+  approvedBy     User           @relation(fields: [approvedById], references: [id])
+
+  @@unique([paymentRequestId, approvedById])
+  @@index([paymentRequestId, decision])
+}
+
+model TreasuryReport {
+  id            String             @id @default(uuid())
+  associationId String
+  type          TreasuryReportType
+  title         String
+  fileUrl       String
+  generatedById String
+  createdAt     DateTime           @default(now())
+
+  association Association @relation(fields: [associationId], references: [id])
+  generatedBy User        @relation(fields: [generatedById], references: [id])
+
+  @@index([associationId, type, createdAt])
+}
+
+model BankStatementEntry {
+  id               String                   @id @default(uuid())
+  associationId    String
+  bankAccountId    String
+  financialEntryId String?                  @unique
+  transactionDate  DateTime
+  description      String
+  amount           Decimal                  @db.Decimal(19, 4)
+  type             BankStatementEntryType
+  documentNumber   String?
+  status           BankStatementEntryStatus @default(PENDING)
+  reconciledAt     DateTime?
+  reconciledById   String?
+  createdAt        DateTime                 @default(now())
+  updatedAt        DateTime                 @updatedAt
+
+  association    Association      @relation(fields: [associationId], references: [id])
+  bankAccount    FinancialAccount @relation("BankStatementAccount", fields: [bankAccountId], references: [id])
+  financialEntry FinancialEntry?  @relation(fields: [financialEntryId], references: [id])
+
+  @@unique([associationId, bankAccountId, transactionDate, amount, documentNumber])
+  @@index([associationId, status])
+  @@index([bankAccountId, transactionDate])
+}
+
+// --- Domain: Procurement and MROSC Contracting ---
+enum ProcurementProcessStatus {
+  DRAFT
+  NOTICE_PREPARED
+  QUOTATION_OPEN
+  PRICE_MAP_READY
+  SUPPLIERS_SELECTED
+  HOMOLOGATED
+  CONTRACTED
+  CANCELED
+}
+
+enum ProcurementJudgmentCriterion {
+  LOWEST_UNIT_PRICE
+  LOWEST_TOTAL_PRICE
+}
+
+enum SupplierProposalStatus {
+  RECEIVED
+  DISQUALIFIED
+  SELECTED
+}
+
+enum ProcurementDocumentType {
+  EDITAL_COTACAO_PREVIA
+  MAPA_PRECOS
+  ATA_SELECAO_FORNECEDORES
+  HOMOLOGACAO_FORNECEDOR
+  CONTRATO
+}
+
+enum ProcurementContractStatus {
+  DRAFT
+  ACTIVE
+  CLOSED
+  CANCELED
+}
+
+model Supplier {
+  id            String   @id @default(uuid())
+  associationId String
+  name          String
+  cnpj          String
+  email         String?
+  phone         String?
+  address       String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  association Association @relation(fields: [associationId], references: [id])
+  proposals   SupplierProposal[]
+  contracts   ProcurementContract[]
+
+  @@unique([associationId, cnpj])
+  @@index([associationId, name])
+}
+
+model ProcurementProcess {
+  id                      String                       @id @default(uuid())
+  associationId           String
+  accountabilityProjectId  String?
+  title                   String
+  noticeNumber            String
+  instrumentNumber        String?
+  object                  String
+  justification           String?
+  status                  ProcurementProcessStatus     @default(DRAFT)
+  judgmentCriterion       ProcurementJudgmentCriterion @default(LOWEST_UNIT_PRICE)
+  proposalStartDate       DateTime
+  proposalEndDate         DateTime
+  openingDate             DateTime?
+  publicationUrl          String?
+  contactName             String?
+  contactEmail            String?
+  contactPhone            String?
+  createdById             String?
+  createdAt               DateTime                     @default(now())
+  updatedAt               DateTime                     @updatedAt
+
+  association           Association            @relation(fields: [associationId], references: [id])
+  accountabilityProject AccountabilityProject? @relation(fields: [accountabilityProjectId], references: [id])
+  items                 ProcurementItem[]
+  proposals             SupplierProposal[]
+  documents             ProcurementDocument[]
+  contracts             ProcurementContract[]
+
+  @@unique([associationId, noticeNumber])
+  @@index([associationId, status])
+  @@index([accountabilityProjectId])
+}
+
+model ProcurementItem {
+  id                 String   @id @default(uuid())
+  processId          String
+  description        String
+  unit               String?
+  quantity           Decimal  @db.Decimal(19, 4)
+  estimatedUnitPrice Decimal? @db.Decimal(19, 4)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  process ProcurementProcess @relation(fields: [processId], references: [id])
+  quotes  SupplierQuoteItem[]
+
+  @@index([processId])
+}
+
+model SupplierProposal {
+  id          String                 @id @default(uuid())
+  processId   String
+  supplierId  String
+  status      SupplierProposalStatus @default(RECEIVED)
+  submittedAt DateTime               @default(now())
+  validUntil  DateTime?
+  notes       String?
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+
+  process  ProcurementProcess @relation(fields: [processId], references: [id])
+  supplier Supplier           @relation(fields: [supplierId], references: [id])
+  items    SupplierQuoteItem[]
+
+  @@unique([processId, supplierId])
+  @@index([processId, status])
+  @@index([supplierId])
+}
+
+model SupplierQuoteItem {
+  id         String   @id @default(uuid())
+  proposalId String
+  itemId     String
+  unitPrice  Decimal  @db.Decimal(19, 4)
+  totalPrice Decimal  @db.Decimal(19, 4)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  proposal SupplierProposal @relation(fields: [proposalId], references: [id])
+  item     ProcurementItem  @relation(fields: [itemId], references: [id])
+
+  @@unique([proposalId, itemId])
+  @@index([itemId])
+}
+
+model ProcurementDocument {
+  id            String                  @id @default(uuid())
+  processId     String
+  type          ProcurementDocumentType
+  title         String
+  fileUrl       String?
+  hash          String?
+  generatedById String?
+  createdAt     DateTime                @default(now())
+
+  process ProcurementProcess @relation(fields: [processId], references: [id])
+
+  @@index([processId, type])
+}
+
+model ProcurementContract {
+  id            String                    @id @default(uuid())
+  associationId String
+  processId     String
+  supplierId    String
+  contractNumber String
+  title         String
+  amount        Decimal                   @db.Decimal(19, 4)
+  startDate     DateTime
+  endDate       DateTime?
+  fileUrl       String?
+  status        ProcurementContractStatus @default(ACTIVE)
+  createdAt     DateTime                  @default(now())
+  updatedAt     DateTime                  @updatedAt
+
+  association Association        @relation(fields: [associationId], references: [id])
+  process     ProcurementProcess @relation(fields: [processId], references: [id])
+  supplier    Supplier           @relation(fields: [supplierId], references: [id])
+  paymentRequests PaymentRequest[]
+
+  @@unique([associationId, contractNumber])
+  @@index([processId])
+  @@index([supplierId])
+  @@index([associationId, status])
+}

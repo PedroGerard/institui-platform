@@ -1,0 +1,38 @@
+name: Frontend
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build public site
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: apps/frontend/package-lock.json
+
+      - name: Prepare isolated frontend
+        run: |
+          mkdir frontend-build
+          cp -R apps/frontend/. frontend-build/
+
+      - name: Install dependencies
+        working-directory: frontend-build
+        run: npm ci
+
+      - name: Build frontend
+        working-directory: frontend-build
+        run: npm run build

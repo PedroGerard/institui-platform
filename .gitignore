@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Environment variables and secrets
+.env
+.env.*
+**/.env
+**/.env.*
+
+# Build outputs
+dist/
+build/
+coverage/
+**/dist/
+**/build/
+**/.next/
+**/out/
+*.tsbuildinfo
+
+# Runtime and generated files
+.git/
+*.log
+dev-server*.log
+test_output*.txt
+apps/api/storage/
+git-meta-test/
+git-upload-meta/
+brand-manual-temp/
+materiais/identity_pdf_extract/
+apps/frontend/.next-dev.pid
+
+# Tooling
+.vercel/
+.vscode/
+.idea/
+
+# System files
+.DS_Store
+Thumbs.db

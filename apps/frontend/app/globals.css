@@ -1,0 +1,165 @@
+@import "tailwindcss";
+
+:root {
+  --brand-teal: #006871;
+  --brand-teal-dark: #00545b;
+  --brand-teal-deep: #003f44;
+  --brand-text: #003f44;
+  --brand-orange: #ff9507;
+  --brand-orange-dark: #b76600;
+  --brand-orange-light: #ffc46d;
+  --brand-orange-soft: #fff3e1;
+  --brand-surface: #f6f6f6;
+  --brand-tint: #e5f1f2;
+  --brand-border: #cfe1e3;
+  --brand-border-strong: #8fc1c4;
+  --brand-border-soft: #edf5f5;
+  --brand-muted: #48686c;
+  --brand-light-text: #d8eeef;
+  --brand-light-surface: #f7ffff;
+  --background: var(--brand-surface);
+  --foreground: var(--brand-teal-deep);
+
+  --app-bg: #f5f8fc;
+  --app-surface: #ffffff;
+  --app-surface-muted: #eef3f8;
+  --app-surface-hover: #e6edf5;
+  --app-border: #d6e0eb;
+  --app-border-strong: #b8c7d9;
+  --app-text: #0e1826;
+  --app-text-soft: #25364b;
+  --app-muted: #526174;
+  --app-muted-strong: #344256;
+  --app-navy: #0c2144;
+  --app-navy-hover: #153761;
+  --app-blue: #195ad8;
+  --app-blue-hover: #154ab3;
+  --app-teal: #048487;
+  --app-green: #0e985b;
+  --app-amber: #b7620b;
+  --app-red: #be2525;
+  --app-focus: #0f6fff;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: "Montserrat", Arial, Helvetica, sans-serif;
+  --font-mono: "Courier New", monospace;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Inter, "Montserrat", Arial, Helvetica, sans-serif;
+}
+
+*:focus-visible {
+  outline: 3px solid var(--app-focus);
+  outline-offset: 2px;
+}
+
+.app-shell {
+  background: var(--app-bg);
+  color: var(--app-text);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+.app-shell .bg-slate-950 {
+  background-color: var(--app-bg) !important;
+}
+
+.app-shell .bg-slate-900,
+.app-shell .bg-slate-900\/50 {
+  background-color: var(--app-surface) !important;
+}
+
+.app-shell .bg-slate-800,
+.app-shell .bg-slate-800\/50,
+.app-shell .hover\:bg-slate-800:hover,
+.app-shell .hover\:bg-slate-800\/40:hover,
+.app-shell .hover\:bg-slate-800\/50:hover,
+.app-shell .hover\:bg-slate-800\/60:hover,
+.app-shell .bg-slate-950\/50,
+.app-shell .bg-slate-950\/60 {
+  background-color: var(--app-surface-muted) !important;
+}
+
+.app-shell .border-slate-800,
+.app-shell .border-slate-800\/50,
+.app-shell .border-slate-700 {
+  border-color: var(--app-border) !important;
+}
+
+.app-shell .text-slate-100,
+.app-shell .text-slate-200 {
+  color: var(--app-text) !important;
+}
+
+.app-shell .text-slate-300 {
+  color: var(--app-text-soft) !important;
+}
+
+.app-shell .text-slate-400 {
+  color: var(--app-muted) !important;
+}
+
+.app-shell .text-slate-500 {
+  color: var(--app-muted-strong) !important;
+}
+
+.app-shell input,
+.app-shell select,
+.app-shell textarea {
+  color: var(--app-text);
+  caret-color: var(--app-blue);
+}
+
+.app-shell input::placeholder,
+.app-shell textarea::placeholder {
+  color: #6b788b;
+}
+
+.app-shell .rounded-xl {
+  border-radius: 8px !important;
+}
+
+.app-shell .rounded-lg {
+  border-radius: 8px !important;
+}
+
+.app-sidebar {
+  background: var(--app-navy);
+  color: #f8fbff;
+}
+
+.app-sidebar .app-nav-item {
+  color: #d9e6f7;
+}
+
+.app-sidebar .app-nav-item:hover {
+  background: var(--app-navy-hover);
+  color: #ffffff;
+}
+
+.app-sidebar .app-nav-item-active {
+  background: #174a7d;
+  color: #ffffff;
+}
+
+.app-sidebar .app-nav-section {
+  color: #9fb5d1;
+}
+
+.app-sidebar .app-sidebar-border {
+  border-color: rgba(217, 230, 247, 0.16);
+}
+
+.app-primary-button {
+  background: var(--app-blue);
+  color: #ffffff;
+}
+
+.app-primary-button:hover {
+  background: var(--app-blue-hover);
+}
