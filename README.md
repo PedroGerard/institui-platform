@@ -1,111 +1,121 @@
-# Instituto Incentive - novo site
+# INSTITUI+
 
-Repositório para construção do novo site público do Instituto Incentive.
+Plataforma integrada de gestao, governanca, compliance e prestacao de contas para Organizacoes da Sociedade Civil.
 
-O projeto reúne a vitrine institucional, página de áreas de atuação, projetos, contato e uma área de Transparência com documentos institucionais, certidões, licenças e demonstrações financeiras já publicados.
+O INSTITUI+ nasce como um ERP especializado para OSCs brasileiras, reunindo core institucional, assembleias, tesouraria, compras e contratacoes MROSC, documentos oficiais, auditoria e prestacao de contas automatica.
 
-## Estrutura
+## Modulos principais
 
-- `apps/frontend`: site público em Next.js.
-- `apps/api`: base interna/API já existente no projeto.
-- `materiais`: materiais editoriais, benchmark e documentos de apoio para publicação.
-- `.github/workflows`: validações automáticas para o GitHub.
+- Core Institucional: associacao, membros, mandatos, usuarios, orgaos de governanca e conselhos configuraveis.
+- Assembleias e governanca: convocacao, quorum, deliberacoes, atas, lista de presenca e trilha decisoria.
+- Tesouraria e contabilidade: lancamentos, contas, pagamentos, conciliacao, relatorios e controles financeiros.
+- Compras e contratacoes MROSC: cotacao previa, mapa de precos, selecao de fornecedores, homologacao e contratos.
+- Prestacao de contas: projetos, documentos obrigatorios, checklist, parecer fiscal, relatorios e submissao.
+- Gerador de documentos oficiais: atas, listas de presenca, estatuto consolidado, oficios e pareceres.
+- Auditoria e compliance: logs, rastreabilidade, alertas e controles de conformidade.
+- Frontend institucional: portal administrativo moderno em Next.js, com navegacao por modulos.
 
-## Páginas públicas atuais
+## Estrutura do repositorio
 
-- `/`
-- `/quem-somos`
-- `/areas-de-atuacao`
-- `/projetos`
-- `/transparencia`
-- `/contato`
+- `apps/api`: API em Fastify, Prisma ORM, PostgreSQL, Clean Architecture e DDD.
+- `apps/frontend`: frontend em Next.js, React e Tailwind.
+- `materiais`: documentacao de apoio, roadmap, matrizes estatutarias e plano de implantacao.
+- `.github/workflows`: validacoes automaticas no GitHub.
+
+## Tecnologias
+
+### Backend
+
+- Fastify
+- Prisma ORM
+- PostgreSQL
+- TypeScript
+- Clean Architecture
+- DDD
+
+### Frontend
+
+- Next.js
+- React
+- Tailwind CSS
+- TypeScript
+
+### Infraestrutura
+
+- Docker
+- GitHub Actions
+- Deploy cloud planejado
 
 ## Como rodar localmente
 
-Instale as dependências:
+Instale as dependencias na raiz:
 
 ```bash
 npm install
 ```
 
-Rode o site:
+Rode o frontend:
 
 ```bash
 npm run dev --workspace=apps/frontend
 ```
 
-Abra:
+Rode a API:
+
+```bash
+npm run dev --workspace=apps/api
+```
+
+Frontend:
 
 ```text
 http://localhost:3000
 ```
 
-## Como validar
+API:
 
-Build do site público:
+```text
+http://localhost:3333
+```
+
+## Validacao
+
+Validar o schema do Prisma:
+
+```bash
+npm run prisma:validate --workspace=apps/api
+```
+
+Executar testes da API:
+
+```bash
+npm test --workspace=apps/api
+```
+
+Build do frontend:
 
 ```bash
 npm run build --workspace=apps/frontend
 ```
 
-## Publicação na Vercel
+## Publicacao
 
-Configuração recomendada ao importar o repositório:
+Repositorio principal:
 
-- Repositório: `PedroGerard/instituto-incentive-site`
-- Framework: Next.js
+```text
+https://github.com/PedroGerard/institui-platform
+```
+
+Configuracao recomendada para publicacao do frontend na Vercel:
+
 - Root Directory: `apps/frontend`
 - Install Command: `npm ci`
 - Build Command: `npm run build`
-- Output Directory: deixar padrão do Next.js
+- Output Directory: padrao do Next.js
 
-O workflow do GitHub já valida o build do frontend antes de publicar mudanças.
+## Transparencia e documentos
 
-## Identidade visual
+O projeto tambem inclui materiais e documentos publicos do Instituto Incentive usados como base para transparencia institucional, matriz estatutaria, prestacao de contas e exemplos de governanca.
 
-A paleta do site segue o manual visual do Instituto Incentive:
+Novos documentos devem passar por validacao institucional antes de publicacao, com atencao a dados pessoais, informacoes sensiveis e requisitos da LGPD.
 
-- Verde/teal institucional: `#006871`
-- Laranja principal: `#ff9507`
-- Cinza claro secundário: `#f6f6f6`
-
-Essas cores estão centralizadas em `apps/frontend/app/globals.css` como tokens CSS para manter botões, links, cards, fundos e rodapés consistentes com a marca.
-
-Assets vetoriais de apoio:
-
-- `apps/frontend/public/images/brand/instituto-incentive-pattern.svg`: faixa institucional em alta qualidade para uso no site.
-- `apps/frontend/public/images/brand/instituto-incentive-palette.svg`: referência visual da paleta oficial.
-
-## Transparência
-
-A página `/transparencia` já publica 16 documentos em PDF organizados em:
-
-- Documentos institucionais.
-- Licenças e conformidade.
-- Certidões negativas e regularidade.
-- Relatórios e contas.
-
-Documentos já disponíveis:
-
-- Estatuto Social.
-- Ata de eleição e posse da diretoria.
-- CNPJ e certidões.
-- Alvarás e certificado de conformidade.
-- Demonstrações contábeis.
-- Certidões federal, estadual, municipal, trabalhista, FGTS, falência/recuperação judicial e entes privados.
-
-Documentos ainda pendentes ou em organização:
-
-- Relatório de Atividades 2026.
-- Diretoria, conselhos e mandatos.
-- Parecer do Conselho Fiscal, quando houver.
-- Código de Conduta.
-- Política de Privacidade.
-- Política de Transparência.
-- Instrumentos de parceria pública, planos de trabalho e prestações de contas.
-
-Novos documentos devem passar por validação da diretoria antes de publicação, com atenção a dados pessoais e informações sensíveis.
-
-## Materiais de apoio
-
-O arquivo `materiais/benchmark-e-reconfiguracao-site.md` consolida a leitura da proposta antiga, referências de boas práticas e recomendações para o novo site.
