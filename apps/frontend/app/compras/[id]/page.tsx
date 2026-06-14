@@ -4,12 +4,13 @@ import { FormEvent, use, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { AlertCircle, ArrowLeft, CheckCircle, FileText, Plus, Save, ShieldCheck } from 'lucide-react';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
+import { AssociationRequired } from '@/components/layout/AssociationRequired';
+import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
 import { api } from '@/services/api';
 import { ProcurementPriceMapDTO, ProcurementProcessDTO, SupplierDTO } from '@/types/dtos';
 import {
     formatCurrency,
     formatDate,
-    DEFAULT_ASSOCIATION_ID,
     procurementDocumentTypeLabels,
     procurementProcessStatusLabels,
     supplierProposalStatusLabels
@@ -20,6 +21,7 @@ const labelClass = "mb-2 block text-xs font-semibold uppercase text-slate-500";
 
 export default function ProcurementProcessDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
+    const { associationId, hasAssociation } = useActiveAssociation();
     const [process, setProcess] = useState<ProcurementProcessDTO | null>(null);
     const [priceMap, setPriceMap] = useState<ProcurementPriceMapDTO | null>(null);
     const [suppliers, setSuppliers] = useState<SupplierDTO[]>([]);
@@ -50,10 +52,11 @@ export default function ProcurementProcessDetailPage({ params }: { params: Promi
         try {
             setLoading(true);
             setError(null);
-            const [processData, mapData, supplierData] = await Promise.all([
-                api.getProcurementProcess(id),
+            const processData = await api.getProcurementProcess(id);
+            const supplierAssociationId = associationId || processData.associationId;
+            const [mapData, supplierData] = await Promise.all([
                 api.getProcurementPriceMap(id),
-                api.listSuppliers({ associationId: DEFAULT_ASSOCIATION_ID })
+                api.listSuppliers({ associationId: supplierAssociationId })
             ]);
             setProcess(processData);
             setPriceMap(mapData);
@@ -67,7 +70,7 @@ export default function ProcurementProcessDetailPage({ params }: { params: Promi
 
     useEffect(() => {
         loadData();
-    }, [id]);
+    }, [associationId, id]);
 
     async function runAction(action: string, fn: () => Promise<unknown>, message: string) {
         try {
@@ -216,6 +219,8 @@ export default function ProcurementProcessDetailPage({ params }: { params: Promi
                         {success}
                     </div>
                 )}
+
+                {!hasAssociation && <AssociationRequired message="A tela usa a associacao do processo para carregar dados, mas defina a associacao ativa no topo para operar novos cadastros com rastreabilidade." />}
 
                 <div className="grid gap-4 md:grid-cols-4">
                     <div className="rounded-lg border border-slate-800 bg-slate-900 p-5">

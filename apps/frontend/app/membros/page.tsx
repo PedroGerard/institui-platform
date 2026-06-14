@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
+import { AssociationRequired } from '@/components/layout/AssociationRequired';
+import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
 import { api } from '@/services/api';
 import { MemberDTO } from '@/types/dtos';
 import { formatDate, memberStatusLabels, memberTypeLabels } from '@/lib/institutional';
@@ -15,6 +17,7 @@ function formatCpf(cpf: string) {
 }
 
 export default function MembersPage() {
+    const { associationId, hasAssociation } = useActiveAssociation();
     const [members, setMembers] = useState<MemberDTO[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -25,10 +28,16 @@ export default function MembersPage() {
     );
 
     async function loadMembers() {
+        if (!associationId) {
+            setMembers([]);
+            setLoading(false);
+            return;
+        }
+
         try {
             setLoading(true);
             setError(null);
-            setMembers(await api.listMembers());
+            setMembers(await api.listMembers(associationId));
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : 'Erro ao carregar membros.');
         } finally {
@@ -38,7 +47,7 @@ export default function MembersPage() {
 
     useEffect(() => {
         loadMembers();
-    }, []);
+    }, [associationId]);
 
     return (
         <InstitutionalLayout title="Membros" activePath="/membros">
@@ -73,6 +82,8 @@ export default function MembersPage() {
                         {error}
                     </div>
                 )}
+
+                {!hasAssociation && <AssociationRequired />}
 
                 <div className="overflow-x-auto rounded-lg border border-slate-800 bg-slate-900">
                     <div className="min-w-[760px]">

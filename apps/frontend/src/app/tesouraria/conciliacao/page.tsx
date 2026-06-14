@@ -3,6 +3,8 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { AlertCircle, CheckCircle2, RefreshCw, Save, ShieldCheck, XCircle } from 'lucide-react';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
+import { AssociationRequired } from '@/components/layout/AssociationRequired';
+import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
 import { api } from '@/services/api';
 import {
     BankReconciliationSummaryDTO,
@@ -15,7 +17,6 @@ import { FinancialAccount } from '@/types/financial';
 import {
     bankStatementEntryStatusLabels,
     bankStatementEntryTypeLabels,
-    DEFAULT_ASSOCIATION_ID,
     formatCurrency,
     formatDate
 } from '@/lib/institutional';
@@ -30,6 +31,7 @@ const initialForm = {
 };
 
 export default function BankReconciliationPage() {
+    const { associationId, hasAssociation } = useActiveAssociation();
     const [accounts, setAccounts] = useState<FinancialAccount[]>([]);
     const [entries, setEntries] = useState<BankStatementEntryDTO[]>([]);
     const [candidates, setCandidates] = useState<FinancialEntryDTO[]>([]);
@@ -45,17 +47,26 @@ export default function BankReconciliationPage() {
     const bankAccounts = useMemo(() => accounts.filter((account) => account.type === 'ASSET' && account.isAnalytic), [accounts]);
 
     async function loadData() {
+        if (!associationId) {
+            setAccounts([]);
+            setEntries([]);
+            setSummary(null);
+            setCandidates([]);
+            setLoading(false);
+            return;
+        }
+
         try {
             setLoading(true);
             setError(null);
             const [accountData, entryData, summaryData, candidateData] = await Promise.all([
-                api.listFinancialAccounts(DEFAULT_ASSOCIATION_ID),
+                api.listFinancialAccounts(associationId),
                 api.listBankStatementEntries({
-                    associationId: DEFAULT_ASSOCIATION_ID,
+                    associationId,
                     status: status || undefined
                 }),
-                api.getBankReconciliationSummary(DEFAULT_ASSOCIATION_ID),
-                api.listReconciliationCandidates({ associationId: DEFAULT_ASSOCIATION_ID })
+                api.getBankReconciliationSummary(associationId),
+                api.listReconciliationCandidates({ associationId })
             ]);
 
             setAccounts(accountData);
@@ -71,7 +82,7 @@ export default function BankReconciliationPage() {
 
     useEffect(() => {
         loadData();
-    }, [status]);
+    }, [associationId, status]);
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -80,8 +91,12 @@ export default function BankReconciliationPage() {
         setSuccess(null);
 
         try {
+            if (!associationId) {
+                throw new Error('Defina a associacao ativa antes de registrar movimento bancario.');
+            }
+
             await api.createBankStatementEntry({
-                associationId: DEFAULT_ASSOCIATION_ID,
+                associationId,
                 bankAccountId: form.bankAccountId,
                 transactionDate: new Date(`${form.transactionDate}T00:00:00.000Z`).toISOString(),
                 description: form.description,
@@ -207,6 +222,8 @@ export default function BankReconciliationPage() {
                     </div>
                 )}
 
+                {!hasAssociation && <AssociationRequired message="Informe a associacao ativa no topo antes de conciliar movimentos bancarios." />}
+
                 <div className="grid gap-4 md:grid-cols-4">
                     <div className="rounded-lg border border-slate-800 bg-slate-900 p-5">
                         <div className="text-xs font-semibold uppercase text-slate-500">Pendentes</div>
@@ -303,7 +320,7 @@ export default function BankReconciliationPage() {
                         />
                         <button
                             type="submit"
-                            disabled={saving}
+                            disabled={saving || !hasAssociation}
                             className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                             <Save size={16} />

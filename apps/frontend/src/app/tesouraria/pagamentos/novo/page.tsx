@@ -5,22 +5,23 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AlertCircle, ArrowLeft, CheckCircle, Save } from 'lucide-react';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
+import { AssociationRequired } from '@/components/layout/AssociationRequired';
+import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
 import { api } from '@/services/api';
 import { FinancialAccount } from '@/types/financial';
-import { DEFAULT_ASSOCIATION_ID } from '@/lib/institutional';
 
 const inputClass = "w-full rounded-lg border border-slate-800 bg-slate-950 px-4 py-2.5 text-sm text-slate-100 outline-none focus:border-blue-500";
 const labelClass = "mb-2 block text-xs font-semibold uppercase text-slate-500";
 
 export default function NewPaymentRequestPage() {
     const router = useRouter();
+    const { associationId, hasAssociation } = useActiveAssociation();
     const [accounts, setAccounts] = useState<FinancialAccount[]>([]);
     const [loadingRefs, setLoadingRefs] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
     const [formData, setFormData] = useState({
-        associationId: DEFAULT_ASSOCIATION_ID,
         payeeName: '',
         description: '',
         amount: '',
@@ -41,9 +42,15 @@ export default function NewPaymentRequestPage() {
 
     useEffect(() => {
         async function loadAccounts() {
+            if (!associationId) {
+                setAccounts([]);
+                setLoadingRefs(false);
+                return;
+            }
+
             try {
                 setLoadingRefs(true);
-                setAccounts(await api.listFinancialAccounts(DEFAULT_ASSOCIATION_ID));
+                setAccounts(await api.listFinancialAccounts(associationId));
             } catch (err: unknown) {
                 setError(err instanceof Error ? err.message : 'Erro ao carregar contas financeiras.');
             } finally {
@@ -52,7 +59,7 @@ export default function NewPaymentRequestPage() {
         }
 
         loadAccounts();
-    }, []);
+    }, [associationId]);
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -61,8 +68,12 @@ export default function NewPaymentRequestPage() {
         setSuccess(false);
 
         try {
+            if (!associationId) {
+                throw new Error('Defina a associacao ativa antes de solicitar pagamento.');
+            }
+
             const payment = await api.createPaymentRequest({
-                associationId: formData.associationId,
+                associationId,
                 accountabilityProjectId: formData.accountabilityProjectId || undefined,
                 documentId: formData.documentId || undefined,
                 fundId: formData.fundId || undefined,
@@ -109,11 +120,13 @@ export default function NewPaymentRequestPage() {
                     </div>
                 )}
 
+                {!hasAssociation && <AssociationRequired message="Informe a associacao ativa no topo antes de solicitar pagamento." />}
+
                 <form onSubmit={handleSubmit} className="rounded-lg border border-slate-800 bg-slate-900 p-6">
                     <div className="grid gap-5 md:grid-cols-2">
                         <div className="md:col-span-2">
                             <label className={labelClass}>Associacao</label>
-                            <input required value={formData.associationId} onChange={(event) => setFormData({ ...formData, associationId: event.target.value })} className={inputClass} />
+                            <input readOnly value={associationId} className={inputClass} placeholder="Defina no seletor superior" />
                         </div>
 
                         <div>
@@ -192,7 +205,7 @@ export default function NewPaymentRequestPage() {
                     </div>
 
                     <div className="mt-6 flex justify-end border-t border-slate-800 pt-6">
-                        <button type="submit" disabled={saving} className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60">
+                        <button type="submit" disabled={saving || !hasAssociation} className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60">
                             <Save size={17} />
                             {saving ? 'Salvando...' : 'Salvar solicitacao'}
                         </button>

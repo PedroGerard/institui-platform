@@ -3,12 +3,15 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
+import { AssociationRequired } from '@/components/layout/AssociationRequired';
+import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
 import { api } from '@/services/api';
 import { MandateDTO, MemberDTO } from '@/types/dtos';
 import { formatDate, governanceRoleLabels } from '@/lib/institutional';
 import { AlertCircle, CheckCircle, Plus, RefreshCw, ShieldCheck, XCircle } from 'lucide-react';
 
 export default function MandatesPage() {
+    const { associationId, hasAssociation } = useActiveAssociation();
     const [mandates, setMandates] = useState<MandateDTO[]>([]);
     const [members, setMembers] = useState<MemberDTO[]>([]);
     const [showOnlyActive, setShowOnlyActive] = useState(false);
@@ -23,12 +26,19 @@ export default function MandatesPage() {
     );
 
     async function loadData() {
+        if (!associationId) {
+            setMandates([]);
+            setMembers([]);
+            setLoading(false);
+            return;
+        }
+
         try {
             setLoading(true);
             setError(null);
             const [mandateData, memberData] = await Promise.all([
-                showOnlyActive ? api.listActiveMandates() : api.listMandates(),
-                api.listMembers()
+                showOnlyActive ? api.listActiveMandates(associationId) : api.listMandates(associationId),
+                api.listMembers(associationId)
             ]);
             setMandates(mandateData);
             setMembers(memberData);
@@ -41,7 +51,7 @@ export default function MandatesPage() {
 
     useEffect(() => {
         loadData();
-    }, [showOnlyActive]);
+    }, [associationId, showOnlyActive]);
 
     async function closeMandate(id: string) {
         try {
@@ -114,6 +124,8 @@ export default function MandatesPage() {
                         {success}
                     </div>
                 )}
+
+                {!hasAssociation && <AssociationRequired />}
 
                 <div className="overflow-x-auto rounded-lg border border-slate-800 bg-slate-900">
                     <div className="min-w-[860px]">

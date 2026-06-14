@@ -4,9 +4,11 @@ import { FormEvent, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
+import { AssociationRequired } from '@/components/layout/AssociationRequired';
+import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
 import { api } from '@/services/api';
 import { GovernanceBodyCategory } from '@/types/dtos';
-import { DEFAULT_ASSOCIATION_ID, governanceBodyCategoryLabels } from '@/lib/institutional';
+import { governanceBodyCategoryLabels } from '@/lib/institutional';
 import { AlertCircle, ArrowLeft, CheckCircle, Save } from 'lucide-react';
 
 const inputClass = "w-full rounded-lg border border-slate-800 bg-slate-950 px-4 py-2.5 text-sm text-slate-100 outline-none focus:border-blue-500";
@@ -14,11 +16,11 @@ const labelClass = "mb-2 block text-xs font-semibold uppercase text-slate-500";
 
 export default function NewGovernanceBodyPage() {
     const router = useRouter();
+    const { associationId, hasAssociation } = useActiveAssociation();
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
     const [formData, setFormData] = useState({
-        associationId: DEFAULT_ASSOCIATION_ID,
         name: '',
         category: 'CONSULTATIVE_COUNCIL' as GovernanceBodyCategory,
         description: '',
@@ -33,8 +35,13 @@ export default function NewGovernanceBodyPage() {
         setSuccess(false);
 
         try {
+            if (!associationId) {
+                throw new Error('Defina a associacao ativa antes de criar um orgao.');
+            }
+
             await api.createGovernanceBody({
                 ...formData,
+                associationId,
                 description: formData.description || undefined
             });
             setSuccess(true);
@@ -69,15 +76,17 @@ export default function NewGovernanceBodyPage() {
                     </div>
                 )}
 
+                {!hasAssociation && <AssociationRequired message="Informe a associacao ativa no topo antes de cadastrar um orgao de governanca." />}
+
                 <form onSubmit={handleSubmit} className="rounded-lg border border-slate-800 bg-slate-900 p-6">
                     <div className="grid gap-5 md:grid-cols-2">
                         <div className="md:col-span-2">
                             <label className={labelClass}>Associacao</label>
                             <input
-                                required
-                                value={formData.associationId}
-                                onChange={(event) => setFormData({ ...formData, associationId: event.target.value })}
+                                readOnly
+                                value={associationId}
                                 className={inputClass}
+                                placeholder="Defina no seletor superior"
                             />
                         </div>
 
@@ -139,7 +148,7 @@ export default function NewGovernanceBodyPage() {
                     <div className="mt-6 flex justify-end border-t border-slate-800 pt-6">
                         <button
                             type="submit"
-                            disabled={saving}
+                            disabled={saving || !hasAssociation}
                             className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                             <Save size={17} />

@@ -1,10 +1,11 @@
 'use client';
 
 import InstitutionalLayout from "@/components/layout/InstitutionalLayout";
+import { AssociationRequired } from "@/components/layout/AssociationRequired";
 import { ComplianceStatus } from "@/components/dashboard/ComplianceStatus";
 import { LegalTimeline } from "@/components/dashboard/LegalTimeline";
 import { useAssociationDashboard } from "@/hooks/useAssociationDashboard";
-import { DEFAULT_ASSOCIATION_ID } from "@/lib/institutional";
+import { useActiveAssociation } from "@/contexts/ActiveAssociationContext";
 import Link from "next/link";
 import { FileCheck2, FileText, Landmark, Scale, ShieldCheck, ShoppingCart, Users, Vote, Wallet } from "lucide-react";
 
@@ -20,11 +21,14 @@ const modules = [
 ];
 
 export default function Dashboard() {
-  const { status, events, loading, error } = useAssociationDashboard(DEFAULT_ASSOCIATION_ID);
+  const { associationId, hasAssociation } = useActiveAssociation();
+  const { status, events, loading, error } = useAssociationDashboard(associationId);
 
   return (
     <InstitutionalLayout title="Visao Geral" activePath="/dashboard">
       <div className="space-y-6">
+        {!hasAssociation && <AssociationRequired message="Use o seletor no topo para informar a associacao que sera operada neste ambiente." />}
+
         {error && (
           <div className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm font-medium text-amber-900">
             Nao foi possivel carregar todos os dados do backend agora. As telas continuam disponiveis para navegacao.

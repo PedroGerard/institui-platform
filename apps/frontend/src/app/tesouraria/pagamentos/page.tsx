@@ -4,11 +4,14 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { AlertCircle, CheckCircle, Clock, Plus, RefreshCw, Wallet } from 'lucide-react';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
+import { AssociationRequired } from '@/components/layout/AssociationRequired';
+import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
 import { api } from '@/services/api';
 import { PaymentRequestDTO, PaymentRequestStatus, PaymentRequestSummaryDTO } from '@/types/dtos';
-import { DEFAULT_ASSOCIATION_ID, formatCurrency, formatDate, paymentRequestStatusLabels } from '@/lib/institutional';
+import { formatCurrency, formatDate, paymentRequestStatusLabels } from '@/lib/institutional';
 
 export default function PaymentRequestsPage() {
+    const { associationId, hasAssociation } = useActiveAssociation();
     const [payments, setPayments] = useState<PaymentRequestDTO[]>([]);
     const [summary, setSummary] = useState<PaymentRequestSummaryDTO | null>(null);
     const [status, setStatus] = useState<PaymentRequestStatus | ''>('');
@@ -16,15 +19,22 @@ export default function PaymentRequestsPage() {
     const [error, setError] = useState<string | null>(null);
 
     async function loadData() {
+        if (!associationId) {
+            setPayments([]);
+            setSummary(null);
+            setLoading(false);
+            return;
+        }
+
         try {
             setLoading(true);
             setError(null);
             const [paymentData, summaryData] = await Promise.all([
                 api.listPaymentRequests({
-                    associationId: DEFAULT_ASSOCIATION_ID,
+                    associationId,
                     status: status || undefined
                 }),
-                api.getPaymentRequestSummary({ associationId: DEFAULT_ASSOCIATION_ID })
+                api.getPaymentRequestSummary({ associationId })
             ]);
             setPayments(paymentData);
             setSummary(summaryData);
@@ -37,7 +47,7 @@ export default function PaymentRequestsPage() {
 
     useEffect(() => {
         loadData();
-    }, [status]);
+    }, [associationId, status]);
 
     return (
         <InstitutionalLayout title="Pagamentos" activePath="/tesouraria/pagamentos">
@@ -84,6 +94,8 @@ export default function PaymentRequestsPage() {
                         {error}
                     </div>
                 )}
+
+                {!hasAssociation && <AssociationRequired />}
 
                 <div className="grid gap-4 md:grid-cols-4">
                     <div className="rounded-lg border border-slate-800 bg-slate-900 p-5">

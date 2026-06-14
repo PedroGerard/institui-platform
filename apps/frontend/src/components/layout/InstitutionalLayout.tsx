@@ -1,6 +1,9 @@
-import React from 'react';
+'use client';
+
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { BarChart3, FileText, History, Landmark, LayoutDashboard, LucideIcon, Network, RefreshCcw, Scale, ScrollText, Search, ShoppingCart, TrendingUp, Users, Vote, Wallet } from 'lucide-react';
+import { BarChart3, Building2, FileText, History, Landmark, LayoutDashboard, LucideIcon, Network, RefreshCcw, Scale, ScrollText, Search, ShoppingCart, TrendingUp, Users, Vote, Wallet } from 'lucide-react';
+import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
 
 interface SidebarItemProps {
     href: string;
@@ -35,6 +38,17 @@ export default function InstitutionalLayout({
     title?: string;
     activePath?: string;
 }) {
+    const { associationId, hasAssociation, setAssociationId } = useActiveAssociation();
+    const [draftAssociationId, setDraftAssociationId] = useState('');
+
+    useEffect(() => {
+        setDraftAssociationId(associationId);
+    }, [associationId]);
+
+    function applyAssociationId() {
+        setAssociationId(draftAssociationId);
+    }
+
     return (
         <div className="app-shell flex min-h-screen font-sans">
             <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-slate-950">
@@ -107,9 +121,33 @@ export default function InstitutionalLayout({
                                 type="search"
                             />
                         </label>
-                        <div className="text-right text-sm">
-                            <div className="font-semibold text-slate-100">Associacao Beneficente Exemplo</div>
-                            <div className="text-xs text-slate-500">Ambiente de implantacao</div>
+                        <div className="min-w-[310px] rounded-lg border border-slate-800 bg-slate-950 p-2">
+                            <div className="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.08em] text-slate-500">
+                                <Building2 size={14} aria-hidden="true" />
+                                Associacao ativa
+                            </div>
+                            <div className="flex gap-2">
+                                <input
+                                    aria-label="ID da associacao ativa"
+                                    value={draftAssociationId}
+                                    onChange={(event) => setDraftAssociationId(event.target.value)}
+                                    onKeyDown={(event) => {
+                                        if (event.key === 'Enter') applyAssociationId();
+                                    }}
+                                    className="h-9 min-w-0 flex-1 rounded-md border border-slate-800 bg-slate-900 px-3 text-xs text-slate-100 outline-none focus:border-blue-500"
+                                    placeholder="ID da associacao"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={applyAssociationId}
+                                    className="h-9 rounded-md bg-blue-600 px-3 text-xs font-semibold text-white hover:bg-blue-700"
+                                >
+                                    Aplicar
+                                </button>
+                            </div>
+                            <div className="mt-1 text-[11px] text-slate-500">
+                                {hasAssociation ? 'Usada por membros, mandatos, compras, tesouraria e documentos.' : 'Informe uma associacao para carregar dados operacionais.'}
+                            </div>
                         </div>
                     </div>
                 </header>

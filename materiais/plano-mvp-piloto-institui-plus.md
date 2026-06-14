@@ -1,6 +1,6 @@
 # Plano MVP Piloto - INSTITUI+
 
-Atualizado em 05 de junho de 2026.
+Atualizado em 14 de junho de 2026.
 
 ## 1. Estado atual verificado
 
@@ -10,6 +10,10 @@ Atualizado em 05 de junho de 2026.
 - Build completo da API e do frontend passou.
 - API respondeu em `/health`.
 - Frontend respondeu em `/prestacao-contas`.
+- Frontend administrativo passou a operar com contexto de associacao ativa, sem ID fixo nos fluxos criticos.
+- PR #9 aberto para a Sprint 00 com a correcao de associacao ativa.
+- CI do monorepo preparado para validar Prisma, gerar Prisma Client, testar/buildar API e buildar frontend.
+- Roadmap de desenvolvimento consolidado em `materiais/roadmap-desenvolvimento-institui-plus.md`.
 
 Observacao operacional: neste ambiente Codex, os servidores locais sobem corretamente em primeiro plano, mas o sandbox encerra processos quando tentamos mante-los em segundo plano. Para uso continuo, a execucao deve ser feita no terminal local do usuario ou em ambiente de deploy.
 

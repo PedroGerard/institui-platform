@@ -3,19 +3,24 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
+import { AssociationRequired } from '@/components/layout/AssociationRequired';
+import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
 import { api } from '@/services/api';
 import { GeneratedDocumentDTO } from '@/types/dtos';
-import { DEFAULT_ASSOCIATION_ID } from '@/lib/institutional';
 import { AlertCircle, CheckCircle, Download, ScrollText } from 'lucide-react';
 
 export default function InstitutionalPage() {
-    const [associationId, setAssociationId] = useState(DEFAULT_ASSOCIATION_ID);
+    const { associationId, hasAssociation } = useActiveAssociation();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [document, setDocument] = useState<GeneratedDocumentDTO | null>(null);
 
     async function generateStatute() {
         try {
+            if (!associationId) {
+                throw new Error('Defina a associacao ativa antes de gerar o estatuto.');
+            }
+
             setLoading(true);
             setError(null);
             setDocument(await api.generateStatute(associationId));
@@ -55,12 +60,15 @@ export default function InstitutionalPage() {
                     </div>
                 )}
 
+                {!hasAssociation && <AssociationRequired message="Informe a associacao ativa no topo antes de gerar o estatuto consolidado." />}
+
                 <div className="rounded-lg border border-slate-800 bg-slate-900 p-6">
                     <label className="mb-2 block text-xs font-semibold uppercase text-slate-500">Associacao</label>
                     <input
+                        readOnly
                         value={associationId}
-                        onChange={(event) => setAssociationId(event.target.value)}
                         className="w-full rounded-lg border border-slate-800 bg-slate-950 px-4 py-2.5 text-sm text-slate-100 outline-none focus:border-blue-500"
+                        placeholder="Defina no seletor superior"
                     />
 
                     <div className="mt-6 flex flex-col gap-3 border-t border-slate-800 pt-6 sm:flex-row sm:items-center sm:justify-between">
@@ -70,7 +78,7 @@ export default function InstitutionalPage() {
                         <button
                             type="button"
                             onClick={generateStatute}
-                            disabled={loading}
+                            disabled={loading || !hasAssociation}
                             className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                             <ScrollText size={17} />

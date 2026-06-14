@@ -1,17 +1,21 @@
-name: Frontend
+name: CI
 
 on:
   push:
     branches:
       - main
+      - "codex/**"
   pull_request:
     branches:
       - main
 
 jobs:
-  build:
-    name: Build public site
+  validate:
+    name: Validate monorepo
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://institui:institui@localhost:5432/institui_ci
+      NEXT_TELEMETRY_DISABLED: "1"
 
     steps:
       - name: Checkout
@@ -22,17 +26,22 @@ jobs:
         with:
           node-version: "22"
           cache: npm
-          cache-dependency-path: apps/frontend/package-lock.json
-
-      - name: Prepare isolated frontend
-        run: |
-          mkdir frontend-build
-          cp -R apps/frontend/. frontend-build/
+          cache-dependency-path: package-lock.json
 
       - name: Install dependencies
-        working-directory: frontend-build
         run: npm ci
 
+      - name: Validate Prisma schema
+        run: npx prisma validate --schema apps/api/prisma/schema.prisma
+
+      - name: Generate Prisma client
+        run: npx prisma generate --schema apps/api/prisma/schema.prisma
+
+      - name: Test API
+        run: npm run test --workspace=apps/api -- --run
+
+      - name: Build API
+        run: npm run build --workspace=apps/api
+
       - name: Build frontend
-        working-directory: frontend-build
-        run: npm run build
+        run: npm run build --workspace=apps/frontend

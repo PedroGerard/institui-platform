@@ -4,11 +4,14 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { AlertCircle, FileText, Plus, RefreshCw, ShoppingCart } from 'lucide-react';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
+import { AssociationRequired } from '@/components/layout/AssociationRequired';
+import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
 import { api } from '@/services/api';
 import { ProcurementProcessDTO, ProcurementProcessStatus } from '@/types/dtos';
-import { DEFAULT_ASSOCIATION_ID, formatCurrency, formatDate, procurementProcessStatusLabels } from '@/lib/institutional';
+import { formatCurrency, formatDate, procurementProcessStatusLabels } from '@/lib/institutional';
 
 export default function ProcurementProcessesPage() {
+    const { associationId, hasAssociation } = useActiveAssociation();
     const [processes, setProcesses] = useState<ProcurementProcessDTO[]>([]);
     const [status, setStatus] = useState<ProcurementProcessStatus | ''>('');
     const [loading, setLoading] = useState(true);
@@ -24,11 +27,17 @@ export default function ProcurementProcessesPage() {
     }, [processes]);
 
     async function loadData() {
+        if (!associationId) {
+            setProcesses([]);
+            setLoading(false);
+            return;
+        }
+
         try {
             setLoading(true);
             setError(null);
             setProcesses(await api.listProcurementProcesses({
-                associationId: DEFAULT_ASSOCIATION_ID,
+                associationId,
                 status: status || undefined
             }));
         } catch (err: unknown) {
@@ -40,7 +49,7 @@ export default function ProcurementProcessesPage() {
 
     useEffect(() => {
         loadData();
-    }, [status]);
+    }, [associationId, status]);
 
     function statusClass(value: ProcurementProcessStatus) {
         if (value === 'CONTRACTED') return 'bg-emerald-500/10 text-emerald-300';
@@ -94,6 +103,8 @@ export default function ProcurementProcessesPage() {
                         {error}
                     </div>
                 )}
+
+                {!hasAssociation && <AssociationRequired />}
 
                 <div className="grid gap-4 md:grid-cols-4">
                     <div className="rounded-lg border border-slate-800 bg-slate-900 p-5">
