@@ -2,14 +2,12 @@
 import { AggregateRoot } from "../shared/AggregateRoot";
 import { UniqueEntityID } from "../shared/Entity";
 import { CNPJ } from "../value-objects/CNPJ";
-import { Statute } from "./Statute"; // To be created
 
 interface AssociationProps {
     name: string;
     cnpj: CNPJ;
     foundationDate: Date;
-    activeStatuteId?: UniqueEntityID; // Reference to the active ruleset
-    // TODO: Add Address, contact info, etc.
+    activeStatuteId?: UniqueEntityID;
 }
 
 export class Association extends AggregateRoot<AssociationProps> {

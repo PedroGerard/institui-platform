@@ -1,5 +1,5 @@
-import { IAssemblyRepository } from "../../../domain/repositories/Interfaces";
-import { IAssociationRepository } from "../../../domain/repositories/Interfaces";
+import { PrismaClient } from "@prisma/client";
+import { IAssemblyRepository, IAssociationRepository } from "../../../domain/repositories/Interfaces";
 import { DocumentTemplateService } from "../../../domain/services/DocumentTemplateService";
 import { PdfGeneratorService } from "../../../domain/services/PdfGeneratorService";
 import { UniqueEntityID } from "../../../domain/shared/Entity";
@@ -9,7 +9,8 @@ export class GenerateMinutesPDF {
         private assemblyRepository: IAssemblyRepository,
         private associationRepository: IAssociationRepository,
         private templateService: DocumentTemplateService,
-        private pdfService: PdfGeneratorService
+        private pdfService: PdfGeneratorService,
+        private prisma?: PrismaClient
     ) { }
 
     async execute(assemblyId: string): Promise<Buffer> {
@@ -23,25 +24,39 @@ export class GenerateMinutesPDF {
             throw new Error('Association not found');
         }
 
-        // Mock data for Secretary/President (logic would be fetching from Mandates/Attendance)
-        const secretaryName = "Secretário Ad Hoc";
-        const presidentName = "Presidente em Exercício";
+        const secretaryName = await this.memberNameOrRole(
+            assembly.props.secretaryMemberId?.toString(),
+            'Secretario(a) da assembleia'
+        );
+        const presidentName = await this.memberNameOrRole(
+            assembly.props.chairMemberId?.toString(),
+            'Presidente da assembleia'
+        );
 
         const textContent = this.templateService.generateMinutes({
             associationName: association.name,
             assemblyType: assembly.type,
             date: assembly.date,
-            topics: assembly.agendaItemIds, // Simplification: IDs are texts for now? Or catch actual content
-            secretaryName: secretaryName,
-            presidentName: presidentName
+            topics: assembly.agendaItemIds,
+            secretaryName,
+            presidentName
         });
 
-        const pdfBuffer = await this.pdfService.generate({
+        return this.pdfService.generate({
             title: `ATA DE ASSEMBLEIA - ${association.name}`,
             content: textContent,
             footerText: "Gerado digitalmente por Institui+"
         });
+    }
 
-        return pdfBuffer;
+    private async memberNameOrRole(memberId: string | undefined, fallback: string) {
+        if (!memberId || !this.prisma) return fallback;
+
+        const member = await this.prisma.member.findUnique({
+            where: { id: memberId },
+            select: { fullName: true }
+        });
+
+        return member?.fullName || fallback;
     }
 }

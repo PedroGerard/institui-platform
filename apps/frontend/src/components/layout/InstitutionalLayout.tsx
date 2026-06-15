@@ -98,8 +98,8 @@ export default function InstitutionalLayout({
                     <div className="flex items-center gap-3 rounded-lg bg-white/8 px-3 py-3">
                         <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-xs font-bold text-[#0c2144]">AD</div>
                         <div className="text-sm">
-                            <div className="font-semibold text-white">Administrador</div>
-                            <div className="text-xs text-[#b9cbe3]">admin@institui.local</div>
+                            <div className="font-semibold text-white">Usuario operador</div>
+                            <div className="text-xs text-[#b9cbe3]">Perfil operacional</div>
                         </div>
                     </div>
                 </div>

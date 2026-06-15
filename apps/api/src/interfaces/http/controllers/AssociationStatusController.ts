@@ -13,15 +13,22 @@ export class AssociationStatusController extends BaseController {
         try {
             const { associationId } = req.params as { associationId: string };
 
-            // 1. Check Active Statute
             const association = await this.prisma.association.findUnique({
                 where: { id: associationId },
-                include: { activeStatute: true }
+                include: {
+                    activeStatute: {
+                        include: {
+                            versions: {
+                                orderBy: { versionNumber: "desc" },
+                                take: 1
+                            }
+                        }
+                    }
+                }
             });
 
             if (!association) return this.clientError(reply, "Association not found");
 
-            // 2. Check Active Mandates
             const activeMandates = await this.prisma.mandate.findMany({
                 where: {
                     associationId: associationId,
@@ -29,19 +36,18 @@ export class AssociationStatusController extends BaseController {
                 }
             });
 
-            // 3. Check Pending Minutes (Held assemblies not registered)
             const pendingAssemblies = await this.prisma.assembly.count({
                 where: {
                     associationId: associationId,
-                    status: "HELD" // Not REGISTERED_MINUTES
+                    status: "HELD"
                 }
             });
 
             const hasActiveStatute = !!association.activeStatuteId;
+            const activeStatuteVersion = association.activeStatute?.versions[0]?.versionNumber;
             const hasActiveMandate = activeMandates.length > 0;
             const pendingMinutes = pendingAssemblies;
 
-            // Basic Compliance Logic (Reflecting Facts)
             let complianceLevel: "GREEN" | "YELLOW" | "RED" = "GREEN";
 
             if (!hasActiveStatute || !hasActiveMandate) {
@@ -53,7 +59,7 @@ export class AssociationStatusController extends BaseController {
             const dto: AssociationStatusDTO = {
                 associationId,
                 hasActiveStatute,
-                activeStatuteVersion: undefined, // TODO: Load version number
+                activeStatuteVersion,
                 hasActiveMandate,
                 pendingMinutes,
                 complianceLevel

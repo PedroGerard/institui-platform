@@ -10,6 +10,7 @@ import {
     ReportType
 } from "@prisma/client";
 import { PdfGeneratorService } from "../../../domain/services/PdfGeneratorService";
+import { resolveActor } from "../../services/ActorResolver";
 
 export const REQUIRED_ACCOUNTABILITY_DOCUMENTS: DocumentType[] = [
     DocumentType.REX,
@@ -535,36 +536,7 @@ export class AccountabilityService {
     }
 
     private async ensureActor(associationId: string, performedById?: string) {
-        if (performedById) {
-            const user = await this.prisma.user.findUnique({ where: { id: performedById } });
-
-            if (user) {
-                return user.id;
-            }
-        }
-
-        const existingUser = await this.prisma.user.findFirst({
-            where: { associationId },
-            orderBy: { createdAt: "asc" }
-        });
-
-        if (existingUser) {
-            return existingUser.id;
-        }
-
-        const systemEmail = `system+${associationId}@institui.local`;
-        const systemUser = await this.prisma.user.upsert({
-            where: { email: systemEmail },
-            update: {},
-            create: {
-                associationId,
-                name: "Sistema INSTITUI+",
-                email: systemEmail,
-                role: "SYSTEM"
-            }
-        });
-
-        return systemUser.id;
+        return resolveActor(this.prisma, associationId, performedById);
     }
 
     private formatDate(value: Date) {

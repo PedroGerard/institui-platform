@@ -1,65 +1,181 @@
+'use client';
+
+import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { TrendingUp, TrendingDown, Wallet, FileText, ArrowRight } from 'lucide-react';
+import { AlertCircle, ArrowRight, Clock, FileText, Plus, RefreshCw, ShieldAlert, TrendingUp, Wallet } from 'lucide-react';
+import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
+import { AssociationRequired } from '@/components/layout/AssociationRequired';
+import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
+import { api } from '@/services/api';
+import { PaymentRequestDTO, PaymentRequestSummaryDTO } from '@/types/dtos';
+import { formatCurrency, formatDate, paymentRequestStatusLabels } from '@/lib/institutional';
 
 export default function TreasuryDashboard() {
-    const stats = [
-        { label: 'Saldo Atual', value: 'R$ 145.200,00', icon: Wallet, color: 'text-blue-400', bg: 'bg-blue-400/10' },
-        { label: 'Receitas (Mês)', value: 'R$ 12.500,00', icon: TrendingUp, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
-        { label: 'Despesas (Mês)', value: 'R$ 8.350,00', icon: TrendingDown, color: 'text-rose-400', bg: 'bg-rose-400/10' },
+    const { associationId, hasAssociation } = useActiveAssociation();
+    const [summary, setSummary] = useState<PaymentRequestSummaryDTO | null>(null);
+    const [payments, setPayments] = useState<PaymentRequestDTO[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    const loadData = useCallback(async () => {
+        if (!associationId) {
+            setSummary(null);
+            setPayments([]);
+            setLoading(false);
+            return;
+        }
+
+        try {
+            setLoading(true);
+            setError(null);
+            const [summaryData, paymentData] = await Promise.all([
+                api.getPaymentRequestSummary({ associationId }),
+                api.listPaymentRequests({ associationId })
+            ]);
+            setSummary(summaryData);
+            setPayments(paymentData.slice(0, 5));
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : 'Erro ao carregar tesouraria.');
+        } finally {
+            setLoading(false);
+        }
+    }, [associationId]);
+
+    useEffect(() => {
+        loadData();
+    }, [loadData]);
+
+    const cards = [
+        {
+            label: 'Total solicitado',
+            value: formatCurrency(summary?.totalAmount),
+            icon: Wallet,
+            tone: 'text-blue-300',
+            bg: 'bg-blue-500/10'
+        },
+        {
+            label: 'Bloqueado',
+            value: formatCurrency(summary?.byStatus.BLOCKED.amount),
+            icon: ShieldAlert,
+            tone: 'text-rose-300',
+            bg: 'bg-rose-500/10'
+        },
+        {
+            label: 'Aprovado',
+            value: formatCurrency(summary?.byStatus.APPROVED.amount),
+            icon: TrendingUp,
+            tone: 'text-emerald-300',
+            bg: 'bg-emerald-500/10'
+        },
+        {
+            label: 'Vencidos',
+            value: String(summary?.overdueCount || 0),
+            icon: Clock,
+            tone: 'text-amber-300',
+            bg: 'bg-amber-500/10'
+        }
     ];
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-slate-100">Tesouraria (Fluxo de Caixa)</h2>
-                <div className="flex gap-3">
-                    <Link href="/tesouraria/lancamentos/novo" className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors">
-                        + Novo Lançamento
-                    </Link>
-                </div>
-            </div>
-
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {stats.map((stat, idx) => (
-                    <div key={idx} className="bg-slate-900 border border-slate-800 p-6 rounded-xl">
-                        <div className="flex items-center justify-between mb-4">
-                            <div className={`${stat.bg} p-3 rounded-lg`}>
-                                <stat.icon className={`w-6 h-6 ${stat.color}`} />
-                            </div>
-                            <span className="text-slate-500 text-sm font-medium">Jan/2026</span>
-                        </div>
-                        <p className="text-slate-400 text-sm font-medium">{stat.label}</p>
-                        <p className="text-2xl font-bold text-slate-100 mt-1">{stat.value}</p>
+        <InstitutionalLayout title="Tesouraria" activePath="/tesouraria">
+            <div className="space-y-6">
+                <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+                    <div>
+                        <h2 className="text-2xl font-bold text-slate-100">Fluxo financeiro operacional</h2>
+                        <p className="mt-1 text-sm text-slate-400">Resumo de pagamentos, bloqueios e pendencias financeiras.</p>
                     </div>
-                ))}
-            </div>
-
-            {/* Recent Activity Mock */}
-            <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
-                <div className="p-6 border-b border-slate-800 flex justify-between items-center">
-                    <h3 className="font-semibold text-slate-100">Últimos Lançamentos</h3>
-                    <Link href="/tesouraria/lancamentos" className="text-sm text-blue-400 hover:text-blue-300 flex items-center gap-1">
-                        Ver todos <ArrowRight size={14} />
-                    </Link>
+                    <div className="flex flex-wrap gap-3">
+                        <button
+                            type="button"
+                            onClick={loadData}
+                            className="inline-flex items-center gap-2 rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-slate-800"
+                        >
+                            <RefreshCw size={16} />
+                            Atualizar
+                        </button>
+                        <Link
+                            href="/tesouraria/pagamentos/novo"
+                            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                        >
+                            <Plus size={16} />
+                            Solicitar pagamento
+                        </Link>
+                    </div>
                 </div>
-                <div className="divide-y divide-slate-800">
-                    {[1, 2, 3].map((_, i) => (
-                        <div key={i} className="p-4 flex items-center justify-between hover:bg-slate-800/50 transition-colors">
-                            <div className="flex items-center gap-4">
-                                <div className={`w-2 h-2 rounded-full ${i === 1 ? 'bg-rose-500' : 'bg-emerald-500'}`} />
-                                <div>
-                                    <p className="text-sm font-medium text-slate-200">{i === 1 ? 'Pagamento Energia' : 'Mensalidade Associado'}</p>
-                                    <p className="text-xs text-slate-500">Há 2 horas • Documento #123{i}</p>
+
+                {error && (
+                    <div className="flex items-center gap-3 rounded-lg border border-rose-500/30 bg-rose-500/10 p-4 text-sm text-rose-300">
+                        <AlertCircle size={18} />
+                        {error}
+                    </div>
+                )}
+
+                {!hasAssociation && <AssociationRequired />}
+
+                <div className="grid gap-4 md:grid-cols-4">
+                    {cards.map((card) => (
+                        <div key={card.label} className="rounded-lg border border-slate-800 bg-slate-900 p-5">
+                            <div className="mb-4 flex items-center justify-between">
+                                <div className={`${card.bg} ${card.tone} flex h-11 w-11 items-center justify-center rounded-lg`}>
+                                    <card.icon size={22} />
                                 </div>
+                                {loading && <span className="text-xs font-medium text-slate-500">Carregando</span>}
                             </div>
-                            <span className={`text-sm font-bold ${i === 1 ? 'text-rose-400' : 'text-emerald-400'}`}>
-                                {i === 1 ? '- R$ 450,00' : '+ R$ 150,00'}
-                            </span>
+                            <div className="text-xs font-semibold uppercase text-slate-500">{card.label}</div>
+                            <div className={`mt-2 text-xl font-bold ${card.tone}`}>{card.value}</div>
                         </div>
                     ))}
                 </div>
+
+                {summary && summary.blockingReasons.length > 0 && (
+                    <div className="rounded-lg border border-slate-800 bg-slate-900 p-5">
+                        <h3 className="mb-3 text-sm font-semibold text-slate-100">Bloqueios que precisam de atencao</h3>
+                        <div className="flex flex-wrap gap-2">
+                            {summary.blockingReasons.slice(0, 6).map((item) => (
+                                <span key={item.reason} className="rounded-full bg-rose-500/10 px-3 py-1 text-xs font-semibold text-rose-300">
+                                    {item.reason}: {item.count}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                <div className="rounded-lg border border-slate-800 bg-slate-900">
+                    <div className="flex items-center justify-between border-b border-slate-800 p-5">
+                        <h3 className="font-semibold text-slate-100">Solicitacoes recentes</h3>
+                        <Link href="/tesouraria/pagamentos" className="inline-flex items-center gap-1 text-sm text-blue-300 hover:text-blue-200">
+                            Ver pagamentos <ArrowRight size={14} />
+                        </Link>
+                    </div>
+
+                    {loading ? (
+                        <div className="px-5 py-10 text-center text-sm text-slate-400">Carregando movimentacoes...</div>
+                    ) : payments.length === 0 ? (
+                        <div className="flex flex-col items-center gap-3 px-5 py-12 text-center text-slate-400">
+                            <FileText size={28} />
+                            <span className="text-sm">Nenhuma solicitacao de pagamento cadastrada.</span>
+                        </div>
+                    ) : (
+                        <div className="divide-y divide-slate-800">
+                            {payments.map((payment) => (
+                                <Link
+                                    key={payment.id}
+                                    href={`/tesouraria/pagamentos/${payment.id}`}
+                                    className="grid gap-3 p-4 text-sm hover:bg-slate-800/50 md:grid-cols-[1.4fr_1fr_120px_150px]"
+                                >
+                                    <span className="min-w-0">
+                                        <span className="block break-words font-medium text-slate-100">{payment.description}</span>
+                                        <span className="mt-1 block text-xs text-slate-500">{payment.payeeName}</span>
+                                    </span>
+                                    <span className="font-semibold text-slate-100">{formatCurrency(payment.amount)}</span>
+                                    <span className="text-slate-400">{formatDate(payment.dueDate)}</span>
+                                    <span className="text-slate-300">{paymentRequestStatusLabels[payment.status]}</span>
+                                </Link>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
-        </div>
+        </InstitutionalLayout>
     );
 }

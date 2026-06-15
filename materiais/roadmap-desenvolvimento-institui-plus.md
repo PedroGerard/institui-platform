@@ -33,7 +33,7 @@ Status por frente:
 - Issue #1 - Contexto de associacao ativa: implementada e em PR.
 - Issue #2 - CI do monorepo: alteracao preparada localmente.
 - Issue #3 - Ambiente, CORS e DATABASE_URL: preparada localmente.
-- Issue #4 - TODOs, mocks e defaults tecnicos: pendente.
+- Issue #4 - TODOs, mocks e defaults tecnicos: preparada localmente.
 - Issue #5 - Estrutura de paginas Next.js entre `app` e `src/app`: pendente.
 - Issue #6 - Padronizacao visual administrativa: pendente.
 - Issue #7 - Organizacao do Figma com frames rastreaveis: em andamento com esta atualizacao.

@@ -16,6 +16,7 @@ import {
     ListProcurementProcessesDTO,
     ListSuppliersDTO
 } from "../../../interfaces/http/dtos/ProcurementDTOs";
+import { resolveActor } from "../../services/ActorResolver";
 
 export class ProcurementService {
     constructor(private readonly prisma: PrismaClient) { }
@@ -633,36 +634,7 @@ export class ProcurementService {
     }
 
     private async ensureActor(associationId: string, performedById?: string) {
-        if (performedById) {
-            const user = await this.prisma.user.findUnique({ where: { id: performedById } });
-
-            if (user) {
-                return user.id;
-            }
-        }
-
-        const existingUser = await this.prisma.user.findFirst({
-            where: { associationId },
-            orderBy: { createdAt: "asc" }
-        });
-
-        if (existingUser) {
-            return existingUser.id;
-        }
-
-        const systemEmail = `system+${associationId}@institui.local`;
-        const systemUser = await this.prisma.user.upsert({
-            where: { email: systemEmail },
-            update: {},
-            create: {
-                associationId,
-                name: "Sistema INSTITUI+",
-                email: systemEmail,
-                role: "SYSTEM"
-            }
-        });
-
-        return systemUser.id;
+        return resolveActor(this.prisma, associationId, performedById);
     }
 
     private decimalToNumber(value: Prisma.Decimal) {

@@ -3,7 +3,9 @@ export type FinancialAccount = {
     code: string;
     name: string;
     type: 'ASSET' | 'LIABILITY' | 'EQUITY' | 'REVENUE' | 'EXPENSE';
-    isAnalytic: boolean; // Assuming this based on user request "isAnalytic: boolean" mentioned in "Correção correta"
+    nature?: 'DEBIT' | 'CREDIT';
+    parentId?: string | null;
+    isAnalytic: boolean;
     level?: number;
     children?: FinancialAccount[];
 };
