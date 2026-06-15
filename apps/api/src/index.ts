@@ -1,6 +1,7 @@
 
 import Fastify from "fastify";
 import { PrismaClient } from "@prisma/client";
+import { env, isCorsOriginAllowed } from "./config/env.js";
 import { PrismaAssemblyRepository } from "./infrastructure/database/PrismaAssemblyRepository.js";
 import { PrismaAssociationRepository } from "./infrastructure/database/PrismaAssociationRepository.js";
 import { PrismaStatuteRepository } from "./infrastructure/database/PrismaStatuteRepository.js";
@@ -15,8 +16,6 @@ import { LegalEventController } from "./interfaces/http/controllers/LegalEventCo
 import { AssemblyController } from "./interfaces/http/controllers/AssemblyController.js";
 
 import { AssociationStatusController } from "./interfaces/http/controllers/AssociationStatusController.js";
-
-process.env.DATABASE_URL ||= "postgresql://institui:institui@localhost:5432/institui";
 
 const server = Fastify({ logger: true });
 
@@ -41,9 +40,19 @@ const associationStatusController = new AssociationStatusController(prisma);
 
 
 server.addHook("onRequest", async (request, reply) => {
-    reply.header("Access-Control-Allow-Origin", "*");
-    reply.header("Access-Control-Allow-Methods", "GET,POST,PATCH,DELETE,OPTIONS");
-    reply.header("Access-Control-Allow-Headers", "Content-Type,Authorization,x-association-id,x-user-id");
+    const origin = request.headers.origin;
+
+    if (!isCorsOriginAllowed(origin)) {
+        return reply.status(403).send({ error: "Origem nao permitida pelo CORS." });
+    }
+
+    if (origin) {
+        reply.header("Access-Control-Allow-Origin", origin);
+        reply.header("Vary", "Origin");
+    }
+
+    reply.header("Access-Control-Allow-Methods", env.cors.allowedMethods.join(","));
+    reply.header("Access-Control-Allow-Headers", env.cors.allowedHeaders.join(","));
 
     if (request.method === "OPTIONS") {
         return reply.status(204).send();
@@ -474,8 +483,7 @@ server.get("/health", async () => {
 
 const start = async () => {
     try {
-        const port = Number(process.env.PORT || 3333);
-        await server.listen({ port });
+        await server.listen({ port: env.port, host: env.host });
     } catch (err) {
         server.log.error(err);
         process.exit(1);

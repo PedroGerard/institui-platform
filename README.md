@@ -89,6 +89,16 @@ Instale as dependencias na raiz:
 npm install
 ```
 
+Crie os arquivos de ambiente a partir dos exemplos:
+
+```bash
+cp .env.example .env
+cp apps/api/.env.example apps/api/.env
+cp apps/frontend/.env.example apps/frontend/.env.local
+```
+
+Em producao, `DATABASE_URL` deve ser definida obrigatoriamente no ambiente. O fallback local de banco so e usado fora de producao.
+
 Rode o frontend:
 
 ```bash
@@ -146,6 +156,15 @@ Build do frontend:
 ```bash
 npm run build --workspace=apps/frontend
 ```
+
+## Variaveis de ambiente principais
+
+- `DATABASE_URL`: conexao PostgreSQL usada pelo Prisma.
+- `PORT`: porta da API. Padrao local: `3333`.
+- `HOST`: host da API. Padrao local: `0.0.0.0`.
+- `CORS_ORIGINS`: origens permitidas pela API, separadas por virgula.
+- `NEXT_PUBLIC_API_URL`: URL publica da API consumida pelo frontend.
+- `NEXT_PUBLIC_ACTIVE_ASSOCIATION_ID`: associacao inicial opcional para desenvolvimento.
 
 ## Publicacao
 
