@@ -12,6 +12,55 @@ interface SidebarItemProps {
     active?: boolean;
 }
 
+const navGroups = [
+    {
+        title: "Governanca",
+        items: [
+            { href: "/dashboard", icon: LayoutDashboard, label: "Visao Geral" },
+            { href: "/institucional", icon: Scale, label: "Institucional" },
+            { href: "/orgaos", icon: Network, label: "Orgaos e Comites" },
+            { href: "/eleicoes", icon: Vote, label: "Eleicoes" },
+            { href: "/mandatos", icon: Users, label: "Mandatos" },
+            { href: "/assembleias", icon: Users, label: "Assembleias" }
+        ]
+    },
+    {
+        title: "Secretaria",
+        items: [
+            { href: "/membros", icon: Users, label: "Membros" },
+            { href: "/atas", icon: ScrollText, label: "Atas & Registros" }
+        ]
+    },
+    {
+        title: "Operacao",
+        items: [
+            { href: "/tesouraria", icon: TrendingUp, label: "Fluxo de Caixa" },
+            { href: "/compras", icon: ShoppingCart, label: "Compras MROSC" },
+            { href: "/tesouraria/pagamentos", icon: Wallet, label: "Pagamentos" },
+            { href: "/tesouraria/conciliacao", icon: RefreshCcw, label: "Conciliacao" },
+            { href: "/tesouraria/relatorios", icon: BarChart3, label: "Relatorios" },
+            { href: "/tesouraria/plano-contas", icon: Landmark, label: "Plano de Contas" },
+            { href: "/tesouraria/lancamentos", icon: Wallet, label: "Lancamentos" },
+            { href: "/prestacao-contas", icon: FileText, label: "Prestacao de Contas" }
+        ]
+    },
+    {
+        title: "Juridico",
+        items: [
+            { href: "/documentos", icon: FileText, label: "Documentos" },
+            { href: "/auditoria", icon: History, label: "Auditoria" }
+        ]
+    }
+];
+
+const mobileNavItems = navGroups.flatMap((group) => group.items);
+
+function isActiveNav(href: string, activePath: string) {
+    if (href === "/dashboard") return activePath === "/dashboard";
+    if (href === "/tesouraria") return activePath === "/tesouraria";
+    return activePath.startsWith(href);
+}
+
 const SidebarItem = ({ href, icon: Icon, label, active }: SidebarItemProps) => (
     <Link
         href={href}
@@ -67,31 +116,20 @@ export default function InstitutionalLayout({
                 </div>
 
                 <nav aria-label="Modulos do sistema" className="flex-1 overflow-y-auto px-3 py-4">
-                    <NavSection>Governanca</NavSection>
-                    <SidebarItem href="/dashboard" icon={LayoutDashboard} label="Visao Geral" active={activePath === "/dashboard"} />
-                    <SidebarItem href="/institucional" icon={Scale} label="Institucional" active={activePath.startsWith("/institucional")} />
-                    <SidebarItem href="/orgaos" icon={Network} label="Orgaos e Comites" active={activePath.startsWith("/orgaos")} />
-                    <SidebarItem href="/eleicoes" icon={Vote} label="Eleicoes" active={activePath.startsWith("/eleicoes")} />
-                    <SidebarItem href="/mandatos" icon={Users} label="Mandatos" active={activePath.startsWith("/mandatos")} />
-                    <SidebarItem href="/assembleias" icon={Users} label="Assembleias" active={activePath.startsWith("/assembleias")} />
-
-                    <NavSection>Secretaria</NavSection>
-                    <SidebarItem href="/membros" icon={Users} label="Membros" active={activePath.startsWith("/membros")} />
-                    <SidebarItem href="/atas" icon={ScrollText} label="Atas & Registros" active={activePath.startsWith("/atas")} />
-
-                    <NavSection>Operacao</NavSection>
-                    <SidebarItem href="/tesouraria" icon={TrendingUp} label="Fluxo de Caixa" active={activePath === "/tesouraria"} />
-                    <SidebarItem href="/compras" icon={ShoppingCart} label="Compras MROSC" active={activePath.startsWith("/compras")} />
-                    <SidebarItem href="/tesouraria/pagamentos" icon={Wallet} label="Pagamentos" active={activePath.startsWith("/tesouraria/pagamentos")} />
-                    <SidebarItem href="/tesouraria/conciliacao" icon={RefreshCcw} label="Conciliacao" active={activePath.startsWith("/tesouraria/conciliacao")} />
-                    <SidebarItem href="/tesouraria/relatorios" icon={BarChart3} label="Relatorios" active={activePath.startsWith("/tesouraria/relatorios")} />
-                    <SidebarItem href="/tesouraria/plano-contas" icon={Landmark} label="Plano de Contas" active={activePath.startsWith("/tesouraria/plano-contas")} />
-                    <SidebarItem href="/tesouraria/lancamentos" icon={Wallet} label="Lancamentos" active={activePath.startsWith("/tesouraria/lancamentos")} />
-                    <SidebarItem href="/prestacao-contas" icon={FileText} label="Prestacao de Contas" active={activePath.startsWith("/prestacao-contas")} />
-
-                    <NavSection>Juridico</NavSection>
-                    <SidebarItem href="/documentos" icon={FileText} label="Documentos" active={activePath.startsWith("/documentos")} />
-                    <SidebarItem href="/auditoria" icon={History} label="Auditoria" active={activePath.startsWith("/auditoria")} />
+                    {navGroups.map((group) => (
+                        <React.Fragment key={group.title}>
+                            <NavSection>{group.title}</NavSection>
+                            {group.items.map((item) => (
+                                <SidebarItem
+                                    key={item.href}
+                                    href={item.href}
+                                    icon={item.icon}
+                                    label={item.label}
+                                    active={isActiveNav(item.href, activePath)}
+                                />
+                            ))}
+                        </React.Fragment>
+                    ))}
                 </nav>
 
                 <div className="app-sidebar-border border-t p-4">
@@ -151,6 +189,19 @@ export default function InstitutionalLayout({
                         </div>
                     </div>
                 </header>
+                <nav className="app-mobile-nav border-b border-slate-800 bg-slate-900/50" aria-label="Modulos do sistema em telas menores">
+                    {mobileNavItems.map((item) => {
+                        const Icon = item.icon;
+                        const active = isActiveNav(item.href, activePath);
+
+                        return (
+                            <Link key={item.href} href={item.href} aria-current={active ? "page" : undefined}>
+                                <Icon size={16} aria-hidden="true" />
+                                {item.label}
+                            </Link>
+                        );
+                    })}
+                </nav>
                 <div id="main-content" className="flex-1 overflow-y-auto p-5 md:p-8">
                     {children}
                 </div>

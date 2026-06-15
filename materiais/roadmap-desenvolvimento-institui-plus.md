@@ -35,7 +35,7 @@ Status por frente:
 - Issue #3 - Ambiente, CORS e DATABASE_URL: preparada localmente.
 - Issue #4 - TODOs, mocks e defaults tecnicos: preparada localmente.
 - Issue #5 - Estrutura de paginas Next.js entre `app` e `src/app`: preparada localmente.
-- Issue #6 - Padronizacao visual administrativa: pendente.
+- Issue #6 - Padronizacao visual administrativa: preparada localmente.
 - Issue #7 - Organizacao do Figma com frames rastreaveis: em andamento com esta atualizacao.
 - Issue #8 - Documentacao operacional minima: em andamento com README e roadmap.
 

@@ -26,25 +26,25 @@ export default function Dashboard() {
 
   return (
     <InstitutionalLayout title="Visao Geral" activePath="/dashboard">
-      <div className="space-y-6">
+      <div className="app-page">
         {!hasAssociation && <AssociationRequired message="Use o seletor no topo para informar a associacao que sera operada neste ambiente." />}
 
         {error && (
-          <div className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm font-medium text-amber-900">
+          <div className="app-alert app-alert-warning text-sm font-medium">
             Nao foi possivel carregar todos os dados do backend agora. As telas continuam disponiveis para navegacao.
           </div>
         )}
 
         <section className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
-          <div className="rounded-lg border border-slate-800 bg-slate-900 p-6">
+          <div className="app-panel app-panel-pad">
             <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-600/10 text-blue-700">
+              <div className="app-icon-tile bg-blue-600/10 text-blue-700">
                 <Scale size={26} aria-hidden="true" />
               </div>
               <div>
                 <p className="text-sm font-bold uppercase tracking-[0.08em] text-slate-500">Central operacional</p>
-                <h2 className="mt-2 text-2xl font-bold text-slate-100">Governanca, financeiro e prestacao em uma so esteira.</h2>
-                <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">
+                <h2 className="app-heading mt-2">Governanca, financeiro e prestacao em uma so esteira.</h2>
+                <p className="app-subtitle max-w-3xl">
                   Acompanhe a situacao institucional, as decisoes formais, compras MROSC, pagamentos e documentos que sustentam auditoria e prestacao de contas.
                 </p>
               </div>
@@ -55,8 +55,8 @@ export default function Dashboard() {
 
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {modules.map((module) => (
-            <Link key={module.href} href={module.href} className="group rounded-lg border border-slate-800 bg-slate-900 p-5 transition hover:-translate-y-0.5 hover:border-slate-700 hover:bg-slate-800/50">
-              <div className={`mb-4 flex h-11 w-11 items-center justify-center rounded-lg ${module.bg} ${module.color}`}>
+            <Link key={module.href} href={module.href} className="app-card-link group">
+              <div className={`app-icon-tile mb-4 ${module.bg} ${module.color}`}>
                 <module.icon size={23} aria-hidden="true" />
               </div>
               <h3 className="text-base font-bold text-slate-100">{module.label}</h3>
