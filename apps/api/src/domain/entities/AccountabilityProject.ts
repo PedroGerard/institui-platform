@@ -33,6 +33,12 @@ export class AccountabilityProject extends Entity<AccountabilityProjectProps> {
     get associationId(): UniqueEntityID { return this.props.associationId; }
     get name(): string { return this.props.name; }
     get status(): AccountabilityStatus { return this.props.status; }
+    get grantor(): string { return this.props.grantor; }
+    get instrumentType(): InstrumentType { return this.props.instrumentType; }
+    get instrumentNumber(): string | undefined { return this.props.instrumentNumber; }
+    get periodStart(): Date { return this.props.periodStart; }
+    get periodEnd(): Date { return this.props.periodEnd; }
+    get bankAccountId(): string | undefined { return this.props.bankAccountId; }
 
     private constructor(props: AccountabilityProjectProps, id?: UniqueEntityID) {
         super(props, id);

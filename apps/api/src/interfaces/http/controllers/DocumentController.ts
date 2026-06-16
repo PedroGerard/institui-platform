@@ -47,7 +47,8 @@ export class DocumentController {
             assemblyRepo,
             associationRepo,
             templateService,
-            pdfService
+            pdfService,
+            prisma
         );
 
         try {

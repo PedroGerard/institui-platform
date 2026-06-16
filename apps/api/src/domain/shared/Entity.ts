@@ -1,6 +1,17 @@
 
 import { v4 as uuidv4 } from 'uuid';
 
+interface UniqueEntityIDLike {
+    toValue(): unknown;
+}
+
+function hasToValue(value: unknown): value is UniqueEntityIDLike {
+    return typeof value === "object"
+        && value !== null
+        && "toValue" in value
+        && typeof value.toValue === "function";
+}
+
 export class UniqueEntityID {
     private value: string;
 
@@ -16,14 +27,13 @@ export class UniqueEntityID {
         return this.value;
     }
 
-    equals(id?: UniqueEntityID): boolean {
+    equals(id?: UniqueEntityID | UniqueEntityIDLike): boolean {
         if (id === null || id === undefined) {
             return false;
         }
         if (!(id instanceof UniqueEntityID)) {
-            // Fallback: Check structural equality (value) for mixed environment/versions
-            if (typeof (id as any).toValue === 'function') {
-                return (id as any).toValue() === this.value;
+            if (hasToValue(id)) {
+                return id.toValue() === this.value;
             }
             return false;
         }
@@ -62,6 +72,6 @@ export abstract class Entity<T> {
     }
 }
 
-const isEntity = (v: any): v is Entity<any> => {
+const isEntity = (v: unknown): v is Entity<unknown> => {
     return v instanceof Entity;
 };

@@ -1,17 +1,30 @@
-name: Frontend
+name: CI
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
+      - "codex/**"
   pull_request:
     branches:
       - main
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  build:
-    name: Build public site
+  validate:
+    name: Validate monorepo
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DATABASE_URL: postgresql://institui:institui@localhost:5432/institui_ci
+      NEXT_TELEMETRY_DISABLED: "1"
 
     steps:
       - name: Checkout
@@ -22,17 +35,10 @@ jobs:
         with:
           node-version: "22"
           cache: npm
-          cache-dependency-path: apps/frontend/package-lock.json
-
-      - name: Prepare isolated frontend
-        run: |
-          mkdir frontend-build
-          cp -R apps/frontend/. frontend-build/
+          cache-dependency-path: package-lock.json
 
       - name: Install dependencies
-        working-directory: frontend-build
         run: npm ci
 
-      - name: Build frontend
-        working-directory: frontend-build
-        run: npm run build
+      - name: Validate Prisma, API and frontend
+        run: npm run ci

@@ -21,18 +21,15 @@ export class PrismaAccountabilityRepository implements IAccountabilityRepository
             id: project.id.toString(),
             associationId: project.associationId.toString(),
             name: project.name,
-            status: project.status as any, // Cast to Prisma Enum
-            grantor: 'FNDE', // Default or need props
-            instrumentType: 'PDDE' as any, // Default or need props
-            periodStart: new Date(), // Mock defaults if props missing in Domain Entity (Need to update Entity)
-            periodEnd: new Date(),
+            status: project.status as any,
+            grantor: project.grantor,
+            instrumentType: project.instrumentType as any,
+            instrumentNumber: project.instrumentNumber,
+            periodStart: project.periodStart,
+            periodEnd: project.periodEnd,
+            bankAccountId: project.bankAccountId,
             updatedAt: new Date()
         };
-
-        // Note: The Domain Entity AccountabilityProject defined earlier was minimal (props: name, status).
-        // The Prisma Schema has coverage for grantor, instrumentType, etc.
-        // I need to update the Domain Entity to support these fields if I want to save them.
-        // For now, saving what we have.
 
         await this.prisma.accountabilityProject.upsert({
             where: { id: project.id.toString() },

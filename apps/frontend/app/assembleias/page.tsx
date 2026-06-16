@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
+import { AssociationRequired } from '@/components/layout/AssociationRequired';
+import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
 import { api } from '@/services/api';
 import { AssemblyDTO } from '@/types/dtos';
 import { assemblyStatusLabels, assemblyTypeLabels, formatDate } from '@/lib/institutional';
@@ -16,6 +18,7 @@ function statusClass(status: AssemblyDTO['status']) {
 }
 
 export default function AssembliesPage() {
+    const { associationId, hasAssociation } = useActiveAssociation();
     const [assemblies, setAssemblies] = useState<AssemblyDTO[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -26,10 +29,16 @@ export default function AssembliesPage() {
     );
 
     async function loadAssemblies() {
+        if (!associationId) {
+            setAssemblies([]);
+            setLoading(false);
+            return;
+        }
+
         try {
             setLoading(true);
             setError(null);
-            setAssemblies(await api.listAssemblies());
+            setAssemblies(await api.listAssemblies({ associationId }));
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : 'Erro ao carregar assembleias.');
         } finally {
@@ -39,7 +48,7 @@ export default function AssembliesPage() {
 
     useEffect(() => {
         loadAssemblies();
-    }, []);
+    }, [associationId]);
 
     return (
         <InstitutionalLayout title="Assembleias" activePath="/assembleias">
@@ -74,6 +83,8 @@ export default function AssembliesPage() {
                         {error}
                     </div>
                 )}
+
+                {!hasAssociation && <AssociationRequired />}
 
                 <div className="overflow-x-auto rounded-lg border border-slate-800 bg-slate-900">
                     <div className="min-w-[920px]">

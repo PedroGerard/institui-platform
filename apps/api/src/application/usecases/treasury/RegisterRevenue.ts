@@ -12,25 +12,18 @@ export class RegisterRevenue {
     }
 
     async execute(dto: RegisterTransactionDTO, associationId: string, actorId: string) {
-        // 1. Get the Credit Account (Revenue)
         const creditAccount = await this.prisma.financialAccount.findUnique({
             where: { id: dto.creditAccountId }
         });
 
-        if (!creditAccount) throw new Error('Conta de crédito não encontrada.');
-
-        // 2. Validate Nature (Must be REVENUE or ASSET in some cases, but typically Revenue)
-        // Actually, strictly speaking, Revenue Accounts are Credit Nature.
-        // We can enforce that the selected Credit Account is of type 'REVENUE'
-        if (creditAccount.type !== 'REVENUE') {
-            const confirm = true; // In strict mode, we might block. For now, allow but warn?
-            // Let's enforce structural consistency: Revenues increase by Credit.
-            // It's possible to credit an Asset (Sale of Asset).
-            // It's possible to credit a Liability (Loan).
-            // But if the intent is "Register Revenue", it usually implies a Revenue account.
+        if (!creditAccount) {
+            throw new Error('Conta de credito nao encontrada.');
         }
 
-        // 3. Delegate to Base Transaction Logic
+        if (creditAccount.type !== 'REVENUE') {
+            throw new Error('Receitas devem usar uma conta de credito do tipo REVENUE.');
+        }
+
         return this.baseUseCase.execute(dto, associationId, actorId);
     }
 }

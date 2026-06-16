@@ -4,9 +4,11 @@ import { FormEvent, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
+import { AssociationRequired } from '@/components/layout/AssociationRequired';
+import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
 import { api } from '@/services/api';
 import { AssemblyDTO, GovernanceBodyDTO } from '@/types/dtos';
-import { DEFAULT_ASSOCIATION_ID, assemblyTypeLabels, formatDate, governanceBodyCategoryLabels } from '@/lib/institutional';
+import { assemblyTypeLabels, formatDate, governanceBodyCategoryLabels } from '@/lib/institutional';
 import { AlertCircle, ArrowLeft, CheckCircle, Save } from 'lucide-react';
 
 const inputClass = "w-full rounded-lg border border-slate-800 bg-slate-950 px-4 py-2.5 text-sm text-slate-100 outline-none focus:border-blue-500";
@@ -14,6 +16,7 @@ const labelClass = "mb-2 block text-xs font-semibold uppercase text-slate-500";
 
 export default function NewElectionPage() {
     const router = useRouter();
+    const { associationId, hasAssociation } = useActiveAssociation();
     const [assemblies, setAssemblies] = useState<AssemblyDTO[]>([]);
     const [bodies, setBodies] = useState<GovernanceBodyDTO[]>([]);
     const [loadingRefs, setLoadingRefs] = useState(true);
@@ -21,7 +24,6 @@ export default function NewElectionPage() {
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
     const [formData, setFormData] = useState({
-        associationId: DEFAULT_ASSOCIATION_ID,
         assemblyId: '',
         governanceBodyId: '',
         title: '',
@@ -32,11 +34,18 @@ export default function NewElectionPage() {
 
     useEffect(() => {
         async function loadRefs() {
+            if (!associationId) {
+                setAssemblies([]);
+                setBodies([]);
+                setLoadingRefs(false);
+                return;
+            }
+
             try {
                 setLoadingRefs(true);
                 const [assemblyData, bodyData] = await Promise.all([
-                    api.listAssemblies(),
-                    api.listGovernanceBodies({ active: true })
+                    api.listAssemblies({ associationId }),
+                    api.listGovernanceBodies({ associationId, active: true })
                 ]);
                 setAssemblies(assemblyData);
                 setBodies(bodyData);
@@ -48,7 +57,7 @@ export default function NewElectionPage() {
         }
 
         loadRefs();
-    }, []);
+    }, [associationId]);
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -57,8 +66,12 @@ export default function NewElectionPage() {
         setSuccess(false);
 
         try {
+            if (!associationId) {
+                throw new Error('Defina a associacao ativa antes de criar uma eleicao.');
+            }
+
             const election = await api.createElection({
-                associationId: formData.associationId,
+                associationId,
                 assemblyId: formData.assemblyId || undefined,
                 governanceBodyId: formData.governanceBodyId || undefined,
                 title: formData.title,
@@ -98,15 +111,17 @@ export default function NewElectionPage() {
                     </div>
                 )}
 
+                {!hasAssociation && <AssociationRequired message="Informe a associacao ativa no topo antes de criar uma eleicao." />}
+
                 <form onSubmit={handleSubmit} className="rounded-lg border border-slate-800 bg-slate-900 p-6">
                     <div className="grid gap-5 md:grid-cols-2">
                         <div className="md:col-span-2">
                             <label className={labelClass}>Associacao</label>
                             <input
-                                required
-                                value={formData.associationId}
-                                onChange={(event) => setFormData({ ...formData, associationId: event.target.value })}
+                                readOnly
+                                value={associationId}
                                 className={inputClass}
+                                placeholder="Defina no seletor superior"
                             />
                         </div>
 
@@ -189,7 +204,7 @@ export default function NewElectionPage() {
                     <div className="mt-6 flex justify-end border-t border-slate-800 pt-6">
                         <button
                             type="submit"
-                            disabled={saving}
+                            disabled={saving || !hasAssociation}
                             className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                             <Save size={17} />

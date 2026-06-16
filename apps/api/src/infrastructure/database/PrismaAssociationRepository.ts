@@ -19,8 +19,6 @@ export class PrismaAssociationRepository implements IAssociationRepository {
 
         if (!raw) return null;
 
-        // TODO: Map Address or real props
-        // We recreate via 'create' or a public mapping method
         return Association.create({
             name: raw.name,
             cnpj: CNPJ.create(raw.cnpj),

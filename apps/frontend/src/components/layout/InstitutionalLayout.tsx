@@ -1,12 +1,64 @@
-import React from 'react';
+'use client';
+
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { BarChart3, FileText, History, Landmark, LayoutDashboard, LucideIcon, Network, RefreshCcw, Scale, ScrollText, Search, ShoppingCart, TrendingUp, Users, Vote, Wallet } from 'lucide-react';
+import { BarChart3, Building2, FileText, History, Landmark, LayoutDashboard, LucideIcon, Network, RefreshCcw, Scale, ScrollText, Search, ShoppingCart, TrendingUp, Users, Vote, Wallet } from 'lucide-react';
+import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
 
 interface SidebarItemProps {
     href: string;
     icon: LucideIcon;
     label: string;
     active?: boolean;
+}
+
+const navGroups = [
+    {
+        title: "Governanca",
+        items: [
+            { href: "/dashboard", icon: LayoutDashboard, label: "Visao Geral" },
+            { href: "/institucional", icon: Scale, label: "Institucional" },
+            { href: "/orgaos", icon: Network, label: "Orgaos e Comites" },
+            { href: "/eleicoes", icon: Vote, label: "Eleicoes" },
+            { href: "/mandatos", icon: Users, label: "Mandatos" },
+            { href: "/assembleias", icon: Users, label: "Assembleias" }
+        ]
+    },
+    {
+        title: "Secretaria",
+        items: [
+            { href: "/membros", icon: Users, label: "Membros" },
+            { href: "/atas", icon: ScrollText, label: "Atas & Registros" }
+        ]
+    },
+    {
+        title: "Operacao",
+        items: [
+            { href: "/tesouraria", icon: TrendingUp, label: "Fluxo de Caixa" },
+            { href: "/compras", icon: ShoppingCart, label: "Compras MROSC" },
+            { href: "/tesouraria/pagamentos", icon: Wallet, label: "Pagamentos" },
+            { href: "/tesouraria/conciliacao", icon: RefreshCcw, label: "Conciliacao" },
+            { href: "/tesouraria/relatorios", icon: BarChart3, label: "Relatorios" },
+            { href: "/tesouraria/plano-contas", icon: Landmark, label: "Plano de Contas" },
+            { href: "/tesouraria/lancamentos", icon: Wallet, label: "Lancamentos" },
+            { href: "/prestacao-contas", icon: FileText, label: "Prestacao de Contas" }
+        ]
+    },
+    {
+        title: "Juridico",
+        items: [
+            { href: "/documentos", icon: FileText, label: "Documentos" },
+            { href: "/auditoria", icon: History, label: "Auditoria" }
+        ]
+    }
+];
+
+const mobileNavItems = navGroups.flatMap((group) => group.items);
+
+function isActiveNav(href: string, activePath: string) {
+    if (href === "/dashboard") return activePath === "/dashboard";
+    if (href === "/tesouraria") return activePath === "/tesouraria";
+    return activePath.startsWith(href);
 }
 
 const SidebarItem = ({ href, icon: Icon, label, active }: SidebarItemProps) => (
@@ -35,6 +87,17 @@ export default function InstitutionalLayout({
     title?: string;
     activePath?: string;
 }) {
+    const { associationId, hasAssociation, setAssociationId } = useActiveAssociation();
+    const [draftAssociationId, setDraftAssociationId] = useState('');
+
+    useEffect(() => {
+        setDraftAssociationId(associationId);
+    }, [associationId]);
+
+    function applyAssociationId() {
+        setAssociationId(draftAssociationId);
+    }
+
     return (
         <div className="app-shell flex min-h-screen font-sans">
             <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-slate-950">
@@ -53,39 +116,28 @@ export default function InstitutionalLayout({
                 </div>
 
                 <nav aria-label="Modulos do sistema" className="flex-1 overflow-y-auto px-3 py-4">
-                    <NavSection>Governanca</NavSection>
-                    <SidebarItem href="/dashboard" icon={LayoutDashboard} label="Visao Geral" active={activePath === "/dashboard"} />
-                    <SidebarItem href="/institucional" icon={Scale} label="Institucional" active={activePath.startsWith("/institucional")} />
-                    <SidebarItem href="/orgaos" icon={Network} label="Orgaos e Comites" active={activePath.startsWith("/orgaos")} />
-                    <SidebarItem href="/eleicoes" icon={Vote} label="Eleicoes" active={activePath.startsWith("/eleicoes")} />
-                    <SidebarItem href="/mandatos" icon={Users} label="Mandatos" active={activePath.startsWith("/mandatos")} />
-                    <SidebarItem href="/assembleias" icon={Users} label="Assembleias" active={activePath.startsWith("/assembleias")} />
-
-                    <NavSection>Secretaria</NavSection>
-                    <SidebarItem href="/membros" icon={Users} label="Membros" active={activePath.startsWith("/membros")} />
-                    <SidebarItem href="/atas" icon={ScrollText} label="Atas & Registros" active={activePath.startsWith("/atas")} />
-
-                    <NavSection>Operacao</NavSection>
-                    <SidebarItem href="/tesouraria" icon={TrendingUp} label="Fluxo de Caixa" active={activePath === "/tesouraria"} />
-                    <SidebarItem href="/compras" icon={ShoppingCart} label="Compras MROSC" active={activePath.startsWith("/compras")} />
-                    <SidebarItem href="/tesouraria/pagamentos" icon={Wallet} label="Pagamentos" active={activePath.startsWith("/tesouraria/pagamentos")} />
-                    <SidebarItem href="/tesouraria/conciliacao" icon={RefreshCcw} label="Conciliacao" active={activePath.startsWith("/tesouraria/conciliacao")} />
-                    <SidebarItem href="/tesouraria/relatorios" icon={BarChart3} label="Relatorios" active={activePath.startsWith("/tesouraria/relatorios")} />
-                    <SidebarItem href="/tesouraria/plano-contas" icon={Landmark} label="Plano de Contas" active={activePath.startsWith("/tesouraria/plano-contas")} />
-                    <SidebarItem href="/tesouraria/lancamentos" icon={Wallet} label="Lancamentos" active={activePath.startsWith("/tesouraria/lancamentos")} />
-                    <SidebarItem href="/prestacao-contas" icon={FileText} label="Prestacao de Contas" active={activePath.startsWith("/prestacao-contas")} />
-
-                    <NavSection>Juridico</NavSection>
-                    <SidebarItem href="/documentos" icon={FileText} label="Documentos" active={activePath.startsWith("/documentos")} />
-                    <SidebarItem href="/auditoria" icon={History} label="Auditoria" active={activePath.startsWith("/auditoria")} />
+                    {navGroups.map((group) => (
+                        <React.Fragment key={group.title}>
+                            <NavSection>{group.title}</NavSection>
+                            {group.items.map((item) => (
+                                <SidebarItem
+                                    key={item.href}
+                                    href={item.href}
+                                    icon={item.icon}
+                                    label={item.label}
+                                    active={isActiveNav(item.href, activePath)}
+                                />
+                            ))}
+                        </React.Fragment>
+                    ))}
                 </nav>
 
                 <div className="app-sidebar-border border-t p-4">
                     <div className="flex items-center gap-3 rounded-lg bg-white/8 px-3 py-3">
                         <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-xs font-bold text-[#0c2144]">AD</div>
                         <div className="text-sm">
-                            <div className="font-semibold text-white">Administrador</div>
-                            <div className="text-xs text-[#b9cbe3]">admin@institui.local</div>
+                            <div className="font-semibold text-white">Usuario operador</div>
+                            <div className="text-xs text-[#b9cbe3]">Perfil operacional</div>
                         </div>
                     </div>
                 </div>
@@ -107,12 +159,49 @@ export default function InstitutionalLayout({
                                 type="search"
                             />
                         </label>
-                        <div className="text-right text-sm">
-                            <div className="font-semibold text-slate-100">Associacao Beneficente Exemplo</div>
-                            <div className="text-xs text-slate-500">Ambiente de implantacao</div>
+                        <div className="min-w-[310px] rounded-lg border border-slate-800 bg-slate-950 p-2">
+                            <div className="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.08em] text-slate-500">
+                                <Building2 size={14} aria-hidden="true" />
+                                Associacao ativa
+                            </div>
+                            <div className="flex gap-2">
+                                <input
+                                    aria-label="ID da associacao ativa"
+                                    value={draftAssociationId}
+                                    onChange={(event) => setDraftAssociationId(event.target.value)}
+                                    onKeyDown={(event) => {
+                                        if (event.key === 'Enter') applyAssociationId();
+                                    }}
+                                    className="h-9 min-w-0 flex-1 rounded-md border border-slate-800 bg-slate-900 px-3 text-xs text-slate-100 outline-none focus:border-blue-500"
+                                    placeholder="ID da associacao"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={applyAssociationId}
+                                    className="h-9 rounded-md bg-blue-600 px-3 text-xs font-semibold text-white hover:bg-blue-700"
+                                >
+                                    Aplicar
+                                </button>
+                            </div>
+                            <div className="mt-1 text-[11px] text-slate-500">
+                                {hasAssociation ? 'Usada por membros, mandatos, compras, tesouraria e documentos.' : 'Informe uma associacao para carregar dados operacionais.'}
+                            </div>
                         </div>
                     </div>
                 </header>
+                <nav className="app-mobile-nav border-b border-slate-800 bg-slate-900/50" aria-label="Modulos do sistema em telas menores">
+                    {mobileNavItems.map((item) => {
+                        const Icon = item.icon;
+                        const active = isActiveNav(item.href, activePath);
+
+                        return (
+                            <Link key={item.href} href={item.href} aria-current={active ? "page" : undefined}>
+                                <Icon size={16} aria-hidden="true" />
+                                {item.label}
+                            </Link>
+                        );
+                    })}
+                </nav>
                 <div id="main-content" className="flex-1 overflow-y-auto p-5 md:p-8">
                     {children}
                 </div>

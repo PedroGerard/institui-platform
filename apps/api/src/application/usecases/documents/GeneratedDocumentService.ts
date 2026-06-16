@@ -3,6 +3,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { GeneratedDocumentType, PrismaClient } from "@prisma/client";
 import { PdfGeneratorService } from "../../../domain/services/PdfGeneratorService";
+import { resolveActor } from "../../services/ActorResolver";
 
 interface OfficialLetterInput {
     associationId: string;
@@ -391,37 +392,7 @@ export class GeneratedDocumentService {
     }
 
     private async ensureActor(associationId: string, generatedById?: string) {
-        if (generatedById) {
-            const user = await this.prisma.user.findUnique({ where: { id: generatedById } });
-
-            if (user) {
-                return user.id;
-            }
-        }
-
-        const existingUser = await this.prisma.user.findFirst({
-            where: { associationId },
-            orderBy: { createdAt: "asc" }
-        });
-
-        if (existingUser) {
-            return existingUser.id;
-        }
-
-        const systemEmail = `system+${associationId}@institui.local`;
-
-        const systemUser = await this.prisma.user.upsert({
-            where: { email: systemEmail },
-            update: {},
-            create: {
-                associationId,
-                name: "Sistema INSTITUI+",
-                email: systemEmail,
-                role: "SYSTEM"
-            }
-        });
-
-        return systemUser.id;
+        return resolveActor(this.prisma, associationId, generatedById);
     }
 
     private formatDate(value: Date) {

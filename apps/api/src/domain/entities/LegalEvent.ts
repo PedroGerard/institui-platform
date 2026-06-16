@@ -2,11 +2,11 @@
 import { Entity, UniqueEntityID } from "../shared/Entity";
 
 export interface LegalEventProps {
-    type: string; // e.g. "AssemblyHeld", "StatuteChanged"
+    type: string;
     timestamp: Date;
-    actorId?: UniqueEntityID; // Who caused it
+    actorId?: UniqueEntityID;
     associationId: UniqueEntityID;
-    payload: any; // JSON detail
+    payload: unknown;
 }
 
 export class LegalEvent extends Entity<LegalEventProps> {

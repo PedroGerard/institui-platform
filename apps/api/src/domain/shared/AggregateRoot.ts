@@ -1,16 +1,16 @@
 
 import { Entity, UniqueEntityID } from "./Entity";
+import { DomainEvent } from "../events/DomainEvents";
 
 export abstract class AggregateRoot<T> extends Entity<T> {
-    private _domainEvents: any[] = []; // Type strictly later
+    private _domainEvents: DomainEvent[] = [];
 
-    get domainEvents(): any[] {
+    get domainEvents(): DomainEvent[] {
         return this._domainEvents;
     }
 
-    protected addDomainEvent(domainEvent: any): void {
+    protected addDomainEvent(domainEvent: DomainEvent): void {
         this._domainEvents.push(domainEvent);
-        // Log intent to dispatch
     }
 
     public clearEvents(): void {

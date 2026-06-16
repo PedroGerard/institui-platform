@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
+import { AssociationRequired } from '@/components/layout/AssociationRequired';
+import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
 import { api } from '@/services/api';
 import { AccountabilityProjectDTO, AccountabilityStatus, InstrumentType } from '@/types/dtos';
 import { accountabilityStatusLabels, formatDate, instrumentTypeLabels } from '@/lib/institutional';
@@ -12,6 +14,7 @@ const statuses = Object.keys(accountabilityStatusLabels) as AccountabilityStatus
 const instruments = Object.keys(instrumentTypeLabels) as InstrumentType[];
 
 export default function AccountabilityProjectsPage() {
+    const { associationId, hasAssociation } = useActiveAssociation();
     const [projects, setProjects] = useState<AccountabilityProjectDTO[]>([]);
     const [status, setStatus] = useState<AccountabilityStatus | 'ALL'>('ALL');
     const [instrumentType, setInstrumentType] = useState<InstrumentType | 'ALL'>('ALL');
@@ -25,10 +28,17 @@ export default function AccountabilityProjectsPage() {
     );
 
     async function loadProjects() {
+        if (!associationId) {
+            setProjects([]);
+            setLoading(false);
+            return;
+        }
+
         try {
             setLoading(true);
             setError(null);
             setProjects(await api.listAccountabilityProjects({
+                associationId,
                 status: status === 'ALL' ? undefined : status,
                 instrumentType: instrumentType === 'ALL' ? undefined : instrumentType,
                 year: year || undefined
@@ -42,7 +52,7 @@ export default function AccountabilityProjectsPage() {
 
     useEffect(() => {
         loadProjects();
-    }, [status, instrumentType, year]);
+    }, [associationId, status, instrumentType, year]);
 
     return (
         <InstitutionalLayout title="Prestacao de contas" activePath="/prestacao-contas">
@@ -79,6 +89,8 @@ export default function AccountabilityProjectsPage() {
                         {error}
                     </div>
                 )}
+
+                {!hasAssociation && <AssociationRequired />}
 
                 <div className="overflow-x-auto rounded-lg border border-slate-800 bg-slate-900">
                     <div className="min-w-[920px]">

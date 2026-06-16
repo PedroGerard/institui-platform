@@ -1,5 +1,4 @@
 import { PrismaClient } from "@prisma/client";
-
-process.env.DATABASE_URL ||= "postgresql://institui:institui@localhost:5432/institui";
+import "../../config/env.js";
 
 export const prisma = new PrismaClient();

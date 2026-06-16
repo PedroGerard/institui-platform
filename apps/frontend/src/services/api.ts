@@ -72,9 +72,12 @@ class ApiService {
         });
 
         if (!response.ok) {
-            // Basic error handling - could be expanded to parse standardized LegalErrors later
-            const errorBody = await response.json().catch(() => ({}));
-            throw new Error(errorBody.message || errorBody.error || `API Error: ${response.statusText}`);
+            const errorBody = await response
+                .clone()
+                .json()
+                .catch(async () => ({ message: await response.text().catch(() => "") }));
+            const message = errorBody.message || errorBody.error || response.statusText || `HTTP ${response.status}`;
+            throw new Error(message);
         }
 
         return response.json();

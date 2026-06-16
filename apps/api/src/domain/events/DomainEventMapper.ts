@@ -8,10 +8,8 @@ export class DomainEventMapper {
         const eventName = event.constructor.name;
         const aggregateId = event.getAggregateId();
 
-        // Extract payload (everything except standard props)
-        const payload: any = { ...event };
+        const payload = { ...event } as Record<string, unknown>;
         delete payload.dateTimeOccurred;
-        // We can leave other props as payload
 
         return LegalEvent.create({
             type: eventName,

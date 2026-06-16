@@ -3,9 +3,11 @@
 import { FormEvent, useState } from 'react';
 import Link from 'next/link';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
+import { AssociationRequired } from '@/components/layout/AssociationRequired';
+import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
 import { api } from '@/services/api';
 import { GeneratedDocumentDTO, GeneratedDocumentType } from '@/types/dtos';
-import { DEFAULT_ASSOCIATION_ID, generatedDocumentTypeLabels } from '@/lib/institutional';
+import { generatedDocumentTypeLabels } from '@/lib/institutional';
 import { AlertCircle, ArrowLeft, CheckCircle, FilePlus } from 'lucide-react';
 
 const inputClass = "w-full rounded-lg border border-slate-800 bg-slate-950 px-4 py-2.5 text-sm text-slate-100 outline-none focus:border-blue-500";
@@ -13,8 +15,8 @@ const labelClass = "mb-2 block text-xs font-semibold uppercase text-slate-500";
 const documentTypes = Object.keys(generatedDocumentTypeLabels) as GeneratedDocumentType[];
 
 export default function GenerateDocumentPage() {
+    const { associationId, hasAssociation } = useActiveAssociation();
     const [type, setType] = useState<GeneratedDocumentType>('ATA');
-    const [associationId, setAssociationId] = useState(DEFAULT_ASSOCIATION_ID);
     const [referenceId, setReferenceId] = useState('');
     const [title, setTitle] = useState('Oficio institucional');
     const [recipient, setRecipient] = useState('');
@@ -31,6 +33,10 @@ export default function GenerateDocumentPage() {
         setGeneratedDocument(null);
 
         try {
+            if (!associationId && (type === 'ESTATUTO' || type === 'OFICIO')) {
+                throw new Error('Defina a associacao ativa antes de gerar este documento.');
+            }
+
             let document: GeneratedDocumentDTO;
 
             if (type === 'ATA') {
@@ -96,6 +102,8 @@ export default function GenerateDocumentPage() {
                     </div>
                 )}
 
+                {!hasAssociation && <AssociationRequired message="Informe a associacao ativa no topo para gerar estatuto consolidado ou oficio." />}
+
                 <form onSubmit={handleSubmit} className="rounded-lg border border-slate-800 bg-slate-900 p-6">
                     <div className="grid gap-5 md:grid-cols-2">
                         <div>
@@ -118,10 +126,10 @@ export default function GenerateDocumentPage() {
                         <div>
                             <label className={labelClass}>Associacao</label>
                             <input
-                                required
+                                readOnly
                                 value={associationId}
-                                onChange={(event) => setAssociationId(event.target.value)}
                                 className={inputClass}
+                                placeholder="Defina no seletor superior"
                             />
                         </div>
 
@@ -206,7 +214,7 @@ export default function GenerateDocumentPage() {
                         </Link>
                         <button
                             type="submit"
-                            disabled={saving}
+                            disabled={saving || (!hasAssociation && (type === 'ESTATUTO' || type === 'OFICIO'))}
                             className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                             <FilePlus size={17} />
