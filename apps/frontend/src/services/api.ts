@@ -47,7 +47,9 @@ import {
     PaymentRequestStatus,
     SupplierDTO,
     TreasuryReportDTO,
-    TreasuryReportType
+    TreasuryReportType,
+    UserDTO,
+    UserRole
 } from "../types/dtos";
 import { FinancialAccount } from "../types/financial";
 
@@ -112,6 +114,29 @@ class ApiService {
         return this.fetch<AssociationDTO>('/associations', {
             method: 'POST',
             body: JSON.stringify(payload)
+        });
+    }
+
+    public async listUsers(associationId: string): Promise<UserDTO[]> {
+        return this.fetch<UserDTO[]>(`/users?associationId=${associationId}`);
+    }
+
+    public async createUser(payload: {
+        associationId: string;
+        name: string;
+        email: string;
+        role: Exclude<UserRole, "SYSTEM">;
+    }): Promise<UserDTO> {
+        return this.fetch<UserDTO>('/users', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+    }
+
+    public async updateUserRole(id: string, role: Exclude<UserRole, "SYSTEM">): Promise<UserDTO> {
+        return this.fetch<UserDTO>(`/users/${id}/role`, {
+            method: 'PATCH',
+            body: JSON.stringify({ role })
         });
     }
 

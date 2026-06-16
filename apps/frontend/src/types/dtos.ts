@@ -36,6 +36,18 @@ export interface AssociationDTO {
     };
 }
 
+export type UserRole = "ADM" | "MEMBER" | "AUDITOR" | "SYSTEM";
+
+export interface UserDTO {
+    id: string;
+    associationId: string;
+    name: string;
+    email: string;
+    role: UserRole;
+    createdAt?: string;
+    updatedAt?: string;
+}
+
 export type MemberType = "FOUNDER" | "EFFECTIVE" | "BENEFACTOR" | "COLLABORATOR" | "HONORARY";
 export type MemberStatus = "ACTIVE" | "INACTIVE" | "SUSPENDED" | "EXCLUDED";
 export type GovernanceRole = "DIRECTOR_PRESIDENT" | "ADMINISTRATIVE_FINANCIAL_DIRECTOR" | "TECHNICAL_DIRECTOR" | "PRESIDENT" | "VICE_PRESIDENT" | "TREASURER" | "SECRETARY" | "FISCAL_COUNCIL" | "FISCAL_COUNCIL_PRESIDENT" | "FISCAL_COUNCIL_MEMBER" | "FISCAL_COUNCIL_SUBSTITUTE" | "DIRECTOR";

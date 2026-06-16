@@ -294,6 +294,25 @@ server.post<{ Params: { id: string } }>("/procurements/:id/contracts", async (re
 
 // --- Member Routes ---
 import { MemberController } from "./interfaces/http/controllers/MemberController.js";
+import { UserController } from "./interfaces/http/controllers/UserController.js";
+
+// --- User Routes ---
+
+server.post("/users", async (req, reply) => {
+    await UserController.create(req, reply);
+});
+
+server.get("/users", async (req, reply) => {
+    await UserController.list(req, reply);
+});
+
+server.get<{ Params: { id: string } }>("/users/:id", async (req, reply) => {
+    await UserController.getById(req, reply);
+});
+
+server.patch<{ Params: { id: string } }>("/users/:id/role", async (req, reply) => {
+    await UserController.updateRole(req, reply);
+});
 
 server.post("/members", async (req, reply) => {
     await MemberController.register(req, reply);

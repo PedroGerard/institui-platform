@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { BarChart3, Building2, FileText, History, Landmark, LayoutDashboard, LucideIcon, Network, RefreshCcw, Scale, ScrollText, Search, ShoppingCart, TrendingUp, Users, Vote, Wallet } from 'lucide-react';
+import { BarChart3, Building2, FileText, History, Landmark, LayoutDashboard, LucideIcon, Network, RefreshCcw, Scale, ScrollText, Search, ShoppingCart, TrendingUp, UserCog, Users, Vote, Wallet } from 'lucide-react';
 import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
 
 interface SidebarItemProps {
@@ -18,6 +18,7 @@ const navGroups = [
         items: [
             { href: "/dashboard", icon: LayoutDashboard, label: "Visao Geral" },
             { href: "/institucional", icon: Scale, label: "Institucional" },
+            { href: "/usuarios", icon: UserCog, label: "Usuarios" },
             { href: "/orgaos", icon: Network, label: "Orgaos e Comites" },
             { href: "/eleicoes", icon: Vote, label: "Eleicoes" },
             { href: "/mandatos", icon: Users, label: "Mandatos" },
