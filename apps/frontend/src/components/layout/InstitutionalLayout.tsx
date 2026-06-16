@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import { BarChart3, Building2, FileText, History, Landmark, LayoutDashboard, LucideIcon, Network, RefreshCcw, Scale, ScrollText, Search, ShoppingCart, TrendingUp, Users, Vote, Wallet } from 'lucide-react';
 import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
@@ -78,6 +78,71 @@ const NavSection = ({ children }: { children: React.ReactNode }) => (
     </div>
 );
 
+function AssociationSwitcher() {
+    const {
+        associationId,
+        activeAssociation,
+        associations,
+        loadingAssociations,
+        associationError,
+        hasAssociation,
+        setAssociationId,
+        refreshAssociations
+    } = useActiveAssociation();
+
+    const selectedAssociationIsMissing = Boolean(associationId && !activeAssociation);
+    const helperText = loadingAssociations
+        ? 'Carregando entidades cadastradas.'
+        : associationError
+            ? `Nao foi possivel carregar: ${associationError}`
+            : activeAssociation
+                ? `${activeAssociation.cnpjFormatted || activeAssociation.cnpj} - ${activeAssociation.counts?.members || 0} membros`
+                : associations.length === 0
+                    ? 'Cadastre uma entidade na tela Institucional.'
+                    : 'Selecione a OSC que sera operada.';
+
+    return (
+        <section className="w-full min-w-0 rounded-lg border border-slate-800 bg-slate-950 p-2 lg:min-w-[310px]" aria-label="Associacao ativa">
+            <div className="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.08em] text-slate-500">
+                <Building2 size={14} aria-hidden="true" />
+                Associacao ativa
+            </div>
+            <div className="flex gap-2">
+                <select
+                    aria-label="Selecionar associacao ativa"
+                    value={associationId}
+                    disabled={loadingAssociations || associations.length === 0}
+                    onChange={(event) => setAssociationId(event.target.value)}
+                    className="h-9 min-w-0 flex-1 rounded-md border border-slate-800 bg-slate-900 px-3 text-xs text-slate-100 outline-none focus:border-blue-500 disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                    <option value="">Selecionar OSC</option>
+                    {selectedAssociationIsMissing && (
+                        <option value={associationId}>Associacao salva nao encontrada</option>
+                    )}
+                    {associations.map((association) => (
+                        <option key={association.id} value={association.id}>
+                            {association.name}
+                        </option>
+                    ))}
+                </select>
+                <button
+                    type="button"
+                    onClick={refreshAssociations}
+                    disabled={loadingAssociations}
+                    className="flex h-9 w-9 items-center justify-center rounded-md border border-slate-800 bg-slate-900 text-slate-300 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                    aria-label="Atualizar associacoes"
+                    title="Atualizar associacoes"
+                >
+                    <RefreshCcw size={15} aria-hidden="true" className={loadingAssociations ? 'animate-spin' : ''} />
+                </button>
+            </div>
+            <div className={`mt-1 text-[11px] ${hasAssociation ? 'text-slate-400' : 'text-amber-300'}`} aria-live="polite">
+                {helperText}
+            </div>
+        </section>
+    );
+}
+
 export default function InstitutionalLayout({
     children,
     title = "Visao Geral",
@@ -87,17 +152,6 @@ export default function InstitutionalLayout({
     title?: string;
     activePath?: string;
 }) {
-    const { associationId, hasAssociation, setAssociationId } = useActiveAssociation();
-    const [draftAssociationId, setDraftAssociationId] = useState('');
-
-    useEffect(() => {
-        setDraftAssociationId(associationId);
-    }, [associationId]);
-
-    function applyAssociationId() {
-        setAssociationId(draftAssociationId);
-    }
-
     return (
         <div className="app-shell flex min-h-screen font-sans">
             <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-slate-950">
@@ -159,36 +213,12 @@ export default function InstitutionalLayout({
                                 type="search"
                             />
                         </label>
-                        <div className="min-w-[310px] rounded-lg border border-slate-800 bg-slate-950 p-2">
-                            <div className="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.08em] text-slate-500">
-                                <Building2 size={14} aria-hidden="true" />
-                                Associacao ativa
-                            </div>
-                            <div className="flex gap-2">
-                                <input
-                                    aria-label="ID da associacao ativa"
-                                    value={draftAssociationId}
-                                    onChange={(event) => setDraftAssociationId(event.target.value)}
-                                    onKeyDown={(event) => {
-                                        if (event.key === 'Enter') applyAssociationId();
-                                    }}
-                                    className="h-9 min-w-0 flex-1 rounded-md border border-slate-800 bg-slate-900 px-3 text-xs text-slate-100 outline-none focus:border-blue-500"
-                                    placeholder="ID da associacao"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={applyAssociationId}
-                                    className="h-9 rounded-md bg-blue-600 px-3 text-xs font-semibold text-white hover:bg-blue-700"
-                                >
-                                    Aplicar
-                                </button>
-                            </div>
-                            <div className="mt-1 text-[11px] text-slate-500">
-                                {hasAssociation ? 'Usada por membros, mandatos, compras, tesouraria e documentos.' : 'Informe uma associacao para carregar dados operacionais.'}
-                            </div>
-                        </div>
+                        <AssociationSwitcher />
                     </div>
                 </header>
+                <div className="border-b border-slate-800 bg-slate-900/50 p-4 lg:hidden">
+                    <AssociationSwitcher />
+                </div>
                 <nav className="app-mobile-nav border-b border-slate-800 bg-slate-900/50" aria-label="Modulos do sistema em telas menores">
                     {mobileNavItems.map((item) => {
                         const Icon = item.icon;

@@ -9,6 +9,7 @@ import {
     AssemblyDTO,
     AssemblyDeliberationDTO,
     AssemblyType,
+    AssociationDTO,
     AssociationStatusDTO,
     DocumentType,
     ElectionCandidateDTO,
@@ -85,6 +86,14 @@ class ApiService {
 
     // --- Read Components ---
 
+    public async listAssociations(): Promise<AssociationDTO[]> {
+        return this.fetch<AssociationDTO[]>('/associations');
+    }
+
+    public async getAssociation(id: string): Promise<AssociationDTO> {
+        return this.fetch<AssociationDTO>(`/associations/${id}`);
+    }
+
     public async getLegalEvents(associationId: string): Promise<LegalEventDTO[]> {
         return this.fetch<LegalEventDTO[]>(`/legal-events/${associationId}`);
     }
@@ -94,6 +103,17 @@ class ApiService {
     }
 
     // --- Write Components ---
+
+    public async createAssociation(payload: {
+        name: string;
+        cnpj: string;
+        foundationDate: string;
+    }): Promise<AssociationDTO> {
+        return this.fetch<AssociationDTO>('/associations', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+    }
 
     public async callAssembly(payload: {
         associationId: string;

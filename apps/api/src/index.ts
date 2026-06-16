@@ -16,6 +16,7 @@ import { LegalEventController } from "./interfaces/http/controllers/LegalEventCo
 import { AssemblyController } from "./interfaces/http/controllers/AssemblyController.js";
 
 import { AssociationStatusController } from "./interfaces/http/controllers/AssociationStatusController.js";
+import { AssociationController } from "./interfaces/http/controllers/AssociationController.js";
 
 const server = Fastify({ logger: true });
 
@@ -60,6 +61,18 @@ server.addHook("onRequest", async (request, reply) => {
 });
 
 // --- Routes ---
+
+server.post("/associations", async (req, reply) => {
+    await AssociationController.create(req, reply);
+});
+
+server.get("/associations", async (req, reply) => {
+    await AssociationController.list(req, reply);
+});
+
+server.get<{ Params: { id: string } }>("/associations/:id", async (req, reply) => {
+    await AssociationController.getById(req, reply);
+});
 
 server.post("/assemblies/call", async (req, reply) => {
     await callAssemblyController.execute(req, reply);

@@ -18,6 +18,24 @@ export interface AssociationStatusDTO {
     complianceLevel: "GREEN" | "YELLOW" | "RED";
 }
 
+export interface AssociationDTO {
+    id: string;
+    name: string;
+    cnpj: string;
+    cnpjFormatted?: string;
+    foundationDate: string;
+    activeStatuteId?: string;
+    createdAt?: string;
+    updatedAt?: string;
+    counts?: {
+        members: number;
+        mandates: number;
+        governanceBodies: number;
+        assemblies: number;
+        accountabilityProjects: number;
+    };
+}
+
 export type MemberType = "FOUNDER" | "EFFECTIVE" | "BENEFACTOR" | "COLLABORATOR" | "HONORARY";
 export type MemberStatus = "ACTIVE" | "INACTIVE" | "SUSPENDED" | "EXCLUDED";
 export type GovernanceRole = "DIRECTOR_PRESIDENT" | "ADMINISTRATIVE_FINANCIAL_DIRECTOR" | "TECHNICAL_DIRECTOR" | "PRESIDENT" | "VICE_PRESIDENT" | "TREASURER" | "SECRETARY" | "FISCAL_COUNCIL" | "FISCAL_COUNCIL_PRESIDENT" | "FISCAL_COUNCIL_MEMBER" | "FISCAL_COUNCIL_SUBSTITUTE" | "DIRECTOR";
