@@ -20,13 +20,6 @@ export class PrismaAssemblyRepository implements IAssemblyRepository {
 
         if (!raw) return null;
 
-        // Map Prisma -> Domain
-        // We need to support 'create' from raw data. 
-        // Ideally domain classes should have a Mapper, but here we do manual mapping.
-        // Assembly.create usually is for NEW entities. For existing, maybe we need a public constructor or a Mapper static method.
-        // For now we assume create can restore state or we add a "Method: Map" to Entity.
-
-        // Hack: Casting strings to Enums
         const type = raw.type as AssemblyType;
         const status = raw.status as AssemblyStatus;
 
@@ -59,9 +52,6 @@ export class PrismaAssemblyRepository implements IAssemblyRepository {
     }
 
     async findByScheduledDate(associationId: UniqueEntityID, type: AssemblyType, date: Date): Promise<Assembly | null> {
-        // Find existing assembly for same association, type and date (scheduled)
-        // Ignoring status for now, or maybe only checking non-canceled ones?
-        // User requirement: "Duplicate Act". Usually means same day/time.
         const raw = await this.prisma.assembly.findFirst({
             where: {
                 associationId: associationId.toString(),
@@ -72,7 +62,6 @@ export class PrismaAssemblyRepository implements IAssemblyRepository {
 
         if (!raw) return null;
 
-        // Map Prisma -> Domain (Duplicated logic, should extract to private method helper)
         return Assembly.create({
             associationId: new UniqueEntityID(raw.associationId),
             type: raw.type as AssemblyType,

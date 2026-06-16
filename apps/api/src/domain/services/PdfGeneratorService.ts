@@ -1,10 +1,8 @@
 import PDFDocument from 'pdfkit';
-import fs from 'fs';
-import path from 'path';
 
 export interface PdfOptions {
     title: string;
-    content: string; // For now simplified text content, later could be huge structure
+    content: string;
     footerText?: string;
 }
 
@@ -20,17 +18,14 @@ export class PdfGeneratorService {
                 resolve(pdfData);
             });
 
-            // Standard Header
             doc.fontSize(20).text(options.title, { align: 'center' });
             doc.moveDown();
 
-            // Content
             doc.fontSize(12).text(options.content, {
                 align: 'justify',
                 paragraphGap: 10
             });
 
-            // Footer
             if (options.footerText) {
                 const bottom = doc.page.margins.bottom;
                 doc.page.margins.bottom = 0;

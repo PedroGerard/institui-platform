@@ -33,9 +33,6 @@ export class PrismaStatuteRepository {
         return Statute.create({
             associationId: new UniqueEntityID(raw.associationId),
             versions: versions,
-            // activeVersionId needs to be resolved from association's activeStatuteId ideally, 
-            // or stored on Statute model. In Schema I put it on Association.
-            // For now, let's assume we can derive it or pass it.
         }, new UniqueEntityID(raw.id));
     }
 
@@ -43,7 +40,6 @@ export class PrismaStatuteRepository {
         const domainEvents = statute.domainEvents;
 
         await this.prisma.$transaction(async (tx: any) => {
-            // Upsert Statute
             await tx.statute.upsert({
                 where: { id: statute.id.toString() },
                 create: {
@@ -53,7 +49,6 @@ export class PrismaStatuteRepository {
                 update: {}
             });
 
-            // Upsert Versions
             for (const v of statute.props.versions) {
                 await tx.statuteVersion.upsert({
                     where: { id: v.id.toString() },
@@ -73,7 +68,6 @@ export class PrismaStatuteRepository {
                 });
             }
 
-            // Save Events
             for (const event of domainEvents) {
                 const legalEvent = DomainEventMapper.toPersistence(event, statute.props.associationId);
                 await tx.legalEvent.create({

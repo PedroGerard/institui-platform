@@ -4,7 +4,7 @@ export interface LegalEventDTO {
     type: string;
     timestamp: Date;
     actorId?: string;
-    payload: any;
+    payload: unknown;
 }
 
 export interface AssociationStatusDTO {

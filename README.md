@@ -37,6 +37,7 @@ Avancos recentes:
 - `apps/api`: API em Fastify, Prisma ORM, PostgreSQL, Clean Architecture e DDD.
 - `apps/frontend`: frontend em Next.js, React e Tailwind.
 - `materiais`: documentacao de apoio, roadmap, matrizes estatutarias e plano de implantacao.
+- `materiais/divida-tecnica-sprint-00.md`: pendencias tecnicas rastreadas na Sprint 00.
 - `.github/workflows`: validacoes automaticas no GitHub.
 
 ## Roadmap

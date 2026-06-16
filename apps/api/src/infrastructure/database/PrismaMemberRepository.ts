@@ -39,7 +39,7 @@ export class PrismaMemberRepository implements IMemberRepository {
             birthDate: member.birthDate,
             email: member.email,
             phone: member.phone,
-            memberType: member.memberType as any, // Cast to match Prisma Enum if types diff slightly
+            memberType: member.memberType as any,
             status: member.status as any,
             admissionDate: member.admissionDate,
             resignationDate: member.resignationDate,

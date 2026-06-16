@@ -19,12 +19,12 @@ import { AssociationStatusController } from "./interfaces/http/controllers/Assoc
 
 const server = Fastify({ logger: true });
 
-// --- DI Container (Poor man's) ---
+// --- Application composition ---
 const prisma = new PrismaClient();
 const assemblyRepo = new PrismaAssemblyRepository(prisma);
 const associationRepo = new PrismaAssociationRepository(prisma);
 const statuteRepo = new PrismaStatuteRepository(prisma);
-const documentRepo = new PrismaDocumentRepository(prisma); // Added
+const documentRepo = new PrismaDocumentRepository(prisma);
 
 const callAssemblyUseCase = new CallAssemblyUseCase(associationRepo, assemblyRepo, statuteRepo);
 const callAssemblyController = new CallAssemblyController(callAssemblyUseCase);

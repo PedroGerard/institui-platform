@@ -1,7 +1,10 @@
 
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { LegalEvent } from "../../domain/entities/LegalEvent";
-import { UniqueEntityID } from "../../domain/shared/Entity";
+
+function toJsonValue(payload: unknown): Prisma.InputJsonValue {
+    return JSON.parse(JSON.stringify(payload ?? {})) as Prisma.InputJsonValue;
+}
 
 export class PrismaLegalEventRepository {
     private prisma: PrismaClient;
@@ -18,7 +21,7 @@ export class PrismaLegalEventRepository {
                 type: event.props.type,
                 timestamp: event.props.timestamp,
                 actorId: event.props.actorId?.toString(),
-                payload: event.props.payload
+                payload: toJsonValue(event.props.payload)
             }
         });
     }
