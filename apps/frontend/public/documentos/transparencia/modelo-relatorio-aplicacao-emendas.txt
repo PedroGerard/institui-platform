@@ -1,0 +1,51 @@
+MODELO - RELATORIO DE APLICACAO DE RECURSOS DE EMENDAS PARLAMENTARES
+
+INSTITUTO INCENTIVE DE INOVACAO, DESENVOLVIMENTO E TRANSFORMACAO SOCIAL
+CNPJ: 04.347.564/0001-56
+Endereco: Avenida Jose Milton de Morais, 394, Vila Nova, Pereiro/CE, CEP 63460-000
+
+1. IDENTIFICACAO DA EMENDA
+Exercicio:
+Modalidade:
+Numero/codigo da emenda:
+Autor/parlamentar:
+Orgao concedente:
+Instrumento ou processo:
+Fonte oficial de consulta:
+
+2. DADOS DO RECEBIMENTO
+Valor recebido:
+Data do repasse:
+Conta vinculada, quando houver:
+Documento comprobatorio:
+
+3. OBJETO E FINALIDADE
+Objeto aprovado:
+Publico beneficiado:
+Territorio de execucao:
+Periodo de execucao:
+
+4. APLICACAO DOS RECURSOS
+Descrever, em linguagem clara, em que os recursos foram aplicados e convertidos.
+
+Itens de despesa:
+- Item:
+- Fornecedor:
+- Documento fiscal:
+- Valor:
+- Data:
+
+5. ENTREGAS E RESULTADOS
+Produtos, servicos, atividades ou resultados alcancados:
+Evidencias anexas:
+Links publicos relacionados:
+
+6. SITUACAO DA EXECUCAO E PRESTACAO DE CONTAS
+Status da execucao:
+Status da prestacao de contas:
+Data da ultima atualizacao:
+Responsavel pela informacao:
+
+Pereiro/CE, [DATA].
+
+Assinatura:

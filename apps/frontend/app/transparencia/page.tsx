@@ -245,6 +245,24 @@ export default function TransparencyPage() {
               Status: {totalPublishedDocuments} documentos oficiais já estão disponíveis para consulta pública. Novos
               relatórios e políticas podem ser acrescentados conforme validação da diretoria.
             </p>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/transparencia/emendas-parlamentares"
+                className="inline-flex items-center gap-2 rounded-lg bg-[var(--brand-teal)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[var(--brand-teal-dark)]"
+              >
+                Ver Emendas Parlamentares
+                <ArrowRight size={18} />
+              </Link>
+              <a
+                href="https://www.gov.br/cultura/pt-br/assuntos/noticias/ongs-oscs-beneficiarias-de-emendas-parlamentares-destinadas-ao-minc-deverao-publicar-os-valores-recebidos-em-seus-sites"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 rounded-lg border border-[var(--brand-border-strong)] px-5 py-3 text-sm font-semibold text-[var(--brand-text)] transition hover:border-[var(--brand-teal)] hover:text-[var(--brand-teal)]"
+              >
+                Orientação do MinC
+                <ArrowUpRight size={18} />
+              </a>
+            </div>
           </div>
         </div>
       </section>
@@ -353,6 +371,13 @@ export default function TransparencyPage() {
               A aba deve permitir que qualquer pessoa localize o instrumento, entenda o objeto, veja valores, acompanhe a
               prestação de contas e saiba como pedir informações adicionais.
             </p>
+            <Link
+              href="/transparencia/emendas-parlamentares"
+              className="mt-6 inline-flex items-center gap-2 rounded-lg bg-[var(--brand-orange-light)] px-5 py-3 text-sm font-bold text-[var(--brand-text)] transition hover:bg-white"
+            >
+              Acompanhar emendas parlamentares
+              <ArrowRight size={18} />
+            </Link>
           </div>
 
           <div className="grid gap-3">

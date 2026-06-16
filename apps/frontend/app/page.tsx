@@ -216,14 +216,6 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="border-y border-[var(--brand-border)] bg-white" aria-label="Identidade visual do Instituto Incentive">
-        <img
-          src="/images/brand/instituto-incentive-pattern.svg"
-          alt=""
-          className="h-24 w-full object-cover sm:h-28 lg:h-32"
-        />
-      </section>
-
       <section id="sobre" className="bg-white">
         <div className="mx-auto grid max-w-7xl gap-10 px-5 py-16 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
           <div>
