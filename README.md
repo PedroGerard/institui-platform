@@ -6,7 +6,7 @@ O INSTITUI+ nasce como um ERP especializado para OSCs brasileiras, reunindo core
 
 ## Status do desenvolvimento
 
-Atualizado em 15 de junho de 2026.
+Atualizado em 16 de junho de 2026.
 
 - Repositorio GitHub: `PedroGerard/institui-platform`
 - Figma: `INSTITUI Design System e Modulos Operacionais`
@@ -20,6 +20,8 @@ Avancos recentes:
 - `npm run dev` do frontend usa Webpack para evitar erro de symlink do Turbopack no Windows.
 - CI do monorepo foi preparado para validar Prisma, gerar Prisma Client, testar/buildar API e buildar frontend.
 - Roadmap de desenvolvimento documentado em `materiais/roadmap-desenvolvimento-institui-plus.md`.
+- Figma organizado com frames rastreaveis para Sprint 00 e modulos operacionais.
+- Documentacao operacional consolidada em `materiais/documentacao-operacional.md`.
 
 ## Modulos principais
 
@@ -38,6 +40,8 @@ Avancos recentes:
 - `apps/frontend`: frontend em Next.js, React e Tailwind.
 - `materiais`: documentacao de apoio, roadmap, matrizes estatutarias e plano de implantacao.
 - `materiais/divida-tecnica-sprint-00.md`: pendencias tecnicas rastreadas na Sprint 00.
+- `materiais/figma-rastreabilidade-sprint-00.md`: convencao de frames e links Figma.
+- `materiais/documentacao-operacional.md`: guia operacional para rodar, validar e contribuir.
 - `.github/workflows`: validacoes automaticas no GitHub.
 
 ## Roadmap
@@ -46,6 +50,14 @@ O roadmap de desenvolvimento esta em:
 
 ```text
 materiais/roadmap-desenvolvimento-institui-plus.md
+```
+
+Documentacao operacional:
+
+```text
+materiais/documentacao-operacional.md
+materiais/figma-rastreabilidade-sprint-00.md
+materiais/divida-tecnica-sprint-00.md
 ```
 
 Resumo das proximas frentes:

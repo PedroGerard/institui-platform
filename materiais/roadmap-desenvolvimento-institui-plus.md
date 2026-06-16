@@ -1,6 +1,6 @@
 # Roadmap de Desenvolvimento - INSTITUI+
 
-Atualizado em 15 de junho de 2026.
+Atualizado em 16 de junho de 2026.
 
 ## Links operacionais
 
@@ -23,6 +23,8 @@ Avancos recentes:
 - Tesouraria com pagamentos, conciliacao, relatorios e trilha de auditoria.
 - Gerador de documentos oficiais com registros em banco.
 - CI do monorepo preparado para validar Prisma, API, testes e frontend.
+- Figma organizado com frames rastreaveis para Sprint 00 e modulos operacionais.
+- Documentacao operacional minima criada para desenvolvimento, validacao e contribuicao.
 
 ## Sprint 00 - Correcoes da auditoria
 
@@ -36,8 +38,8 @@ Status por frente:
 - Issue #4 - TODOs, mocks e defaults tecnicos: validada localmente com correcoes e registro de divida tecnica.
 - Issue #5 - Estrutura de paginas Next.js entre `app` e `src/app`: preparada localmente.
 - Issue #6 - Padronizacao visual administrativa: preparada localmente.
-- Issue #7 - Organizacao do Figma com frames rastreaveis: em andamento com esta atualizacao.
-- Issue #8 - Documentacao operacional minima: em andamento com README e roadmap.
+- Issue #7 - Organizacao do Figma com frames rastreaveis: validada com mapa Figma e registro em `materiais/figma-rastreabilidade-sprint-00.md`.
+- Issue #8 - Documentacao operacional minima: validada com `README.md` e `materiais/documentacao-operacional.md`.
 
 Criterio de fechamento da Sprint 00:
 
