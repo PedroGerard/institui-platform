@@ -1,6 +1,6 @@
 # Roadmap de Desenvolvimento - INSTITUI+
 
-Atualizado em 14 de junho de 2026.
+Atualizado em 15 de junho de 2026.
 
 ## Links operacionais
 
@@ -31,7 +31,7 @@ Objetivo: estabilizar a base tecnica antes de evoluir funcionalidades de mercado
 Status por frente:
 
 - Issue #1 - Contexto de associacao ativa: implementada e em PR.
-- Issue #2 - CI do monorepo: alteracao preparada localmente.
+- Issue #2 - CI do monorepo: validada localmente com `npm run ci`.
 - Issue #3 - Ambiente, CORS e DATABASE_URL: preparada localmente.
 - Issue #4 - TODOs, mocks e defaults tecnicos: preparada localmente.
 - Issue #5 - Estrutura de paginas Next.js entre `app` e `src/app`: preparada localmente.

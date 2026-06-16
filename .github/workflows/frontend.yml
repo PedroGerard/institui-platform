@@ -1,6 +1,7 @@
 name: CI
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -9,10 +10,18 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate:
     name: Validate monorepo
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     env:
       DATABASE_URL: postgresql://institui:institui@localhost:5432/institui_ci
       NEXT_TELEMETRY_DISABLED: "1"
@@ -31,17 +40,5 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Validate Prisma schema
-        run: npx prisma validate --schema apps/api/prisma/schema.prisma
-
-      - name: Generate Prisma client
-        run: npx prisma generate --schema apps/api/prisma/schema.prisma
-
-      - name: Test API
-        run: npm run test --workspace=apps/api -- --run
-
-      - name: Build API
-        run: npm run build --workspace=apps/api
-
-      - name: Build frontend
-        run: npm run build --workspace=apps/frontend
+      - name: Validate Prisma, API and frontend
+        run: npm run ci

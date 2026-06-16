@@ -6,7 +6,7 @@ O INSTITUI+ nasce como um ERP especializado para OSCs brasileiras, reunindo core
 
 ## Status do desenvolvimento
 
-Atualizado em 14 de junho de 2026.
+Atualizado em 15 de junho de 2026.
 
 - Repositorio GitHub: `PedroGerard/institui-platform`
 - Figma: `INSTITUI Design System e Modulos Operacionais`
@@ -126,6 +126,14 @@ http://localhost:3333
 ```
 
 ## Validacao
+
+Validacao completa do monorepo:
+
+```bash
+npm run ci
+```
+
+Esse comando valida Prisma, gera o Prisma Client, executa os testes da API e faz build da API e do frontend. E o mesmo fluxo usado no GitHub Actions.
 
 Validar o schema do Prisma:
 
