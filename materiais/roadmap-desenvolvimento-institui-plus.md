@@ -32,7 +32,7 @@ Status por frente:
 
 - Issue #1 - Contexto de associacao ativa: implementada e em PR.
 - Issue #2 - CI do monorepo: validada localmente com `npm run ci`.
-- Issue #3 - Ambiente, CORS e DATABASE_URL: preparada localmente.
+- Issue #3 - Ambiente, CORS e DATABASE_URL: validada localmente com testes de configuracao.
 - Issue #4 - TODOs, mocks e defaults tecnicos: preparada localmente.
 - Issue #5 - Estrutura de paginas Next.js entre `app` e `src/app`: preparada localmente.
 - Issue #6 - Padronizacao visual administrativa: preparada localmente.

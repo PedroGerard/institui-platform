@@ -97,7 +97,7 @@ cp apps/api/.env.example apps/api/.env
 cp apps/frontend/.env.example apps/frontend/.env.local
 ```
 
-Em producao, `DATABASE_URL` deve ser definida obrigatoriamente no ambiente. O fallback local de banco so e usado fora de producao.
+Em producao, `DATABASE_URL` e `CORS_ORIGINS` devem ser definidas obrigatoriamente no ambiente. O fallback local de banco e origens CORS so e usado fora de producao.
 
 Rode o frontend:
 
@@ -171,8 +171,12 @@ npm run build --workspace=apps/frontend
 - `PORT`: porta da API. Padrao local: `3333`.
 - `HOST`: host da API. Padrao local: `0.0.0.0`.
 - `CORS_ORIGINS`: origens permitidas pela API, separadas por virgula.
+- `CORS_METHODS`: metodos HTTP permitidos pela API. Padrao local: `GET,POST,PATCH,DELETE,OPTIONS`.
+- `CORS_HEADERS`: cabecalhos permitidos pela API. Padrao local: `Content-Type,Authorization,x-association-id,x-user-id`.
 - `NEXT_PUBLIC_API_URL`: URL publica da API consumida pelo frontend.
 - `NEXT_PUBLIC_ACTIVE_ASSOCIATION_ID`: associacao inicial opcional para desenvolvimento.
+
+Em producao, `CORS_ORIGINS` nao aceita `*`; informe explicitamente as URLs do frontend e dos paineis autorizados.
 
 ## Publicacao
 

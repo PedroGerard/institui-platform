@@ -1,9 +1,51 @@
+import { existsSync, readFileSync } from "node:fs";
+import { resolve } from "node:path";
+
 type NodeEnv = "development" | "test" | "production";
 
 const DEFAULT_DEV_DATABASE_URL = "postgresql://institui:institui@localhost:5432/institui";
 const DEFAULT_DEV_CORS_ORIGINS = ["http://localhost:3000", "http://127.0.0.1:3000"];
 const DEFAULT_ALLOWED_HEADERS = ["Content-Type", "Authorization", "x-association-id", "x-user-id"];
 const DEFAULT_ALLOWED_METHODS = ["GET", "POST", "PATCH", "DELETE", "OPTIONS"];
+
+function parseEnvValue(value: string) {
+    const trimmed = value.trim();
+    const quote = trimmed[0];
+
+    if ((quote === "\"" || quote === "'") && trimmed.endsWith(quote)) {
+        return trimmed.slice(1, -1);
+    }
+
+    return trimmed;
+}
+
+function loadEnvFile(filePath: string) {
+    if (!existsSync(filePath)) return;
+
+    const content = readFileSync(filePath, "utf8");
+
+    for (const line of content.split(/\r?\n/)) {
+        const trimmed = line.trim();
+        if (!trimmed || trimmed.startsWith("#")) continue;
+
+        const match = trimmed.match(/^([A-Za-z_][A-Za-z0-9_]*)=(.*)$/);
+        if (!match) continue;
+
+        const [, key, rawValue] = match;
+        if (process.env[key] === undefined) {
+            process.env[key] = parseEnvValue(rawValue);
+        }
+    }
+}
+
+function loadLocalEnvFiles() {
+    const cwd = process.env.INSTITUI_ENV_DIR || process.cwd();
+
+    loadEnvFile(resolve(cwd, ".env"));
+    loadEnvFile(resolve(cwd, "apps/api/.env"));
+}
+
+loadLocalEnvFiles();
 
 function normalizeNodeEnv(value?: string): NodeEnv {
     if (value === "production" || value === "test") return value;
@@ -41,6 +83,14 @@ const corsOrigins = readCsv(process.env.CORS_ORIGINS || process.env.CORS_ORIGIN)
 const allowedOrigins = corsOrigins.length > 0 ? corsOrigins : (isProduction ? [] : DEFAULT_DEV_CORS_ORIGINS);
 const corsMethods = readCsv(process.env.CORS_METHODS);
 const corsHeaders = readCsv(process.env.CORS_HEADERS);
+
+if (isProduction && allowedOrigins.length === 0) {
+    throw new Error("CORS_ORIGINS e obrigatoria em producao.");
+}
+
+if (isProduction && allowedOrigins.includes("*")) {
+    throw new Error("CORS_ORIGINS nao pode usar '*' em producao.");
+}
 
 export const env = {
     nodeEnv,
