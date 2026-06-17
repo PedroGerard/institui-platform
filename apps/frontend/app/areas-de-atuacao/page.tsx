@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { PublicBrand } from "@/components/layout/PublicBrand";
+import { PublicFooter } from "@/components/layout/PublicFooter";
+import { PublicHeader } from "@/components/layout/PublicHeader";
 import {
   ArrowRight,
   Briefcase,
@@ -177,26 +178,7 @@ const areaImages = [
 export default function PracticeAreasPage() {
   return (
     <main className="min-h-screen bg-[var(--brand-surface)] text-[var(--brand-text)]">
-      <header className="border-b border-[var(--brand-border)] bg-white">
-        <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-8">
-          <PublicBrand />
-          <div className="flex items-center gap-3">
-            <Link
-              href="/quem-somos"
-              className="hidden rounded-lg border border-[var(--brand-border-strong)] px-4 py-2 text-sm font-semibold text-[var(--brand-text)] transition hover:border-[var(--brand-teal)] hover:text-[var(--brand-teal)] sm:inline-flex"
-            >
-              Quem somos
-            </Link>
-            <Link
-              href="/contato"
-              className="inline-flex items-center gap-2 rounded-lg bg-[var(--brand-teal)] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[var(--brand-teal-dark)]"
-            >
-              Fale conosco
-              <ArrowRight size={16} />
-            </Link>
-          </div>
-        </nav>
-      </header>
+      <PublicHeader />
 
       <section className="bg-white">
         <div className="mx-auto grid max-w-7xl gap-10 px-5 py-14 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
@@ -301,6 +283,7 @@ export default function PracticeAreasPage() {
           </Link>
         </div>
       </section>
+      <PublicFooter />
     </main>
   );
 }

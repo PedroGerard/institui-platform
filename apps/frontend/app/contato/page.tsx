@@ -1,10 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import type { FormEvent } from "react";
-import { PublicBrand } from "@/components/layout/PublicBrand";
+import { PublicFooter } from "@/components/layout/PublicFooter";
+import { PublicHeader } from "@/components/layout/PublicHeader";
 import {
-  ArrowRight,
   Globe,
   Mail,
   MapPin,
@@ -50,32 +49,7 @@ export default function ContactPage() {
 
   return (
     <main className="min-h-screen bg-[var(--brand-surface)] text-[var(--brand-text)]">
-      <header className="border-b border-[var(--brand-border)] bg-white">
-        <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-8">
-          <PublicBrand />
-          <div className="flex items-center gap-3">
-            <Link
-              href="/areas-de-atuacao"
-              className="hidden rounded-lg border border-[var(--brand-border-strong)] px-4 py-2 text-sm font-semibold text-[var(--brand-text)] transition hover:border-[var(--brand-teal)] hover:text-[var(--brand-teal)] lg:inline-flex"
-            >
-              Áreas de atuação
-            </Link>
-            <Link
-              href="/transparencia"
-              className="hidden rounded-lg border border-[var(--brand-border-strong)] px-4 py-2 text-sm font-semibold text-[var(--brand-text)] transition hover:border-[var(--brand-teal)] hover:text-[var(--brand-teal)] sm:inline-flex"
-            >
-              Transparência
-            </Link>
-            <Link
-              href="/projetos"
-              className="inline-flex items-center gap-2 rounded-lg border border-[var(--brand-border-strong)] px-4 py-2 text-sm font-semibold text-[var(--brand-text)] transition hover:border-[var(--brand-teal)] hover:text-[var(--brand-teal)]"
-            >
-              Projetos
-              <ArrowRight size={16} />
-            </Link>
-          </div>
-        </nav>
-      </header>
+      <PublicHeader />
 
       <section className="bg-white">
         <div className="mx-auto grid max-w-7xl gap-10 px-5 py-14 sm:px-8 lg:grid-cols-[0.9fr_1.1fr]">
@@ -178,6 +152,7 @@ export default function ContactPage() {
           </div>
         </div>
       </section>
+      <PublicFooter />
     </main>
   );
 }

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
-import { PublicBrand } from "@/components/layout/PublicBrand";
+import { PublicFooter } from "@/components/layout/PublicFooter";
+import { PublicHeader } from "@/components/layout/PublicHeader";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -125,38 +126,7 @@ const socialChannels = [
 export default function Home() {
   return (
     <main className="min-h-screen bg-[var(--brand-surface)] text-[var(--brand-text)]">
-      <header className="sticky top-0 z-30 border-b border-[var(--brand-border)] bg-[rgba(246,246,246,0.94)] backdrop-blur">
-        <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-8">
-          <PublicBrand variant="wordmark" />
-
-          <div className="hidden items-center gap-5 text-sm font-semibold text-[var(--brand-muted)] md:flex">
-            <Link className="transition hover:text-[var(--brand-teal)]" href="/quem-somos">
-              Quem somos
-            </Link>
-            <Link className="transition hover:text-[var(--brand-teal)]" href="/areas-de-atuacao">
-              Áreas de atuação
-            </Link>
-            <Link className="transition hover:text-[var(--brand-teal)]" href="/projetos">
-              Projetos
-            </Link>
-            <Link className="transition hover:text-[var(--brand-teal)]" href="/transparencia">
-              Transparência
-            </Link>
-            <Link className="transition hover:text-[var(--brand-teal)]" href="/contato">
-              Contato
-            </Link>
-          </div>
-
-          <Link
-            href="/contato"
-            aria-label="Fale conosco"
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--brand-teal)] px-4 py-2 text-sm font-bold text-white shadow-sm shadow-[rgba(0,104,113,0.20)] transition hover:bg-[var(--brand-teal-dark)]"
-          >
-            <Mail size={17} />
-            <span className="hidden sm:inline">Fale conosco</span>
-          </Link>
-        </nav>
-      </header>
+      <PublicHeader />
 
       <section className="relative min-h-[76svh] overflow-hidden bg-[var(--brand-teal-deep)]">
         <img
@@ -214,14 +184,6 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </section>
-
-      <section className="border-y border-[var(--brand-border)] bg-white" aria-label="Identidade visual do Instituto Incentive">
-        <img
-          src="/images/brand/instituto-incentive-pattern.svg"
-          alt=""
-          className="h-24 w-full object-cover sm:h-28 lg:h-32"
-        />
       </section>
 
       <section id="sobre" className="bg-white">
@@ -457,33 +419,7 @@ export default function Home() {
         </div>
       </section>
 
-      <footer className="bg-[var(--brand-text)] px-5 py-6 text-sm text-[var(--brand-light-text)] sm:px-8">
-        <div className="mx-auto flex max-w-7xl flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <span className="inline-flex items-center gap-3 font-bold text-white">
-            <Image
-              src="/images/brand/instituto-incentive-symbol.png"
-              alt=""
-              width={32}
-              height={32}
-              className="h-8 w-8 rounded-full object-contain"
-            />
-            Instituto Incentive
-          </span>
-          <div className="flex flex-wrap gap-3">
-            {socialChannels.map((channel) => {
-              const Icon = channel.icon;
-
-              return (
-                <span key={channel.name} className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-white/10 text-white">
-                  <Icon size={17} />
-                  <span className="sr-only">{channel.name}</span>
-                </span>
-              );
-            })}
-          </div>
-          <span>institutoincentive.org.br</span>
-        </div>
-      </footer>
+      <PublicFooter />
     </main>
   );
 }

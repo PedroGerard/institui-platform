@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { PublicBrand } from "@/components/layout/PublicBrand";
+import { PublicFooter } from "@/components/layout/PublicFooter";
+import { PublicHeader } from "@/components/layout/PublicHeader";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -200,32 +201,7 @@ const legalReferences = [
 export default function TransparencyPage() {
   return (
     <main className="min-h-screen bg-[var(--brand-surface)] text-[var(--brand-text)]">
-      <header className="border-b border-[var(--brand-border)] bg-white">
-        <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-8">
-          <PublicBrand />
-          <div className="flex items-center gap-3">
-            <Link
-              href="/areas-de-atuacao"
-              className="hidden rounded-lg border border-[var(--brand-border-strong)] px-4 py-2 text-sm font-semibold text-[var(--brand-text)] transition hover:border-[var(--brand-teal)] hover:text-[var(--brand-teal)] lg:inline-flex"
-            >
-              Áreas de atuação
-            </Link>
-            <Link
-              href="/projetos"
-              className="hidden rounded-lg border border-[var(--brand-border-strong)] px-4 py-2 text-sm font-semibold text-[var(--brand-text)] transition hover:border-[var(--brand-teal)] hover:text-[var(--brand-teal)] sm:inline-flex"
-            >
-              Projetos
-            </Link>
-            <Link
-              href="/contato"
-              className="inline-flex items-center gap-2 rounded-lg bg-[var(--brand-teal)] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[var(--brand-teal-dark)]"
-            >
-              Solicitar informação
-              <ArrowRight size={16} />
-            </Link>
-          </div>
-        </nav>
-      </header>
+      <PublicHeader />
 
       <section className="bg-white">
         <div className="mx-auto grid max-w-7xl gap-10 px-5 py-14 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
@@ -245,6 +221,13 @@ export default function TransparencyPage() {
               Status: {totalPublishedDocuments} documentos oficiais já estão disponíveis para consulta pública. Novos
               relatórios e políticas podem ser acrescentados conforme validação da diretoria.
             </p>
+            <Link
+              href="/transparencia/emendas-parlamentares"
+              className="inline-flex w-fit items-center gap-2 rounded-lg bg-[var(--brand-teal)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[var(--brand-teal-dark)]"
+            >
+              Ver Emendas Parlamentares
+              <ArrowRight size={18} />
+            </Link>
           </div>
         </div>
       </section>
@@ -353,6 +336,13 @@ export default function TransparencyPage() {
               A aba deve permitir que qualquer pessoa localize o instrumento, entenda o objeto, veja valores, acompanhe a
               prestação de contas e saiba como pedir informações adicionais.
             </p>
+            <Link
+              href="/transparencia/emendas-parlamentares"
+              className="mt-6 inline-flex items-center gap-2 rounded-lg bg-[var(--brand-orange-light)] px-5 py-3 text-sm font-bold text-[var(--brand-text)] transition hover:bg-white"
+            >
+              Acompanhar emendas parlamentares
+              <ArrowRight size={18} />
+            </Link>
           </div>
 
           <div className="grid gap-3">
@@ -453,6 +443,7 @@ export default function TransparencyPage() {
           </div>
         </div>
       </section>
+      <PublicFooter />
     </main>
   );
 }
