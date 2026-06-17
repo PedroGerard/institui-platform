@@ -311,6 +311,10 @@ server.get("/users", async (req, reply) => {
     await UserController.list(req, reply);
 });
 
+server.get("/users/me/context", async (req, reply) => {
+    await UserController.getOperationalContext(req, reply);
+});
+
 server.get<{ Params: { id: string } }>("/users/:id", async (req, reply) => {
     await UserController.getById(req, reply);
 });

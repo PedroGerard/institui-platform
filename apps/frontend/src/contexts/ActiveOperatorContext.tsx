@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { api } from '@/services/api';
 import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
-import type { UserDTO } from '@/types/dtos';
+import type { PermissionKey, UserDTO } from '@/types/dtos';
 
 const STORAGE_KEY = 'institui.activeUserId';
 
@@ -11,12 +11,17 @@ interface ActiveOperatorContextValue {
     operatorId: string;
     activeOperator?: UserDTO;
     operators: UserDTO[];
+    permissions: PermissionKey[];
     loadingOperators: boolean;
+    loadingPermissions: boolean;
     operatorError: string | null;
+    permissionError: string | null;
     hasOperator: boolean;
+    hasPermission: (permission: PermissionKey) => boolean;
     setOperatorId: (operatorId: string) => void;
     clearOperatorId: () => void;
     refreshOperators: () => Promise<void>;
+    refreshPermissions: () => Promise<void>;
 }
 
 const ActiveOperatorContext = createContext<ActiveOperatorContextValue | null>(null);
@@ -30,8 +35,11 @@ export function ActiveOperatorProvider({ children }: { children: React.ReactNode
     const [operatorId, setOperatorIdState] = useState('');
     const [operators, setOperators] = useState<UserDTO[]>([]);
     const [operatorsAssociationId, setOperatorsAssociationId] = useState('');
+    const [permissions, setPermissions] = useState<PermissionKey[]>([]);
     const [loadingOperators, setLoadingOperators] = useState(false);
+    const [loadingPermissions, setLoadingPermissions] = useState(false);
     const [operatorError, setOperatorError] = useState<string | null>(null);
+    const [permissionError, setPermissionError] = useState<string | null>(null);
     const [storageLoaded, setStorageLoaded] = useState(false);
 
     useEffect(() => {
@@ -85,6 +93,36 @@ export function ActiveOperatorProvider({ children }: { children: React.ReactNode
         [operatorId, operators]
     );
 
+    const refreshPermissions = useCallback(async () => {
+        if (!associationId || !operatorId || !activeOperator || activeOperator.associationId !== associationId) {
+            setPermissions([]);
+            setPermissionError(null);
+            setLoadingPermissions(false);
+            return;
+        }
+
+        try {
+            setLoadingPermissions(true);
+            setPermissionError(null);
+            const context = await api.getOperationalContext();
+
+            if (context.associationId !== associationId || context.user.id !== operatorId) {
+                throw new Error('Contexto operacional retornou usuario divergente.');
+            }
+
+            setPermissions(context.permissions);
+        } catch (err: unknown) {
+            setPermissions([]);
+            setPermissionError(err instanceof Error ? err.message : 'Erro ao carregar permissoes.');
+        } finally {
+            setLoadingPermissions(false);
+        }
+    }, [activeOperator, associationId, operatorId]);
+
+    useEffect(() => {
+        refreshPermissions();
+    }, [refreshPermissions]);
+
     useEffect(() => {
         if (!storageLoaded || loadingOperators) return;
 
@@ -110,26 +148,41 @@ export function ActiveOperatorProvider({ children }: { children: React.ReactNode
         storageLoaded
     ]);
 
+    const hasPermission = useCallback(
+        (permission: PermissionKey) => permissions.includes(permission),
+        [permissions]
+    );
+
     const value = useMemo<ActiveOperatorContextValue>(() => {
         return {
             operatorId,
             activeOperator,
             operators,
+            permissions,
             loadingOperators,
+            loadingPermissions,
             operatorError,
+            permissionError,
             hasOperator: Boolean(operatorId && activeOperator),
+            hasPermission,
             setOperatorId,
             clearOperatorId,
-            refreshOperators
+            refreshOperators,
+            refreshPermissions
         };
     }, [
         activeOperator,
         clearOperatorId,
+        hasPermission,
+        loadingPermissions,
         loadingOperators,
         operatorError,
         operatorId,
         operators,
+        permissions,
+        permissionError,
         refreshOperators,
+        refreshPermissions,
         setOperatorId
     ]);
 

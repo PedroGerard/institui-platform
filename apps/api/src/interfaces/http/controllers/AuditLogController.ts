@@ -2,6 +2,7 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 import { AuditAction, Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { prisma } from '../../../infrastructure/database/prisma';
+import { hasPermission } from '../../../application/services/AccessControlService';
 
 const listAuditLogsSchema = z.object({
     associationId: z.string().uuid().optional(),
@@ -62,6 +63,22 @@ export class AuditLogController {
 
             if (!associationId) {
                 return reply.status(400).send({ error: 'Informe a associacao para consultar auditoria.' });
+            }
+
+            const userId = req.headers['x-user-id'] as string | undefined;
+
+            if (!userId) {
+                return reply.status(401).send({ error: 'Selecione um usuario operador para consultar auditoria.' });
+            }
+
+            const operator = await prisma.user.findUnique({ where: { id: userId } });
+
+            if (!operator || operator.associationId !== associationId) {
+                return reply.status(403).send({ error: 'Usuario operador nao autorizado para esta associacao.' });
+            }
+
+            if (!hasPermission(operator.role, 'AUDIT_READ')) {
+                return reply.status(403).send({ error: 'Usuario operador sem permissao para consultar auditoria.' });
             }
 
             const dateFrom = parseDate(query.dateFrom);

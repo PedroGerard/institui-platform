@@ -24,7 +24,7 @@ function formatMetadata(metadata: AuditLogDTO['metadata']) {
 
 export default function AuditPage() {
     const { associationId, activeAssociation, hasAssociation } = useActiveAssociation();
-    const { operators, refreshOperators } = useActiveOperator();
+    const { operators, refreshOperators, hasOperator, hasPermission, loadingPermissions } = useActiveOperator();
     const [logs, setLogs] = useState<AuditLogDTO[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -49,11 +49,26 @@ export default function AuditPage() {
             rejections: logs.filter((log) => log.action === 'REJECT').length
         };
     }, [logs]);
+    const canReadAudit = hasPermission('AUDIT_READ');
 
     async function loadAuditLogs() {
         if (!associationId) {
             setLogs([]);
             setLoading(false);
+            return;
+        }
+
+        if (!hasOperator) {
+            setLogs([]);
+            setLoading(false);
+            setError('Selecione um usuario operador para consultar auditoria.');
+            return;
+        }
+
+        if (!loadingPermissions && !canReadAudit) {
+            setLogs([]);
+            setLoading(false);
+            setError('Usuario operador sem permissao para consultar auditoria.');
             return;
         }
 
@@ -75,7 +90,7 @@ export default function AuditPage() {
 
     useEffect(() => {
         loadAuditLogs();
-    }, [associationId]);
+    }, [associationId, hasOperator, canReadAudit, loadingPermissions]);
 
     return (
         <InstitutionalLayout title="Auditoria" activePath="/auditoria">
@@ -180,7 +195,7 @@ export default function AuditPage() {
                         <button
                             type="button"
                             onClick={loadAuditLogs}
-                            disabled={!hasAssociation || loading}
+                            disabled={!hasAssociation || loading || !hasOperator || (!loadingPermissions && !canReadAudit)}
                             className="app-button app-button-primary min-h-11"
                         >
                             <ShieldCheck size={16} />

@@ -33,6 +33,7 @@ import {
     MemberDTO,
     MemberStatus,
     MemberType,
+    OperationalContextDTO,
     BankReconciliationSummaryDTO,
     BankStatementEntryDTO,
     BankStatementEntryStatus,
@@ -164,6 +165,10 @@ class ApiService {
 
     public async listUsers(associationId: string): Promise<UserDTO[]> {
         return this.fetch<UserDTO[]>(`/users?associationId=${associationId}`);
+    }
+
+    public async getOperationalContext(): Promise<OperationalContextDTO> {
+        return this.fetch<OperationalContextDTO>('/users/me/context');
     }
 
     public async createUser(payload: {

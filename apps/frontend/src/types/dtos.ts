@@ -38,6 +38,27 @@ export interface AssociationDTO {
 
 export type UserRole = "ADM" | "MEMBER" | "AUDITOR" | "SYSTEM";
 export type AuditAction = "CREATE" | "UPDATE" | "DELETE" | "APPROVE" | "REJECT";
+export type PermissionKey =
+    | "DASHBOARD_READ"
+    | "ASSOCIATION_READ"
+    | "ASSOCIATION_CONFIGURE"
+    | "USERS_READ"
+    | "USERS_MANAGE"
+    | "MEMBERS_READ"
+    | "MEMBERS_MANAGE"
+    | "GOVERNANCE_READ"
+    | "GOVERNANCE_MANAGE"
+    | "TREASURY_READ"
+    | "TREASURY_MANAGE"
+    | "PROCUREMENT_READ"
+    | "PROCUREMENT_MANAGE"
+    | "ACCOUNTABILITY_READ"
+    | "ACCOUNTABILITY_MANAGE"
+    | "ACCOUNTABILITY_REVIEW"
+    | "DOCUMENTS_READ"
+    | "DOCUMENTS_GENERATE"
+    | "AUDIT_READ"
+    | "REPORTS_READ";
 
 export interface UserDTO {
     id: string;
@@ -47,6 +68,13 @@ export interface UserDTO {
     role: UserRole;
     createdAt?: string;
     updatedAt?: string;
+}
+
+export interface OperationalContextDTO {
+    associationId: string;
+    user: UserDTO;
+    permissions: PermissionKey[];
+    generatedAt: string;
 }
 
 export interface AuditLogDTO {

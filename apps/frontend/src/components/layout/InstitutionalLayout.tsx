@@ -152,8 +152,11 @@ function OperatorSwitcher() {
         operatorId,
         activeOperator,
         operators,
+        permissions,
         loadingOperators,
+        loadingPermissions,
         operatorError,
+        permissionError,
         hasOperator,
         setOperatorId,
         refreshOperators
@@ -167,7 +170,11 @@ function OperatorSwitcher() {
             : operatorError
                 ? `Nao foi possivel carregar: ${operatorError}`
                 : activeOperator
-                    ? `${userRoleLabels[activeOperator.role]} - usado em auditoria`
+                    ? loadingPermissions
+                        ? `${userRoleLabels[activeOperator.role]} - carregando acessos`
+                        : permissionError
+                            ? `${userRoleLabels[activeOperator.role]} - acessos indisponiveis`
+                            : `${userRoleLabels[activeOperator.role]} - ${permissions.length} acessos ativos`
                     : operators.length === 0
                         ? 'Cadastre usuarios para registrar auditoria.'
                         : 'Selecione quem esta operando.';
@@ -223,7 +230,7 @@ export default function InstitutionalLayout({
     title?: string;
     activePath?: string;
 }) {
-    const { activeOperator } = useActiveOperator();
+    const { activeOperator, permissions, loadingPermissions, permissionError } = useActiveOperator();
 
     return (
         <div className="app-shell flex min-h-screen font-sans">
@@ -267,7 +274,13 @@ export default function InstitutionalLayout({
                         <div className="text-sm">
                             <div className="font-semibold text-white">{activeOperator?.name || 'Usuario operador'}</div>
                             <div className="text-xs text-[#b9cbe3]">
-                                {activeOperator ? userRoleLabels[activeOperator.role] : 'Selecione para auditoria'}
+                                {activeOperator
+                                    ? loadingPermissions
+                                        ? 'Carregando acessos'
+                                        : permissionError
+                                            ? 'Acessos indisponiveis'
+                                            : `${userRoleLabels[activeOperator.role]} - ${permissions.length} acessos`
+                                    : 'Selecione para auditoria'}
                             </div>
                         </div>
                     </div>

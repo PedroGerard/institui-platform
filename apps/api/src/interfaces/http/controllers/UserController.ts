@@ -2,6 +2,7 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { prisma } from '../../../infrastructure/database/prisma';
+import { getPermissionsForRole } from '../../../application/services/AccessControlService';
 
 const userRoleSchema = z.enum(['ADM', 'MEMBER', 'AUDITOR']);
 
@@ -41,6 +42,45 @@ function userToDTO(user: {
 }
 
 export class UserController {
+    static async getOperationalContext(req: FastifyRequest, reply: FastifyReply) {
+        try {
+            const associationId = req.headers['x-association-id'] as string | undefined;
+            const userId = req.headers['x-user-id'] as string | undefined;
+
+            if (!associationId) {
+                return reply.status(400).send({ error: 'Selecione uma associacao ativa.' });
+            }
+
+            if (!userId) {
+                return reply.status(400).send({ error: 'Selecione um usuario operador.' });
+            }
+
+            const user = await prisma.user.findUnique({ where: { id: userId } });
+
+            if (!user) {
+                return reply.status(404).send({ error: 'Usuario operador nao encontrado.' });
+            }
+
+            if (user.associationId !== associationId) {
+                return reply.status(403).send({ error: 'Usuario operador nao pertence a associacao ativa.' });
+            }
+
+            if (user.role === 'SYSTEM') {
+                return reply.status(403).send({ error: 'Usuario de sistema nao pode operar a interface.' });
+            }
+
+            return reply.send({
+                associationId,
+                user: userToDTO(user),
+                permissions: getPermissionsForRole(user.role),
+                generatedAt: new Date().toISOString()
+            });
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'Erro ao carregar contexto operacional.';
+            return reply.status(400).send({ error: message });
+        }
+    }
+
     static async create(req: FastifyRequest, reply: FastifyReply) {
         try {
             const data = createUserSchema.parse(req.body);
