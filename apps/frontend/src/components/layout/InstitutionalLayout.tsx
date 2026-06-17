@@ -2,8 +2,10 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { BarChart3, Building2, FileText, History, Landmark, LayoutDashboard, LucideIcon, Network, RefreshCcw, Scale, ScrollText, Search, ShoppingCart, TrendingUp, UserCog, Users, Vote, Wallet } from 'lucide-react';
+import { BarChart3, Building2, FileText, History, Landmark, LayoutDashboard, LucideIcon, Network, RefreshCcw, Scale, ScrollText, Search, ShoppingCart, TrendingUp, UserCheck, UserCog, Users, Vote, Wallet } from 'lucide-react';
 import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
+import { useActiveOperator } from '@/contexts/ActiveOperatorContext';
+import { userRoleLabels } from '@/lib/institutional';
 
 interface SidebarItemProps {
     href: string;
@@ -144,6 +146,74 @@ function AssociationSwitcher() {
     );
 }
 
+function OperatorSwitcher() {
+    const { associationId } = useActiveAssociation();
+    const {
+        operatorId,
+        activeOperator,
+        operators,
+        loadingOperators,
+        operatorError,
+        hasOperator,
+        setOperatorId,
+        refreshOperators
+    } = useActiveOperator();
+
+    const selectedOperatorIsMissing = Boolean(operatorId && !activeOperator);
+    const helperText = !associationId
+        ? 'Selecione uma OSC antes do operador.'
+        : loadingOperators
+            ? 'Carregando usuarios da associacao.'
+            : operatorError
+                ? `Nao foi possivel carregar: ${operatorError}`
+                : activeOperator
+                    ? `${userRoleLabels[activeOperator.role]} - usado em auditoria`
+                    : operators.length === 0
+                        ? 'Cadastre usuarios para registrar auditoria.'
+                        : 'Selecione quem esta operando.';
+
+    return (
+        <section className="w-full min-w-0 rounded-lg border border-slate-800 bg-slate-950 p-2 lg:min-w-[260px]" aria-label="Usuario operador ativo">
+            <div className="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.08em] text-slate-500">
+                <UserCheck size={14} aria-hidden="true" />
+                Operador
+            </div>
+            <div className="flex gap-2">
+                <select
+                    aria-label="Selecionar usuario operador"
+                    value={operatorId}
+                    disabled={!associationId || loadingOperators || operators.length === 0}
+                    onChange={(event) => setOperatorId(event.target.value)}
+                    className="h-9 min-w-0 flex-1 rounded-md border border-slate-800 bg-slate-900 px-3 text-xs text-slate-100 outline-none focus:border-blue-500 disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                    <option value="">Selecionar operador</option>
+                    {selectedOperatorIsMissing && (
+                        <option value={operatorId}>Operador salvo nao encontrado</option>
+                    )}
+                    {operators.map((operator) => (
+                        <option key={operator.id} value={operator.id}>
+                            {operator.name}
+                        </option>
+                    ))}
+                </select>
+                <button
+                    type="button"
+                    onClick={refreshOperators}
+                    disabled={!associationId || loadingOperators}
+                    className="flex h-9 w-9 items-center justify-center rounded-md border border-slate-800 bg-slate-900 text-slate-300 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                    aria-label="Atualizar operadores"
+                    title="Atualizar operadores"
+                >
+                    <RefreshCcw size={15} aria-hidden="true" className={loadingOperators ? 'animate-spin' : ''} />
+                </button>
+            </div>
+            <div className={`mt-1 text-[11px] ${hasOperator ? 'text-slate-400' : 'text-amber-300'}`} aria-live="polite">
+                {helperText}
+            </div>
+        </section>
+    );
+}
+
 export default function InstitutionalLayout({
     children,
     title = "Visao Geral",
@@ -153,6 +223,8 @@ export default function InstitutionalLayout({
     title?: string;
     activePath?: string;
 }) {
+    const { activeOperator } = useActiveOperator();
+
     return (
         <div className="app-shell flex min-h-screen font-sans">
             <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-slate-950">
@@ -189,10 +261,14 @@ export default function InstitutionalLayout({
 
                 <div className="app-sidebar-border border-t p-4">
                     <div className="flex items-center gap-3 rounded-lg bg-white/8 px-3 py-3">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-xs font-bold text-[#0c2144]">AD</div>
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-xs font-bold text-[#0c2144]">
+                            {activeOperator?.name.slice(0, 2).toUpperCase() || 'OP'}
+                        </div>
                         <div className="text-sm">
-                            <div className="font-semibold text-white">Usuario operador</div>
-                            <div className="text-xs text-[#b9cbe3]">Perfil operacional</div>
+                            <div className="font-semibold text-white">{activeOperator?.name || 'Usuario operador'}</div>
+                            <div className="text-xs text-[#b9cbe3]">
+                                {activeOperator ? userRoleLabels[activeOperator.role] : 'Selecione para auditoria'}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -215,10 +291,12 @@ export default function InstitutionalLayout({
                             />
                         </label>
                         <AssociationSwitcher />
+                        <OperatorSwitcher />
                     </div>
                 </header>
-                <div className="border-b border-slate-800 bg-slate-900/50 p-4 lg:hidden">
+                <div className="space-y-3 border-b border-slate-800 bg-slate-900/50 p-4 lg:hidden">
                     <AssociationSwitcher />
+                    <OperatorSwitcher />
                 </div>
                 <nav className="app-mobile-nav border-b border-slate-800 bg-slate-900/50" aria-label="Modulos do sistema em telas menores">
                     {mobileNavItems.map((item) => {

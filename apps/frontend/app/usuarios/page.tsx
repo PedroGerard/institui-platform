@@ -5,6 +5,7 @@ import type { FormEvent } from 'react';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
 import { AssociationRequired } from '@/components/layout/AssociationRequired';
 import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
+import { useActiveOperator } from '@/contexts/ActiveOperatorContext';
 import { api } from '@/services/api';
 import type { UserDTO, UserRole } from '@/types/dtos';
 import { formatDate, userRoleLabels } from '@/lib/institutional';
@@ -16,6 +17,7 @@ const manageableRoles: ManageableUserRole[] = ['ADM', 'MEMBER', 'AUDITOR'];
 
 export default function UsersPage() {
     const { associationId, activeAssociation, hasAssociation } = useActiveAssociation();
+    const { operatorId, setOperatorId, refreshOperators } = useActiveOperator();
     const [users, setUsers] = useState<UserDTO[]>([]);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -80,6 +82,10 @@ export default function UsersPage() {
                 ...form
             });
             setUsers((current) => [...current, user].sort((a, b) => a.name.localeCompare(b.name)));
+            await refreshOperators();
+            if (!operatorId) {
+                setOperatorId(user.id);
+            }
             setForm({ name: '', email: '', role: 'ADM' });
             setSuccess(`${user.name} cadastrado com perfil ${userRoleLabels[user.role]}.`);
         } catch (err: unknown) {
@@ -96,6 +102,7 @@ export default function UsersPage() {
             setSuccess(null);
             const updated = await api.updateUserRole(userId, role);
             setUsers((current) => current.map((user) => user.id === userId ? updated : user));
+            await refreshOperators();
             setSuccess(`Perfil de ${updated.name} atualizado para ${userRoleLabels[updated.role]}.`);
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : 'Erro ao atualizar perfil.');

@@ -54,6 +54,17 @@ import {
 import { FinancialAccount } from "../types/financial";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3333";
+const ACTIVE_ASSOCIATION_STORAGE_KEY = "institui.activeAssociationId";
+const ACTIVE_OPERATOR_STORAGE_KEY = "institui.activeUserId";
+
+function getStoredValue(key: string) {
+    if (typeof window === "undefined") return "";
+    return window.localStorage.getItem(key) || "";
+}
+
+function hasHeader(headers: Record<string, string>, headerName: string) {
+    return Object.keys(headers).some((key) => key.toLowerCase() === headerName.toLowerCase());
+}
 
 class ApiService {
     public getBaseUrl() {
@@ -64,9 +75,19 @@ class ApiService {
         const headers: Record<string, string> = {
             ...(options?.headers as Record<string, string> | undefined),
         };
+        const activeAssociationId = getStoredValue(ACTIVE_ASSOCIATION_STORAGE_KEY);
+        const activeOperatorId = getStoredValue(ACTIVE_OPERATOR_STORAGE_KEY);
 
         if (options?.body && !headers["Content-Type"]) {
             headers["Content-Type"] = "application/json";
+        }
+
+        if (activeAssociationId && !hasHeader(headers, "x-association-id")) {
+            headers["x-association-id"] = activeAssociationId;
+        }
+
+        if (activeAssociationId && activeOperatorId && !hasHeader(headers, "x-user-id")) {
+            headers["x-user-id"] = activeOperatorId;
         }
 
         const response = await fetch(`${API_BASE_URL}${endpoint}`, {
