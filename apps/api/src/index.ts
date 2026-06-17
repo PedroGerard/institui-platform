@@ -17,6 +17,7 @@ import { AssemblyController } from "./interfaces/http/controllers/AssemblyContro
 
 import { AssociationStatusController } from "./interfaces/http/controllers/AssociationStatusController.js";
 import { AssociationController } from "./interfaces/http/controllers/AssociationController.js";
+import { AuditLogController } from "./interfaces/http/controllers/AuditLogController.js";
 
 const server = Fastify({ logger: true });
 
@@ -72,6 +73,10 @@ server.get("/associations", async (req, reply) => {
 
 server.get<{ Params: { id: string } }>("/associations/:id", async (req, reply) => {
     await AssociationController.getById(req, reply);
+});
+
+server.get("/audit-logs", async (req, reply) => {
+    await AuditLogController.list(req, reply);
 });
 
 server.post("/assemblies/call", async (req, reply) => {

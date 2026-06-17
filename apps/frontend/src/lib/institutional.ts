@@ -2,6 +2,7 @@ import {
     AssemblyStatus,
     AssemblyType,
     AccountabilityStatus,
+    AuditAction,
     DocumentType,
     ElectionSlateStatus,
     ElectionStatus,
@@ -46,6 +47,14 @@ export const userRoleLabels: Record<UserRole, string> = {
     MEMBER: "Membro",
     AUDITOR: "Auditoria/Conselho fiscal",
     SYSTEM: "Sistema"
+};
+
+export const auditActionLabels: Record<AuditAction, string> = {
+    CREATE: "Criacao",
+    UPDATE: "Atualizacao",
+    DELETE: "Exclusao",
+    APPROVE: "Aprovacao",
+    REJECT: "Rejeicao"
 };
 
 export const governanceRoleLabels: Record<GovernanceRole, string> = {

@@ -5,6 +5,8 @@ import {
     AccountabilityProjectDTO,
     AccountabilityReportDTO,
     AccountabilityStatus,
+    AuditAction,
+    AuditLogDTO,
     AssemblyAttendanceDTO,
     AssemblyDTO,
     AssemblyDeliberationDTO,
@@ -123,6 +125,28 @@ class ApiService {
 
     public async getAssociationStatus(associationId: string): Promise<AssociationStatusDTO> {
         return this.fetch<AssociationStatusDTO>(`/association/status/${associationId}`);
+    }
+
+    public async listAuditLogs(filters: {
+        associationId: string;
+        action?: AuditAction | "";
+        entity?: string;
+        performedById?: string;
+        dateFrom?: string;
+        dateTo?: string;
+        limit?: number;
+    }): Promise<AuditLogDTO[]> {
+        const params = new URLSearchParams();
+
+        params.set("associationId", filters.associationId);
+        if (filters.action) params.set("action", filters.action);
+        if (filters.entity) params.set("entity", filters.entity);
+        if (filters.performedById) params.set("performedById", filters.performedById);
+        if (filters.dateFrom) params.set("dateFrom", filters.dateFrom);
+        if (filters.dateTo) params.set("dateTo", filters.dateTo);
+        if (filters.limit) params.set("limit", String(filters.limit));
+
+        return this.fetch<AuditLogDTO[]>(`/audit-logs?${params.toString()}`);
     }
 
     // --- Write Components ---

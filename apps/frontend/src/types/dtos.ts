@@ -37,6 +37,7 @@ export interface AssociationDTO {
 }
 
 export type UserRole = "ADM" | "MEMBER" | "AUDITOR" | "SYSTEM";
+export type AuditAction = "CREATE" | "UPDATE" | "DELETE" | "APPROVE" | "REJECT";
 
 export interface UserDTO {
     id: string;
@@ -46,6 +47,23 @@ export interface UserDTO {
     role: UserRole;
     createdAt?: string;
     updatedAt?: string;
+}
+
+export interface AuditLogDTO {
+    id: string;
+    associationId: string;
+    entity: string;
+    entityId: string;
+    action: AuditAction;
+    performedById: string;
+    performedBy: {
+        id: string;
+        name: string;
+        email: string;
+        role: UserRole;
+    };
+    metadata: Record<string, unknown> | unknown[];
+    createdAt: string;
 }
 
 export type MemberType = "FOUNDER" | "EFFECTIVE" | "BENEFACTOR" | "COLLABORATOR" | "HONORARY";
