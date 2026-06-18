@@ -130,21 +130,12 @@ export class ProcurementService {
         return processes.map((process) => this.toProcessDTO(process));
     }
 
-    async getProcess(id: string) {
-        const process = await this.prisma.procurementProcess.findUnique({
-            where: { id },
-            include: this.processInclude()
-        });
-
-        if (!process) {
-            throw new Error("Processo de compra nao encontrado.");
-        }
-
-        return this.toProcessDTO(process);
+    async getProcess(id: string, associationId?: string) {
+        return this.toProcessDTO(await this.getRawProcess(id, associationId));
     }
 
-    async addItem(processId: string, input: AddProcurementItemDTO, performedById?: string) {
-        const process = await this.getRawProcess(processId);
+    async addItem(processId: string, input: AddProcurementItemDTO, performedById?: string, associationId?: string) {
+        const process = await this.getRawProcess(processId, associationId);
         this.assertEditable(process.status);
 
         const item = await this.prisma.procurementItem.create({
@@ -173,8 +164,8 @@ export class ProcurementService {
         return this.toItemDTO(item);
     }
 
-    async createProposal(processId: string, input: CreateSupplierProposalDTO, performedById?: string) {
-        const process = await this.getRawProcess(processId);
+    async createProposal(processId: string, input: CreateSupplierProposalDTO, performedById?: string, associationId?: string) {
+        const process = await this.getRawProcess(processId, associationId);
         const supplier = await this.prisma.supplier.findUnique({ where: { id: input.supplierId } });
 
         if (!supplier || supplier.associationId !== process.associationId) {
@@ -241,8 +232,8 @@ export class ProcurementService {
         return this.toProposalDTO(proposal);
     }
 
-    async priceMap(processId: string) {
-        const process = await this.getRawProcess(processId);
+    async priceMap(processId: string, associationId?: string) {
+        const process = await this.getRawProcess(processId, associationId);
         const rows = process.items.map((item) => {
             const quotes = process.proposals
                 .flatMap((proposal) => proposal.items.map((quote) => ({
@@ -288,9 +279,9 @@ export class ProcurementService {
         };
     }
 
-    async selectSuppliers(processId: string, performedById?: string) {
-        const process = await this.getRawProcess(processId);
-        const map = await this.priceMap(processId);
+    async selectSuppliers(processId: string, performedById?: string, associationId?: string) {
+        const process = await this.getRawProcess(processId, associationId);
+        const map = await this.priceMap(processId, process.associationId);
 
         if (!map.canSelectSuppliers) {
             throw new Error("Mapa de precos incompleto. Todos os itens precisam ter proposta vencedora.");
@@ -348,11 +339,11 @@ export class ProcurementService {
             }
         });
 
-        return this.getProcess(processId);
+        return this.getProcess(processId, process.associationId);
     }
 
-    async homologate(processId: string, performedById?: string) {
-        const process = await this.getRawProcess(processId);
+    async homologate(processId: string, performedById?: string, associationId?: string) {
+        const process = await this.getRawProcess(processId, associationId);
 
         if (process.status !== ProcurementProcessStatus.SUPPLIERS_SELECTED) {
             throw new Error("A homologacao exige fornecedores selecionados.");
@@ -381,11 +372,11 @@ export class ProcurementService {
             metadata: { status: ProcurementProcessStatus.HOMOLOGATED }
         });
 
-        return this.getProcess(processId);
+        return this.getProcess(processId, process.associationId);
     }
 
-    async createContract(processId: string, input: CreateProcurementContractDTO, performedById?: string) {
-        const process = await this.getRawProcess(processId);
+    async createContract(processId: string, input: CreateProcurementContractDTO, performedById?: string, associationId?: string) {
+        const process = await this.getRawProcess(processId, associationId);
 
         const allowedContractStatuses: ProcurementProcessStatus[] = [
             ProcurementProcessStatus.HOMOLOGATED,
@@ -458,7 +449,7 @@ export class ProcurementService {
         };
     }
 
-    private async getRawProcess(id: string) {
+    private async getRawProcess(id: string, associationId?: string) {
         const process = await this.prisma.procurementProcess.findUnique({
             where: { id },
             include: this.processInclude()
@@ -466,6 +457,10 @@ export class ProcurementService {
 
         if (!process) {
             throw new Error("Processo de compra nao encontrado.");
+        }
+
+        if (associationId && process.associationId !== associationId) {
+            throw new Error("Processo de compra nao pertence a associacao ativa.");
         }
 
         return process;

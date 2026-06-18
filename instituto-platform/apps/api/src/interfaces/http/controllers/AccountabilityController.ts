@@ -12,6 +12,7 @@ import { z } from "zod";
 import { AccountabilityService } from "../../../application/usecases/accountability/AccountabilityService";
 import { PdfGeneratorService } from "../../../domain/services/PdfGeneratorService";
 import { prisma } from "../../../infrastructure/database/prisma";
+import { requireOperationalPermission } from "../OperationalAuth";
 
 const dateFromString = z.string().transform((value) => new Date(value));
 const emptyToUndefined = z.string().optional().transform((value) => value || undefined);
@@ -66,6 +67,11 @@ export class AccountabilityController {
     static async createProject(req: FastifyRequest, reply: FastifyReply) {
         try {
             const data = createProjectSchema.parse(req.body);
+            const auth = await requireOperationalPermission(req, reply, {
+                permission: "ACCOUNTABILITY_MANAGE",
+                associationId: data.associationId
+            });
+            if (!auth) return;
             const project = await this.service().createProject({
                 ...data,
                 performedById: this.performedBy(req)
@@ -80,7 +86,16 @@ export class AccountabilityController {
     static async listProjects(req: FastifyRequest, reply: FastifyReply) {
         try {
             const filters = listProjectQuerySchema.parse(req.query);
-            const projects = await this.service().listProjects(filters);
+            const associationId = filters.associationId || (req.headers["x-association-id"] as string | undefined);
+            const auth = await requireOperationalPermission(req, reply, {
+                permission: "ACCOUNTABILITY_READ",
+                associationId
+            });
+            if (!auth) return;
+            const projects = await this.service().listProjects({
+                ...filters,
+                associationId: auth.associationId
+            });
 
             return reply.send(projects);
         } catch (err: any) {
@@ -90,7 +105,9 @@ export class AccountabilityController {
 
     static async getProject(req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
         try {
-            return reply.send(await this.service().getProject(req.params.id));
+            const auth = await requireOperationalPermission(req, reply, { permission: "ACCOUNTABILITY_READ" });
+            if (!auth) return;
+            return reply.send(await this.service().getProject(req.params.id, auth.associationId));
         } catch (err: any) {
             return reply.status(404).send({ error: err.message });
         }
@@ -98,8 +115,10 @@ export class AccountabilityController {
 
     static async updateStatus(req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
         try {
+            const auth = await requireOperationalPermission(req, reply, { permission: "ACCOUNTABILITY_MANAGE" });
+            if (!auth) return;
             const data = statusSchema.parse(req.body);
-            const project = await this.service().updateStatus(req.params.id, data.status, this.performedBy(req));
+            const project = await this.service().updateStatus(req.params.id, data.status, this.performedBy(req), auth.associationId);
 
             return reply.send(project);
         } catch (err: any) {
@@ -109,11 +128,13 @@ export class AccountabilityController {
 
     static async uploadDocument(req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
         try {
+            const auth = await requireOperationalPermission(req, reply, { permission: "ACCOUNTABILITY_MANAGE" });
+            if (!auth) return;
             const data = documentSchema.parse(req.body);
             const document = await this.service().uploadDocument(req.params.id, {
                 ...data,
                 performedById: this.performedBy(req)
-            });
+            }, auth.associationId);
 
             return reply.status(201).send(document);
         } catch (err: any) {
@@ -123,7 +144,9 @@ export class AccountabilityController {
 
     static async listDocuments(req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
         try {
-            return reply.send(await this.service().listDocuments(req.params.id));
+            const auth = await requireOperationalPermission(req, reply, { permission: "ACCOUNTABILITY_READ" });
+            if (!auth) return;
+            return reply.send(await this.service().listDocuments(req.params.id, auth.associationId));
         } catch (err: any) {
             return reply.status(404).send({ error: err.message });
         }
@@ -131,8 +154,10 @@ export class AccountabilityController {
 
     static async validateDocument(req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
         try {
+            const auth = await requireOperationalPermission(req, reply, { permission: "ACCOUNTABILITY_REVIEW" });
+            if (!auth) return;
             const data = validateDocumentSchema.parse(req.body);
-            const document = await this.service().validateDocument(req.params.id, data.validated, this.performedBy(req));
+            const document = await this.service().validateDocument(req.params.id, data.validated, this.performedBy(req), auth.associationId);
 
             return reply.send(document);
         } catch (err: any) {
@@ -142,7 +167,9 @@ export class AccountabilityController {
 
     static async checklist(req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
         try {
-            return reply.send(await this.service().generateChecklist(req.params.id));
+            const auth = await requireOperationalPermission(req, reply, { permission: "ACCOUNTABILITY_READ" });
+            if (!auth) return;
+            return reply.send(await this.service().generateChecklist(req.params.id, auth.associationId));
         } catch (err: any) {
             return reply.status(404).send({ error: err.message });
         }
@@ -150,8 +177,10 @@ export class AccountabilityController {
 
     static async registerFiscalOpinion(req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
         try {
+            const auth = await requireOperationalPermission(req, reply, { permission: "ACCOUNTABILITY_REVIEW" });
+            if (!auth) return;
             const data = fiscalOpinionSchema.parse(req.body);
-            const opinion = await this.service().registerFiscalOpinion(req.params.id, data);
+            const opinion = await this.service().registerFiscalOpinion(req.params.id, data, auth.associationId);
 
             return reply.status(201).send(opinion);
         } catch (err: any) {
@@ -161,7 +190,9 @@ export class AccountabilityController {
 
     static async listFiscalOpinions(req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
         try {
-            return reply.send(await this.service().listFiscalOpinions(req.params.id));
+            const auth = await requireOperationalPermission(req, reply, { permission: "ACCOUNTABILITY_READ" });
+            if (!auth) return;
+            return reply.send(await this.service().listFiscalOpinions(req.params.id, auth.associationId));
         } catch (err: any) {
             return reply.status(404).send({ error: err.message });
         }
@@ -169,7 +200,9 @@ export class AccountabilityController {
 
     static async generatePdfReport(req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
         try {
-            const report = await this.service().generateReport(req.params.id, ReportType.PDF, this.performedBy(req));
+            const auth = await requireOperationalPermission(req, reply, { permission: "ACCOUNTABILITY_MANAGE" });
+            if (!auth) return;
+            const report = await this.service().generateReport(req.params.id, ReportType.PDF, this.performedBy(req), auth.associationId);
 
             return reply.status(201).send(report);
         } catch (err: any) {
@@ -179,7 +212,9 @@ export class AccountabilityController {
 
     static async generateXlsReport(req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
         try {
-            const report = await this.service().generateReport(req.params.id, ReportType.XLS, this.performedBy(req));
+            const auth = await requireOperationalPermission(req, reply, { permission: "ACCOUNTABILITY_MANAGE" });
+            if (!auth) return;
+            const report = await this.service().generateReport(req.params.id, ReportType.XLS, this.performedBy(req), auth.associationId);
 
             return reply.status(201).send(report);
         } catch (err: any) {
@@ -189,7 +224,9 @@ export class AccountabilityController {
 
     static async listReports(req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
         try {
-            return reply.send(await this.service().listReports(req.params.id));
+            const auth = await requireOperationalPermission(req, reply, { permission: "ACCOUNTABILITY_READ" });
+            if (!auth) return;
+            return reply.send(await this.service().listReports(req.params.id, auth.associationId));
         } catch (err: any) {
             return reply.status(404).send({ error: err.message });
         }
@@ -197,7 +234,9 @@ export class AccountabilityController {
 
     static async submitProject(req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
         try {
-            const project = await this.service().submitProject(req.params.id, this.performedBy(req));
+            const auth = await requireOperationalPermission(req, reply, { permission: "ACCOUNTABILITY_MANAGE" });
+            if (!auth) return;
+            const project = await this.service().submitProject(req.params.id, this.performedBy(req), auth.associationId);
 
             return reply.send(project);
         } catch (err: any) {
@@ -207,7 +246,19 @@ export class AccountabilityController {
 
     static async downloadReport(req: FastifyRequest<{ Params: { fileName: string } }>, reply: FastifyReply) {
         try {
-            const filePath = this.service().getReportFilePath(`/accountability/reports/${req.params.fileName}/download`);
+            const auth = await requireOperationalPermission(req, reply, { permission: "ACCOUNTABILITY_READ" });
+            if (!auth) return;
+            const fileUrl = `/accountability/reports/${req.params.fileName}/download`;
+            const report = await prisma.accountabilityReport.findFirst({
+                where: { fileUrl },
+                include: { project: true }
+            });
+
+            if (!report || report.project.associationId !== auth.associationId) {
+                return reply.status(404).send({ error: "Relatorio de prestacao nao encontrado." });
+            }
+
+            const filePath = this.service().getReportFilePath(fileUrl);
             await access(filePath);
 
             reply.header("Content-Type", req.params.fileName.endsWith(".pdf") ? "application/pdf" : "application/vnd.ms-excel");

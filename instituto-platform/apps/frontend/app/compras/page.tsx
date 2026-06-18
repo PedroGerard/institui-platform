@@ -5,13 +5,16 @@ import Link from 'next/link';
 import { AlertCircle, FileText, Plus, RefreshCw, ShoppingCart } from 'lucide-react';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
 import { AssociationRequired } from '@/components/layout/AssociationRequired';
+import { PermissionRequired } from '@/components/layout/PermissionRequired';
 import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
+import { useActiveOperator } from '@/contexts/ActiveOperatorContext';
 import { api } from '@/services/api';
 import { ProcurementProcessDTO, ProcurementProcessStatus } from '@/types/dtos';
 import { formatCurrency, formatDate, procurementProcessStatusLabels } from '@/lib/institutional';
 
 export default function ProcurementProcessesPage() {
     const { associationId, hasAssociation } = useActiveAssociation();
+    const { hasOperator, hasPermission, loadingPermissions } = useActiveOperator();
     const [processes, setProcesses] = useState<ProcurementProcessDTO[]>([]);
     const [status, setStatus] = useState<ProcurementProcessStatus | ''>('');
     const [loading, setLoading] = useState(true);
@@ -33,6 +36,15 @@ export default function ProcurementProcessesPage() {
             return;
         }
 
+        if (loadingPermissions) return;
+
+        if (!hasOperator || !hasPermission('PROCUREMENT_READ')) {
+            setProcesses([]);
+            setLoading(false);
+            setError('Usuario operador sem permissao para consultar compras.');
+            return;
+        }
+
         try {
             setLoading(true);
             setError(null);
@@ -49,7 +61,7 @@ export default function ProcurementProcessesPage() {
 
     useEffect(() => {
         loadData();
-    }, [associationId, status]);
+    }, [associationId, status, hasOperator, hasPermission, loadingPermissions]);
 
     function statusClass(value: ProcurementProcessStatus) {
         if (value === 'CONTRACTED') return 'bg-emerald-500/10 text-emerald-300';
@@ -57,6 +69,8 @@ export default function ProcurementProcessesPage() {
         if (value === 'CANCELED') return 'bg-rose-500/10 text-rose-300';
         return 'bg-amber-500/10 text-amber-300';
     }
+    const canReadProcurement = hasPermission('PROCUREMENT_READ');
+    const canManageProcurement = hasPermission('PROCUREMENT_MANAGE');
 
     return (
         <InstitutionalLayout title="Compras MROSC" activePath="/compras">
@@ -87,13 +101,20 @@ export default function ProcurementProcessesPage() {
                             <RefreshCw size={16} />
                             Atualizar
                         </button>
-                        <Link
-                            href="/compras/novo"
-                            className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
-                        >
-                            <Plus size={16} />
-                            Novo processo
-                        </Link>
+                        {canManageProcurement ? (
+                            <Link
+                                href="/compras/novo"
+                                className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+                            >
+                                <Plus size={16} />
+                                Novo processo
+                            </Link>
+                        ) : (
+                            <span className="inline-flex cursor-not-allowed items-center gap-2 rounded-lg bg-slate-700 px-4 py-2 text-sm font-medium text-slate-300 opacity-70">
+                                <Plus size={16} />
+                                Novo processo
+                            </span>
+                        )}
                     </div>
                 </div>
 
@@ -105,6 +126,9 @@ export default function ProcurementProcessesPage() {
                 )}
 
                 {!hasAssociation && <AssociationRequired />}
+                {hasAssociation && !loadingPermissions && (!hasOperator || !canReadProcurement) && (
+                    <PermissionRequired message="Selecione um operador com permissao de leitura de compras MROSC." />
+                )}
 
                 <div className="grid gap-4 md:grid-cols-4">
                     <div className="rounded-lg border border-slate-800 bg-slate-900 p-5">

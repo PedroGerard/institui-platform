@@ -1,5 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { ProcurementService } from "../../../application/usecases/procurement/ProcurementService";
+import { requireOperationalPermission } from "../OperationalAuth";
 import {
     addProcurementItemSchema,
     createProcurementContractSchema,
@@ -16,6 +17,11 @@ export class ProcurementController {
     async createSupplier(request: FastifyRequest, reply: FastifyReply) {
         try {
             const data = createSupplierSchema.parse(request.body);
+            const auth = await requireOperationalPermission(request, reply, {
+                permission: "PROCUREMENT_MANAGE",
+                associationId: data.associationId
+            });
+            if (!auth) return;
             return reply.status(201).send(await this.procurements.createSupplier(data, this.actorId(request)));
         } catch (error: any) {
             return reply.status(400).send({ error: error.message });
@@ -26,8 +32,13 @@ export class ProcurementController {
         try {
             const query = listSuppliersSchema.parse(request.query);
             const associationId = query.associationId || (request.headers["x-association-id"] as string | undefined);
+            const auth = await requireOperationalPermission(request, reply, {
+                permission: "PROCUREMENT_READ",
+                associationId
+            });
+            if (!auth) return;
 
-            return reply.send(await this.procurements.listSuppliers({ ...query, associationId }));
+            return reply.send(await this.procurements.listSuppliers({ ...query, associationId: auth.associationId }));
         } catch (error: any) {
             return reply.status(400).send({ error: error.message });
         }
@@ -36,6 +47,11 @@ export class ProcurementController {
     async createProcess(request: FastifyRequest, reply: FastifyReply) {
         try {
             const data = createProcurementProcessSchema.parse(request.body);
+            const auth = await requireOperationalPermission(request, reply, {
+                permission: "PROCUREMENT_MANAGE",
+                associationId: data.associationId
+            });
+            if (!auth) return;
             return reply.status(201).send(await this.procurements.createProcess(data, this.actorId(request)));
         } catch (error: any) {
             return reply.status(400).send({ error: error.message });
@@ -46,8 +62,13 @@ export class ProcurementController {
         try {
             const query = listProcurementProcessesSchema.parse(request.query);
             const associationId = query.associationId || (request.headers["x-association-id"] as string | undefined);
+            const auth = await requireOperationalPermission(request, reply, {
+                permission: "PROCUREMENT_READ",
+                associationId
+            });
+            if (!auth) return;
 
-            return reply.send(await this.procurements.listProcesses({ ...query, associationId }));
+            return reply.send(await this.procurements.listProcesses({ ...query, associationId: auth.associationId }));
         } catch (error: any) {
             return reply.status(400).send({ error: error.message });
         }
@@ -55,7 +76,9 @@ export class ProcurementController {
 
     async getProcess(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
         try {
-            return reply.send(await this.procurements.getProcess(request.params.id));
+            const auth = await requireOperationalPermission(request, reply, { permission: "PROCUREMENT_READ" });
+            if (!auth) return;
+            return reply.send(await this.procurements.getProcess(request.params.id, auth.associationId));
         } catch (error: any) {
             return reply.status(404).send({ error: error.message });
         }
@@ -63,8 +86,10 @@ export class ProcurementController {
 
     async addItem(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
         try {
+            const auth = await requireOperationalPermission(request, reply, { permission: "PROCUREMENT_MANAGE" });
+            if (!auth) return;
             const data = addProcurementItemSchema.parse(request.body);
-            return reply.status(201).send(await this.procurements.addItem(request.params.id, data, this.actorId(request)));
+            return reply.status(201).send(await this.procurements.addItem(request.params.id, data, this.actorId(request), auth.associationId));
         } catch (error: any) {
             return reply.status(400).send({ error: error.message });
         }
@@ -72,8 +97,10 @@ export class ProcurementController {
 
     async createProposal(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
         try {
+            const auth = await requireOperationalPermission(request, reply, { permission: "PROCUREMENT_MANAGE" });
+            if (!auth) return;
             const data = createSupplierProposalSchema.parse(request.body);
-            return reply.status(201).send(await this.procurements.createProposal(request.params.id, data, this.actorId(request)));
+            return reply.status(201).send(await this.procurements.createProposal(request.params.id, data, this.actorId(request), auth.associationId));
         } catch (error: any) {
             return reply.status(400).send({ error: error.message });
         }
@@ -81,7 +108,9 @@ export class ProcurementController {
 
     async priceMap(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
         try {
-            return reply.send(await this.procurements.priceMap(request.params.id));
+            const auth = await requireOperationalPermission(request, reply, { permission: "PROCUREMENT_READ" });
+            if (!auth) return;
+            return reply.send(await this.procurements.priceMap(request.params.id, auth.associationId));
         } catch (error: any) {
             return reply.status(400).send({ error: error.message });
         }
@@ -89,7 +118,9 @@ export class ProcurementController {
 
     async selectSuppliers(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
         try {
-            return reply.send(await this.procurements.selectSuppliers(request.params.id, this.actorId(request)));
+            const auth = await requireOperationalPermission(request, reply, { permission: "PROCUREMENT_MANAGE" });
+            if (!auth) return;
+            return reply.send(await this.procurements.selectSuppliers(request.params.id, this.actorId(request), auth.associationId));
         } catch (error: any) {
             return reply.status(400).send({ error: error.message });
         }
@@ -97,7 +128,9 @@ export class ProcurementController {
 
     async homologate(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
         try {
-            return reply.send(await this.procurements.homologate(request.params.id, this.actorId(request)));
+            const auth = await requireOperationalPermission(request, reply, { permission: "PROCUREMENT_MANAGE" });
+            if (!auth) return;
+            return reply.send(await this.procurements.homologate(request.params.id, this.actorId(request), auth.associationId));
         } catch (error: any) {
             return reply.status(400).send({ error: error.message });
         }
@@ -105,8 +138,10 @@ export class ProcurementController {
 
     async createContract(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
         try {
+            const auth = await requireOperationalPermission(request, reply, { permission: "PROCUREMENT_MANAGE" });
+            if (!auth) return;
             const data = createProcurementContractSchema.parse(request.body);
-            return reply.status(201).send(await this.procurements.createContract(request.params.id, data, this.actorId(request)));
+            return reply.status(201).send(await this.procurements.createContract(request.params.id, data, this.actorId(request), auth.associationId));
         } catch (error: any) {
             return reply.status(400).send({ error: error.message });
         }

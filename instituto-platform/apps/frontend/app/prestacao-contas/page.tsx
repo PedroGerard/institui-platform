@@ -4,7 +4,9 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
 import { AssociationRequired } from '@/components/layout/AssociationRequired';
+import { PermissionRequired } from '@/components/layout/PermissionRequired';
 import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
+import { useActiveOperator } from '@/contexts/ActiveOperatorContext';
 import { api } from '@/services/api';
 import { AccountabilityProjectDTO, AccountabilityStatus, InstrumentType } from '@/types/dtos';
 import { accountabilityStatusLabels, formatDate, instrumentTypeLabels } from '@/lib/institutional';
@@ -15,6 +17,7 @@ const instruments = Object.keys(instrumentTypeLabels) as InstrumentType[];
 
 export default function AccountabilityProjectsPage() {
     const { associationId, hasAssociation } = useActiveAssociation();
+    const { hasOperator, hasPermission, loadingPermissions } = useActiveOperator();
     const [projects, setProjects] = useState<AccountabilityProjectDTO[]>([]);
     const [status, setStatus] = useState<AccountabilityStatus | 'ALL'>('ALL');
     const [instrumentType, setInstrumentType] = useState<InstrumentType | 'ALL'>('ALL');
@@ -31,6 +34,15 @@ export default function AccountabilityProjectsPage() {
         if (!associationId) {
             setProjects([]);
             setLoading(false);
+            return;
+        }
+
+        if (loadingPermissions) return;
+
+        if (!hasOperator || !hasPermission('ACCOUNTABILITY_READ')) {
+            setProjects([]);
+            setLoading(false);
+            setError('Usuario operador sem permissao para consultar prestacao de contas.');
             return;
         }
 
@@ -52,7 +64,9 @@ export default function AccountabilityProjectsPage() {
 
     useEffect(() => {
         loadProjects();
-    }, [associationId, status, instrumentType, year]);
+    }, [associationId, status, instrumentType, year, hasOperator, hasPermission, loadingPermissions]);
+    const canReadAccountability = hasPermission('ACCOUNTABILITY_READ');
+    const canManageAccountability = hasPermission('ACCOUNTABILITY_MANAGE');
 
     return (
         <InstitutionalLayout title="Prestacao de contas" activePath="/prestacao-contas">
@@ -76,10 +90,17 @@ export default function AccountabilityProjectsPage() {
                             <RefreshCw size={16} />
                             Atualizar
                         </button>
-                        <Link href="/prestacao-contas/nova" className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
-                            <FilePlus size={16} />
-                            Nova
-                        </Link>
+                        {canManageAccountability ? (
+                            <Link href="/prestacao-contas/nova" className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+                                <FilePlus size={16} />
+                                Nova
+                            </Link>
+                        ) : (
+                            <span className="inline-flex cursor-not-allowed items-center justify-center gap-2 rounded-lg bg-slate-700 px-4 py-2 text-sm font-medium text-slate-300 opacity-70">
+                                <FilePlus size={16} />
+                                Nova
+                            </span>
+                        )}
                     </div>
                 </div>
 
@@ -91,6 +112,9 @@ export default function AccountabilityProjectsPage() {
                 )}
 
                 {!hasAssociation && <AssociationRequired />}
+                {hasAssociation && !loadingPermissions && (!hasOperator || !canReadAccountability) && (
+                    <PermissionRequired message="Selecione um operador com permissao de leitura de prestacao de contas." />
+                )}
 
                 <div className="overflow-x-auto rounded-lg border border-slate-800 bg-slate-900">
                     <div className="min-w-[920px]">

@@ -97,7 +97,7 @@ export class TreasuryReportService {
         });
     }
 
-    async getById(id: string) {
+    async getById(id: string, associationId?: string) {
         const report = await this.prisma.treasuryReport.findUnique({
             where: { id },
             include: this.include()
@@ -107,10 +107,26 @@ export class TreasuryReportService {
             throw new Error("Relatorio de tesouraria nao encontrado.");
         }
 
+        if (associationId && report.associationId !== associationId) {
+            throw new Error("Relatorio de tesouraria nao pertence a associacao ativa.");
+        }
+
         return report;
     }
 
-    async getFileStream(fileName: string) {
+    async getFileStream(fileName: string, associationId?: string) {
+        const fileUrl = `/treasury/reports/${path.basename(fileName)}/download`;
+        const report = await this.prisma.treasuryReport.findFirst({
+            where: {
+                fileUrl,
+                associationId
+            }
+        });
+
+        if (!report) {
+            throw new Error("Relatorio de tesouraria nao encontrado.");
+        }
+
         const filePath = path.join(this.storageDir, path.basename(fileName));
         await access(filePath);
 

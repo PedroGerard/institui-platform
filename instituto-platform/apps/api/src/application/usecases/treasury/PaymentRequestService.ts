@@ -120,17 +120,8 @@ export class PaymentRequestService {
         return requests.map((request) => this.toDTO(request));
     }
 
-    async getById(id: string) {
-        const request = await this.prisma.paymentRequest.findUnique({
-            where: { id },
-            include: this.include()
-        });
-
-        if (!request) {
-            throw new Error("Solicitacao de pagamento nao encontrada.");
-        }
-
-        return this.toDTO(request);
+    async getById(id: string, associationId?: string) {
+        return this.toDTO(await this.getRawById(id, associationId));
     }
 
     async summary(filters: {
@@ -189,8 +180,8 @@ export class PaymentRequestService {
         };
     }
 
-    async updateCompliance(id: string, input: UpdatePaymentRequestComplianceDTO, performedById?: string) {
-        const request = await this.getRawById(id);
+    async updateCompliance(id: string, input: UpdatePaymentRequestComplianceDTO, performedById?: string, associationId?: string) {
+        const request = await this.getRawById(id, associationId);
 
         const closedStatuses: PaymentRequestStatus[] = [PaymentRequestStatus.PAID, PaymentRequestStatus.CANCELED];
 
@@ -254,12 +245,12 @@ export class PaymentRequestService {
         return this.toDTO(regularized);
     }
 
-    async approve(id: string, input: PaymentApprovalDTO, performedById?: string) {
+    async approve(id: string, input: PaymentApprovalDTO, performedById?: string, associationId?: string) {
         if (!ALLOWED_APPROVAL_ROLES.includes(input.role)) {
             throw new Error("Papel de aprovacao invalido.");
         }
 
-        const request = await this.getRawById(id);
+        const request = await this.getRawById(id, associationId);
         this.assertCanReceiveApproval(request.status);
         const actorId = await this.ensureActor(request.associationId, input.approvedById || performedById);
 
@@ -303,8 +294,8 @@ export class PaymentRequestService {
         return this.toDTO(updated);
     }
 
-    async reject(id: string, input: PaymentApprovalDTO, performedById?: string) {
-        const request = await this.getRawById(id);
+    async reject(id: string, input: PaymentApprovalDTO, performedById?: string, associationId?: string) {
+        const request = await this.getRawById(id, associationId);
         this.assertCanReceiveApproval(request.status);
         const actorId = await this.ensureActor(request.associationId, input.approvedById || performedById);
 
@@ -349,8 +340,8 @@ export class PaymentRequestService {
         return this.toDTO(updated);
     }
 
-    async pay(id: string, input: PayPaymentRequestDTO, performedById?: string) {
-        const request = await this.getRawById(id);
+    async pay(id: string, input: PayPaymentRequestDTO, performedById?: string, associationId?: string) {
+        const request = await this.getRawById(id, associationId);
         const blockingReasons = this.calculatePaymentBlockingReasons(request);
 
         if (blockingReasons.length > 0) {
@@ -403,8 +394,8 @@ export class PaymentRequestService {
         return this.toDTO(updated);
     }
 
-    async getBlockingReasons(id: string) {
-        const request = await this.getRawById(id);
+    async getBlockingReasons(id: string, associationId?: string) {
+        const request = await this.getRawById(id, associationId);
 
         return {
             id,
@@ -507,7 +498,7 @@ export class PaymentRequestService {
         return [...new Set(reasons)];
     }
 
-    private async getRawById(id: string) {
+    private async getRawById(id: string, associationId?: string) {
         const request = await this.prisma.paymentRequest.findUnique({
             where: { id },
             include: this.include()
@@ -515,6 +506,10 @@ export class PaymentRequestService {
 
         if (!request) {
             throw new Error("Solicitacao de pagamento nao encontrada.");
+        }
+
+        if (associationId && request.associationId !== associationId) {
+            throw new Error("Solicitacao de pagamento nao pertence a associacao ativa.");
         }
 
         return request;
