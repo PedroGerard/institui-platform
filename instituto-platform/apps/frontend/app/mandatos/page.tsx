@@ -4,7 +4,9 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
 import { AssociationRequired } from '@/components/layout/AssociationRequired';
+import { PermissionRequired } from '@/components/layout/PermissionRequired';
 import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
+import { useActiveOperator } from '@/contexts/ActiveOperatorContext';
 import { api } from '@/services/api';
 import { MandateDTO, MemberDTO } from '@/types/dtos';
 import { formatDate, governanceRoleLabels } from '@/lib/institutional';
@@ -12,6 +14,7 @@ import { AlertCircle, CheckCircle, Plus, RefreshCw, ShieldCheck, XCircle } from 
 
 export default function MandatesPage() {
     const { associationId, hasAssociation } = useActiveAssociation();
+    const { hasOperator, hasPermission, loadingPermissions } = useActiveOperator();
     const [mandates, setMandates] = useState<MandateDTO[]>([]);
     const [members, setMembers] = useState<MemberDTO[]>([]);
     const [showOnlyActive, setShowOnlyActive] = useState(false);
@@ -33,6 +36,16 @@ export default function MandatesPage() {
             return;
         }
 
+        if (loadingPermissions) return;
+
+        if (!hasOperator || !hasPermission('GOVERNANCE_READ') || !hasPermission('MEMBERS_READ')) {
+            setMandates([]);
+            setMembers([]);
+            setLoading(false);
+            setError('Usuario operador sem permissao para consultar mandatos.');
+            return;
+        }
+
         try {
             setLoading(true);
             setError(null);
@@ -51,10 +64,14 @@ export default function MandatesPage() {
 
     useEffect(() => {
         loadData();
-    }, [associationId, showOnlyActive]);
+    }, [associationId, showOnlyActive, hasOperator, hasPermission, loadingPermissions]);
 
     async function closeMandate(id: string) {
         try {
+            if (!hasOperator || !hasPermission('GOVERNANCE_MANAGE')) {
+                throw new Error('Usuario operador sem permissao para encerrar mandato.');
+            }
+
             setClosingId(id);
             setError(null);
             setSuccess(null);
@@ -67,6 +84,9 @@ export default function MandatesPage() {
             setClosingId(null);
         }
     }
+
+    const canReadMandates = hasPermission('GOVERNANCE_READ') && hasPermission('MEMBERS_READ');
+    const canManageMandates = hasPermission('GOVERNANCE_MANAGE');
 
     return (
         <InstitutionalLayout title="Mandatos" activePath="/mandatos">
@@ -101,13 +121,20 @@ export default function MandatesPage() {
                             <RefreshCw size={16} />
                             Atualizar
                         </button>
-                        <Link
-                            href="/mandatos/novo"
-                            className="app-button app-button-primary"
-                        >
-                            <Plus size={16} />
-                            Novo mandato
-                        </Link>
+                        {canManageMandates ? (
+                            <Link
+                                href="/mandatos/novo"
+                                className="app-button app-button-primary"
+                            >
+                                <Plus size={16} />
+                                Novo mandato
+                            </Link>
+                        ) : (
+                            <span className="app-button app-button-secondary cursor-not-allowed opacity-70">
+                                <Plus size={16} />
+                                Novo mandato
+                            </span>
+                        )}
                     </div>
                 </div>
 
@@ -126,6 +153,9 @@ export default function MandatesPage() {
                 )}
 
                 {!hasAssociation && <AssociationRequired />}
+                {hasAssociation && !loadingPermissions && (!hasOperator || !canReadMandates) && (
+                    <PermissionRequired message="Selecione um operador com permissao de leitura de membros e governanca." />
+                )}
 
                 <div className="app-table">
                     <div className="min-w-[860px]">
@@ -168,7 +198,7 @@ export default function MandatesPage() {
                                                     <button
                                                         type="button"
                                                         onClick={() => closeMandate(mandate.id)}
-                                                        disabled={closingId === mandate.id}
+                                                        disabled={closingId === mandate.id || !canManageMandates}
                                                         className="app-button app-button-danger min-h-9 px-3 py-2 text-xs disabled:opacity-60"
                                                     >
                                                         <XCircle size={14} />

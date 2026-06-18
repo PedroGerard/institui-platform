@@ -5,7 +5,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
 import { AssociationRequired } from '@/components/layout/AssociationRequired';
+import { PermissionRequired } from '@/components/layout/PermissionRequired';
 import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
+import { useActiveOperator } from '@/contexts/ActiveOperatorContext';
 import { api } from '@/services/api';
 import { GovernanceRole, MemberDTO } from '@/types/dtos';
 import { governanceRoleLabels } from '@/lib/institutional';
@@ -17,6 +19,7 @@ const labelClass = "mb-2 block text-xs font-semibold uppercase text-slate-500";
 export default function NewMandatePage() {
     const router = useRouter();
     const { associationId, hasAssociation } = useActiveAssociation();
+    const { hasOperator, hasPermission, loadingPermissions } = useActiveOperator();
     const [members, setMembers] = useState<MemberDTO[]>([]);
     const [loadingMembers, setLoadingMembers] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -42,6 +45,15 @@ export default function NewMandatePage() {
                 return;
             }
 
+            if (loadingPermissions) return;
+
+            if (!hasOperator || !hasPermission('MEMBERS_READ')) {
+                setMembers([]);
+                setLoadingMembers(false);
+                setError('Usuario operador sem permissao para consultar membros.');
+                return;
+            }
+
             try {
                 setLoadingMembers(true);
                 setMembers(await api.listMembers(associationId));
@@ -53,7 +65,7 @@ export default function NewMandatePage() {
         }
 
         loadMembers();
-    }, [associationId]);
+    }, [associationId, hasOperator, hasPermission, loadingPermissions]);
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -64,6 +76,10 @@ export default function NewMandatePage() {
         try {
             if (!associationId) {
                 throw new Error('Defina a associacao ativa antes de criar um mandato.');
+            }
+
+            if (!hasOperator || !hasPermission('GOVERNANCE_MANAGE')) {
+                throw new Error('Usuario operador sem permissao para criar mandatos.');
             }
 
             await api.createMandate({
@@ -79,6 +95,10 @@ export default function NewMandatePage() {
             setSaving(false);
         }
     }
+
+    const canReadMembers = hasPermission('MEMBERS_READ');
+    const canManageGovernance = hasPermission('GOVERNANCE_MANAGE');
+    const formLocked = !hasAssociation || loadingPermissions || !hasOperator || !canReadMembers || !canManageGovernance;
 
     return (
         <InstitutionalLayout title="Novo mandato" activePath="/mandatos/novo">
@@ -104,9 +124,12 @@ export default function NewMandatePage() {
                 )}
 
                 {!hasAssociation && <AssociationRequired message="Informe a associacao ativa no topo antes de criar um mandato." />}
+                {hasAssociation && !loadingPermissions && (!hasOperator || !canReadMembers || !canManageGovernance) && (
+                    <PermissionRequired message="Selecione um operador com permissao para ler membros e gerenciar governanca." />
+                )}
 
                 <form onSubmit={handleSubmit} className="rounded-lg border border-slate-800 bg-slate-900 p-6">
-                    <div className="grid gap-5 md:grid-cols-2">
+                    <fieldset disabled={formLocked || saving} className="grid gap-5 disabled:opacity-70 md:grid-cols-2">
                         <div className="md:col-span-2">
                             <label className={labelClass}>Associacao</label>
                             <input
@@ -166,12 +189,12 @@ export default function NewMandatePage() {
                                 className={inputClass}
                             />
                         </div>
-                    </div>
+                    </fieldset>
 
                     <div className="mt-6 flex justify-end border-t border-slate-800 pt-6">
                         <button
                             type="submit"
-                            disabled={saving || !hasAssociation || activeMembers.length === 0}
+                            disabled={saving || formLocked || activeMembers.length === 0}
                             className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                             <Save size={17} />

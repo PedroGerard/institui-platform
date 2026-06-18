@@ -7,6 +7,8 @@ import { GovernanceRole, Mandate } from '../../../domain/entities/Mandate';
 import { PrismaMandateRepository } from '../../../infrastructure/database/PrismaMandateRepository';
 import { PrismaMemberRepository } from '../../../infrastructure/database/PrismaMemberRepository';
 import { prisma } from '../../../infrastructure/database/prisma';
+import { UniqueEntityID } from '../../../domain/shared/Entity';
+import { requireOperationalPermission } from '../OperationalAuth';
 
 const dateFromString = z.string().transform((value) => new Date(value));
 
@@ -50,6 +52,12 @@ export class MandateController {
     static async create(req: FastifyRequest, reply: FastifyReply) {
         try {
             const data = createMandateSchema.parse(req.body);
+            const auth = await requireOperationalPermission(req, reply, {
+                permission: 'GOVERNANCE_MANAGE',
+                associationId: data.associationId
+            });
+            if (!auth) return;
+
             const mandateRepo = new PrismaMandateRepository(prisma);
             const memberRepo = new PrismaMemberRepository(prisma);
             const useCase = new CreateMandate(mandateRepo, memberRepo);
@@ -65,9 +73,15 @@ export class MandateController {
         try {
             const query = req.query as { associationId?: string };
             const associationId = query.associationId || (req.headers['x-association-id'] as string | undefined);
+            const auth = await requireOperationalPermission(req, reply, {
+                permission: 'GOVERNANCE_READ',
+                associationId
+            });
+            if (!auth) return;
+
             const repo = new PrismaMandateRepository(prisma);
             const useCase = new ListMandates(repo);
-            const mandates = await useCase.execute(associationId);
+            const mandates = await useCase.execute(auth.associationId);
 
             return reply.send(mandates.map(mandateToDTO));
         } catch (err: any) {
@@ -79,9 +93,15 @@ export class MandateController {
         try {
             const query = req.query as { associationId?: string };
             const associationId = query.associationId || (req.headers['x-association-id'] as string | undefined);
+            const auth = await requireOperationalPermission(req, reply, {
+                permission: 'GOVERNANCE_READ',
+                associationId
+            });
+            if (!auth) return;
+
             const repo = new PrismaMandateRepository(prisma);
             const useCase = new ListMandates(repo);
-            const mandates = await useCase.execute(associationId, true);
+            const mandates = await useCase.execute(auth.associationId, true);
 
             return reply.send(mandates.map(mandateToDTO));
         } catch (err: any) {
@@ -93,7 +113,16 @@ export class MandateController {
         try {
             const { id } = req.params as { id: string };
             const data = closeMandateSchema.parse(req.body || {});
+            const auth = await requireOperationalPermission(req, reply, { permission: 'GOVERNANCE_MANAGE' });
+            if (!auth) return;
+
             const repo = new PrismaMandateRepository(prisma);
+            const currentMandate = await repo.findById(new UniqueEntityID(id));
+
+            if (!currentMandate || currentMandate.associationId.toString() !== auth.associationId) {
+                return reply.status(404).send({ error: "Mandate not found" });
+            }
+
             const useCase = new CloseMandate(repo);
             const mandate = await useCase.execute({
                 mandateId: id,
