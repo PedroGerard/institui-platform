@@ -4,7 +4,9 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
 import { AssociationRequired } from '@/components/layout/AssociationRequired';
+import { PermissionRequired } from '@/components/layout/PermissionRequired';
 import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
+import { useActiveOperator } from '@/contexts/ActiveOperatorContext';
 import { api } from '@/services/api';
 import { ElectionDTO, ElectionStatus } from '@/types/dtos';
 import { electionStatusLabels, formatDate } from '@/lib/institutional';
@@ -12,6 +14,7 @@ import { AlertCircle, CheckCircle, Plus, RefreshCw, Vote } from 'lucide-react';
 
 export default function ElectionsPage() {
     const { associationId, hasAssociation } = useActiveAssociation();
+    const { hasOperator, hasPermission, loadingPermissions } = useActiveOperator();
     const [elections, setElections] = useState<ElectionDTO[]>([]);
     const [status, setStatus] = useState<ElectionStatus | ''>('');
     const [loading, setLoading] = useState(true);
@@ -29,6 +32,15 @@ export default function ElectionsPage() {
             return;
         }
 
+        if (loadingPermissions) return;
+
+        if (!hasOperator || !hasPermission('GOVERNANCE_READ')) {
+            setElections([]);
+            setLoading(false);
+            setError('Usuario operador sem permissao para consultar eleicoes.');
+            return;
+        }
+
         try {
             setLoading(true);
             setError(null);
@@ -42,7 +54,10 @@ export default function ElectionsPage() {
 
     useEffect(() => {
         loadData();
-    }, [associationId, status]);
+    }, [associationId, status, hasOperator, hasPermission, loadingPermissions]);
+
+    const canReadGovernance = hasPermission('GOVERNANCE_READ');
+    const canManageGovernance = hasPermission('GOVERNANCE_MANAGE');
 
     return (
         <InstitutionalLayout title="Eleicoes" activePath="/eleicoes">
@@ -71,13 +86,20 @@ export default function ElectionsPage() {
                             <RefreshCw size={16} />
                             Atualizar
                         </button>
-                        <Link
-                            href="/eleicoes/nova"
-                            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-                        >
-                            <Plus size={16} />
-                            Nova eleicao
-                        </Link>
+                        {canManageGovernance ? (
+                            <Link
+                                href="/eleicoes/nova"
+                                className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                            >
+                                <Plus size={16} />
+                                Nova eleicao
+                            </Link>
+                        ) : (
+                            <span className="inline-flex cursor-not-allowed items-center gap-2 rounded-lg bg-slate-700 px-4 py-2 text-sm font-medium text-slate-300 opacity-70">
+                                <Plus size={16} />
+                                Nova eleicao
+                            </span>
+                        )}
                     </div>
                 </div>
 
@@ -89,6 +111,9 @@ export default function ElectionsPage() {
                 )}
 
                 {!hasAssociation && <AssociationRequired />}
+                {hasAssociation && !loadingPermissions && (!hasOperator || !canReadGovernance) && (
+                    <PermissionRequired message="Selecione um operador com permissao de leitura de governanca." />
+                )}
 
                 <div className="overflow-x-auto rounded-lg border border-slate-800 bg-slate-900">
                     <div className="min-w-[920px]">

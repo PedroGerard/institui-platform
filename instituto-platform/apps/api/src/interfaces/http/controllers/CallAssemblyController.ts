@@ -4,6 +4,7 @@ import { BaseController } from "../BaseController.js";
 import { CallAssemblyUseCase } from "../../../application/use-cases/CallAssembly.js";
 import { AssemblyType } from "../../../domain/entities/Assembly.js";
 import { z } from "zod";
+import { requireOperationalPermission } from "../OperationalAuth.js";
 
 
 const callAssemblySchema = z.object({
@@ -32,6 +33,11 @@ export class CallAssemblyController extends BaseController {
 
     protected async executeImpl(req: FastifyRequest, res: FastifyReply): Promise<void> {
         const body = callAssemblySchema.parse(req.body);
+        const auth = await requireOperationalPermission(req, res, {
+            permission: "GOVERNANCE_MANAGE",
+            associationId: body.associationId
+        });
+        if (!auth) return;
 
         // Convert to strict Date object
         const scheduledDate = new Date(body.date);

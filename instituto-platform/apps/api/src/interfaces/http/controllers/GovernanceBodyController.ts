@@ -2,6 +2,7 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import { GovernanceBodyCategory, GovernanceBodyMemberRole, MemberStatus } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "../../../infrastructure/database/prisma";
+import { requireOperationalPermission } from "../OperationalAuth";
 
 const dateFromString = z.string().transform((value) => new Date(value));
 
@@ -101,6 +102,12 @@ export class GovernanceBodyController {
     static async create(req: FastifyRequest, reply: FastifyReply) {
         try {
             const data = createGovernanceBodySchema.parse(req.body);
+            const auth = await requireOperationalPermission(req, reply, {
+                permission: "GOVERNANCE_MANAGE",
+                associationId: data.associationId
+            });
+            if (!auth) return;
+
             const association = await prisma.association.findUnique({
                 where: { id: data.associationId },
                 select: { id: true }
@@ -132,10 +139,15 @@ export class GovernanceBodyController {
         try {
             const query = req.query as { associationId?: string; category?: GovernanceBodyCategory; active?: string };
             const associationId = query.associationId || (req.headers["x-association-id"] as string | undefined);
+            const auth = await requireOperationalPermission(req, reply, {
+                permission: "GOVERNANCE_READ",
+                associationId
+            });
+            if (!auth) return;
 
             const bodies = await prisma.governanceBody.findMany({
                 where: {
-                    ...(associationId ? { associationId } : {}),
+                    associationId: auth.associationId,
                     ...(query.category ? { category: query.category } : {}),
                     ...(query.active === "true" ? { isActive: true } : {}),
                     ...(query.active === "false" ? { isActive: false } : {})
@@ -156,12 +168,15 @@ export class GovernanceBodyController {
     static async getById(req: FastifyRequest, reply: FastifyReply) {
         try {
             const { id } = req.params as { id: string };
+            const auth = await requireOperationalPermission(req, reply, { permission: "GOVERNANCE_READ" });
+            if (!auth) return;
+
             const body = await prisma.governanceBody.findUnique({
                 where: { id },
                 include: bodyInclude
             });
 
-            if (!body) {
+            if (!body || body.associationId !== auth.associationId) {
                 return reply.status(404).send({ error: "Governance body not found" });
             }
 
@@ -175,6 +190,21 @@ export class GovernanceBodyController {
         try {
             const { id } = req.params as { id: string };
             const data = updateGovernanceBodySchema.parse(req.body);
+            const currentBody = await prisma.governanceBody.findUnique({
+                where: { id },
+                select: { associationId: true }
+            });
+
+            if (!currentBody) {
+                return reply.status(404).send({ error: "Governance body not found" });
+            }
+
+            const auth = await requireOperationalPermission(req, reply, {
+                permission: "GOVERNANCE_MANAGE",
+                associationId: currentBody.associationId
+            });
+            if (!auth) return;
+
             const body = await prisma.governanceBody.update({
                 where: { id },
                 data,
@@ -199,6 +229,12 @@ export class GovernanceBodyController {
             if (!body) {
                 return reply.status(404).send({ error: "Governance body not found" });
             }
+
+            const auth = await requireOperationalPermission(req, reply, {
+                permission: "GOVERNANCE_MANAGE",
+                associationId: body.associationId
+            });
+            if (!auth) return;
 
             if (data.memberId) {
                 const member = await prisma.member.findUnique({
@@ -250,6 +286,25 @@ export class GovernanceBodyController {
         try {
             const { memberId } = req.params as { memberId: string };
             const data = closeGovernanceBodyMemberSchema.parse(req.body || {});
+            const currentMember = await prisma.governanceBodyMember.findUnique({
+                where: { id: memberId },
+                include: {
+                    governanceBody: {
+                        select: { associationId: true }
+                    }
+                }
+            });
+
+            if (!currentMember) {
+                return reply.status(404).send({ error: "Governance body member not found" });
+            }
+
+            const auth = await requireOperationalPermission(req, reply, {
+                permission: "GOVERNANCE_MANAGE",
+                associationId: currentMember.governanceBody.associationId
+            });
+            if (!auth) return;
+
             const governanceMember = await prisma.governanceBodyMember.update({
                 where: { id: memberId },
                 data: {
