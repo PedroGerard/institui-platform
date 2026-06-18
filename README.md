@@ -6,13 +6,13 @@ O INSTITUI+ nasce como um ERP especializado para OSCs brasileiras, reunindo core
 
 ## Status do desenvolvimento
 
-Atualizado em 16 de junho de 2026.
+Atualizado em 18 de junho de 2026.
 
-- Repositorio GitHub: `PedroGerard/institui-platform`
+- Repositorio GitHub atual: `PedroGerard/instituto-incentive-site`
 - Figma: `INSTITUI Design System e Modulos Operacionais`
 - GitHub Project: `INSTITUI+ Roadmap de Desenvolvimento`
-- Sprint atual: `Sprint 00 - Correcoes da auditoria`
-- PR em andamento: `#9 - Sprint 00: contexto de associacao ativa`
+- Sprint atual: `Sprint 01 - Fundacao Operacional do Sistema de Gestao`
+- Estrutura atual: ERP em `instituto-platform` e site institucional em `instituto-incentive-site`
 
 Avancos recentes:
 
@@ -32,12 +32,14 @@ Avancos recentes:
 - Prestacao de contas: projetos, documentos obrigatorios, checklist, parecer fiscal, relatorios e submissao.
 - Gerador de documentos oficiais: atas, listas de presenca, estatuto consolidado, oficios e pareceres.
 - Auditoria e compliance: logs, rastreabilidade, alertas e controles de conformidade.
-- Frontend institucional: portal administrativo moderno em Next.js, com navegacao por modulos.
+- Frontend administrativo: portal operacional moderno em Next.js, com navegacao por modulos.
+- Site institucional: presenca publica do Instituto Incentive, transparencia e paginas institucionais.
 
 ## Estrutura do repositorio
 
-- `apps/api`: API em Fastify, Prisma ORM, PostgreSQL, Clean Architecture e DDD.
-- `apps/frontend`: frontend em Next.js, React e Tailwind.
+- `instituto-platform/apps/api`: API do ERP em Fastify, Prisma ORM, PostgreSQL, Clean Architecture e DDD.
+- `instituto-platform/apps/frontend`: frontend administrativo do ERP em Next.js, React e Tailwind.
+- `instituto-incentive-site`: site institucional publico do Instituto Incentive em Next.js.
 - `materiais`: documentacao de apoio, roadmap, matrizes estatutarias e plano de implantacao.
 - `materiais/divida-tecnica-sprint-00.md`: pendencias tecnicas rastreadas na Sprint 00.
 - `materiais/figma-rastreabilidade-sprint-00.md`: convencao de frames e links Figma.
@@ -106,16 +108,17 @@ Crie os arquivos de ambiente a partir dos exemplos:
 
 ```bash
 cp .env.example .env
-cp apps/api/.env.example apps/api/.env
-cp apps/frontend/.env.example apps/frontend/.env.local
+cp instituto-platform/apps/api/.env.example instituto-platform/apps/api/.env
+cp instituto-platform/apps/frontend/.env.example instituto-platform/apps/frontend/.env.local
 ```
 
 Em producao, `DATABASE_URL` e `CORS_ORIGINS` devem ser definidas obrigatoriamente no ambiente. O fallback local de banco e origens CORS so e usado fora de producao.
+O site institucional, por enquanto, nao exige arquivo `.env`.
 
-Rode o frontend:
+Rode o frontend administrativo do ERP:
 
 ```bash
-npm run dev --workspace=apps/frontend
+npm run dev:frontend
 ```
 
 O script do frontend usa Webpack para evitar falhas do Turbopack com symlinks em ambiente Windows/monorepo.
@@ -123,10 +126,17 @@ O script do frontend usa Webpack para evitar falhas do Turbopack com symlinks em
 Rode a API:
 
 ```bash
-npm run dev --workspace=apps/api
+npm run dev:api
 ```
 
-Frontend:
+Rode o site institucional:
+
+```bash
+npm ci --prefix instituto-incentive-site
+npm run dev:site
+```
+
+ERP frontend:
 
 ```text
 http://localhost:3000
@@ -136,6 +146,12 @@ API:
 
 ```text
 http://localhost:3333
+```
+
+Site institucional:
+
+```text
+http://localhost:3000
 ```
 
 ## Validacao
@@ -151,31 +167,31 @@ Esse comando valida Prisma, gera o Prisma Client, executa os testes da API e faz
 Validar o schema do Prisma:
 
 ```bash
-npx prisma validate --schema apps/api/prisma/schema.prisma
+npx prisma validate --schema instituto-platform/apps/api/prisma/schema.prisma
 ```
 
 Gerar o Prisma Client:
 
 ```bash
-npx prisma generate --schema apps/api/prisma/schema.prisma
+npx prisma generate --schema instituto-platform/apps/api/prisma/schema.prisma
 ```
 
 Executar testes da API:
 
 ```bash
-npm run test --workspace=apps/api -- --run
+npm run test --workspace=instituto-platform/apps/api -- --run
 ```
 
 Build da API:
 
 ```bash
-npm run build --workspace=apps/api
+npm run build:api
 ```
 
 Build do frontend:
 
 ```bash
-npm run build --workspace=apps/frontend
+npm run build:frontend
 ```
 
 ## Variaveis de ambiente principais
@@ -196,12 +212,13 @@ Em producao, `CORS_ORIGINS` nao aceita `*`; informe explicitamente as URLs do fr
 Repositorio principal:
 
 ```text
-https://github.com/PedroGerard/institui-platform
+https://github.com/PedroGerard/instituto-incentive-site
 ```
 
 Configuracao recomendada para publicacao do frontend na Vercel:
 
-- Root Directory: `apps/frontend`
+- Root Directory do ERP: `instituto-platform/apps/frontend`
+- Root Directory do site institucional: `instituto-incentive-site`
 - Install Command: `npm ci`
 - Build Command: `npm run build`
 - Output Directory: padrao do Next.js

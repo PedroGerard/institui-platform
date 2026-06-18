@@ -1,13 +1,13 @@
 # Documentacao operacional - INSTITUI+
 
-Atualizado em 16 de junho de 2026.
+Atualizado em 18 de junho de 2026.
 
-Este documento orienta como rodar, validar, contribuir e preparar o INSTITUI+ para a Sprint 01.
+Este documento orienta como rodar, validar, contribuir e preparar o INSTITUI+ a partir da separacao entre ERP e site institucional.
 
 ## Repositorio e ferramentas
 
-- Repositorio: `PedroGerard/institui-platform`
-- Branch de trabalho atual: `codex/sprint-00-associacao-ativa`
+- Repositorio atual: `PedroGerard/instituto-incentive-site`
+- Branch de trabalho atual: `main`
 - GitHub Project: `INSTITUI+ Roadmap de Desenvolvimento`
 - Figma: `INSTITUI Design System e Modulos Operacionais`
 - Workflow principal de validacao: `.github/workflows/frontend.yml`
@@ -24,9 +24,11 @@ Criar arquivos de ambiente:
 
 ```bash
 cp .env.example .env
-cp apps/api/.env.example apps/api/.env
-cp apps/frontend/.env.example apps/frontend/.env.local
+cp instituto-platform/apps/api/.env.example instituto-platform/apps/api/.env
+cp instituto-platform/apps/frontend/.env.example instituto-platform/apps/frontend/.env.local
 ```
+
+O site institucional em `instituto-incentive-site` nao exige arquivo `.env` neste momento.
 
 Variaveis obrigatorias em producao:
 
@@ -37,23 +39,31 @@ Em producao, `CORS_ORIGINS` deve listar origens explicitas e nao pode usar `*`.
 
 ## Rodar localmente
 
-Frontend:
+Frontend administrativo do ERP:
 
 ```bash
-npm run dev --workspace=apps/frontend
+npm run dev:frontend
 ```
 
 API:
 
 ```bash
-npm run dev --workspace=apps/api
+npm run dev:api
+```
+
+Site institucional:
+
+```bash
+npm ci --prefix instituto-incentive-site
+npm run dev:site
 ```
 
 URLs padrao:
 
 ```text
-Frontend: http://localhost:3000
+ERP frontend: http://localhost:3000
 API: http://localhost:3333
+Site institucional: http://localhost:3000
 ```
 
 ## Validacao obrigatoria
@@ -70,7 +80,8 @@ Esse comando executa:
 - geracao do Prisma Client;
 - testes da API;
 - build da API;
-- build do frontend.
+- build do frontend administrativo;
+- build do site institucional.
 
 Comandos individuais:
 
@@ -80,6 +91,7 @@ npm run prisma:generate
 npm run test:api
 npm run build:api
 npm run build:frontend
+npm run build:site
 ```
 
 ## Fluxo GitHub

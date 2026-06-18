@@ -8,12 +8,13 @@ Publicar o novo site institucional do Instituto Incentive com as paginas publica
 - Quem somos
 - Projetos
 - Transparencia
-- Incentivo fiscal
+- Certificacoes e reconhecimentos
+- Emendas parlamentares
 - Contato
 
 ## Estrutura local
 
-Aplicacao: `apps/frontend`
+Aplicacao: `instituto-incentive-site`
 
 Rotas principais:
 
@@ -21,20 +22,21 @@ Rotas principais:
 - `/quem-somos`
 - `/projetos`
 - `/transparencia`
-- `/incentivo-fiscal`
+- `/transparencia/emendas-parlamentares`
+- `/certificacoes-reconhecimentos`
 - `/contato`
 
 Materiais de apoio:
 
 - `materiais/projetos-incentive.md`
-- `apps/frontend/public/images/projects`
+- `instituto-incentive-site/public/images/projects`
 
 ## Build
 
-Comando de build do frontend:
+Comando de build do site:
 
 ```bash
-npm run build --workspace=apps/frontend
+npm run build:site
 ```
 
 O `package.json` do frontend ja usa:
@@ -49,7 +51,7 @@ Opcao simples: Vercel
 
 Configuracao:
 
-- Root directory: `apps/frontend`
+- Root directory: `instituto-incentive-site`
 - Framework: Next.js
 - Install command: `npm ci`
 - Build command: `npm run build`
@@ -75,7 +77,7 @@ Depois do deploy, apontar DNS do dominio para a hospedagem escolhida.
 
 - Confirmar e-mail oficial de contato.
 - Endereco publico atualizado para Avenida Jose Milton de Morais, 394, Vila Nova, Pereiro-CE, CEP 63.460-000.
-- Decidir se a area administrativa `/dashboard` deve ficar publicada, protegida por login ou hospedada separadamente.
+- Confirmar que a area administrativa do ERP esta hospedada separadamente em `instituto-platform/apps/frontend`.
 - Integrar o formulario de contato com e-mail, CRM ou ferramenta de formularios.
 - Revisar imagens e autorizacoes de uso dos registros dos projetos.
 
