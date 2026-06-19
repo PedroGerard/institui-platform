@@ -5,7 +5,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
 import { AssociationRequired } from '@/components/layout/AssociationRequired';
+import { PermissionRequired } from '@/components/layout/PermissionRequired';
 import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
+import { useActiveOperator } from '@/contexts/ActiveOperatorContext';
 import { api } from '@/services/api';
 import { InstrumentType } from '@/types/dtos';
 import { instrumentTypeLabels } from '@/lib/institutional';
@@ -18,6 +20,7 @@ const instruments = Object.keys(instrumentTypeLabels) as InstrumentType[];
 export default function NewAccountabilityProjectPage() {
     const router = useRouter();
     const { associationId, hasAssociation } = useActiveAssociation();
+    const { hasOperator, hasPermission, loadingPermissions } = useActiveOperator();
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
@@ -42,6 +45,10 @@ export default function NewAccountabilityProjectPage() {
                 throw new Error('Defina a associacao ativa antes de criar uma prestacao de contas.');
             }
 
+            if (!hasOperator || !hasPermission('ACCOUNTABILITY_MANAGE')) {
+                throw new Error('Usuario operador sem permissao para criar prestacoes de contas.');
+            }
+
             const project = await api.createAccountabilityProject({
                 ...formData,
                 associationId,
@@ -56,6 +63,9 @@ export default function NewAccountabilityProjectPage() {
             setSaving(false);
         }
     }
+
+    const canManageAccountability = hasPermission('ACCOUNTABILITY_MANAGE');
+    const formLocked = !hasAssociation || loadingPermissions || !hasOperator || !canManageAccountability;
 
     return (
         <InstitutionalLayout title="Nova prestacao" activePath="/prestacao-contas/nova">
@@ -81,9 +91,12 @@ export default function NewAccountabilityProjectPage() {
                 )}
 
                 {!hasAssociation && <AssociationRequired message="Informe a associacao ativa no topo antes de criar uma prestacao de contas." />}
+                {hasAssociation && !loadingPermissions && (!hasOperator || !canManageAccountability) && (
+                    <PermissionRequired message="Selecione um operador com permissao para gerenciar prestacao de contas." />
+                )}
 
                 <form onSubmit={handleSubmit} className="rounded-lg border border-slate-800 bg-slate-900 p-6">
-                    <div className="grid gap-5 md:grid-cols-2">
+                    <fieldset disabled={formLocked || saving} className="grid gap-5 disabled:opacity-70 md:grid-cols-2">
                         <div className="md:col-span-2">
                             <label className={labelClass}>Associacao</label>
                             <input readOnly value={associationId} className={inputClass} placeholder="Defina no seletor superior" />
@@ -118,10 +131,10 @@ export default function NewAccountabilityProjectPage() {
                             <label className={labelClass}>Periodo final</label>
                             <input required type="date" value={formData.periodEnd} onChange={(event) => setFormData({ ...formData, periodEnd: event.target.value })} className={inputClass} />
                         </div>
-                    </div>
+                    </fieldset>
 
                     <div className="mt-6 flex justify-end border-t border-slate-800 pt-6">
-                        <button type="submit" disabled={saving || !hasAssociation} className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60">
+                        <button type="submit" disabled={saving || formLocked} className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60">
                             <Save size={17} />
                             {saving ? 'Salvando...' : 'Salvar prestacao'}
                         </button>

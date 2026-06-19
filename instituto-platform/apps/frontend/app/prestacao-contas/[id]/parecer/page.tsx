@@ -3,6 +3,8 @@
 import { FormEvent, use, useEffect, useState } from 'react';
 import { AccountabilityProjectNav } from '@/components/accountability/AccountabilityProjectNav';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
+import { PermissionRequired } from '@/components/layout/PermissionRequired';
+import { useActiveOperator } from '@/contexts/ActiveOperatorContext';
 import { api } from '@/services/api';
 import { AccountabilityProjectDTO, FiscalOpinionDTO, FiscalOpinionType } from '@/types/dtos';
 import { fiscalOpinionLabels, formatDate } from '@/lib/institutional';
@@ -13,6 +15,7 @@ const labelClass = "mb-2 block text-xs font-semibold uppercase text-slate-500";
 
 export default function FiscalOpinionPage({ params }: { params: Promise<{ id: string }> }) {
     const { id: projectId } = use(params);
+    const { hasOperator, hasPermission, loadingPermissions } = useActiveOperator();
     const [project, setProject] = useState<AccountabilityProjectDTO | null>(null);
     const [opinions, setOpinions] = useState<FiscalOpinionDTO[]>([]);
     const [councilUserId, setCouncilUserId] = useState('');
@@ -24,6 +27,16 @@ export default function FiscalOpinionPage({ params }: { params: Promise<{ id: st
     const [message, setMessage] = useState<string | null>(null);
 
     async function loadData() {
+        if (loadingPermissions) return;
+
+        if (!hasOperator || !hasPermission('ACCOUNTABILITY_READ')) {
+            setProject(null);
+            setOpinions([]);
+            setLoading(false);
+            setError('Usuario operador sem permissao para consultar pareceres.');
+            return;
+        }
+
         try {
             setLoading(true);
             setError(null);
@@ -47,6 +60,10 @@ export default function FiscalOpinionPage({ params }: { params: Promise<{ id: st
         setMessage(null);
 
         try {
+            if (!hasOperator || !hasPermission('ACCOUNTABILITY_REVIEW')) {
+                throw new Error('Usuario operador sem permissao para registrar parecer fiscal.');
+            }
+
             await api.registerFiscalOpinion(projectId, {
                 councilUserId,
                 opinion,
@@ -64,12 +81,23 @@ export default function FiscalOpinionPage({ params }: { params: Promise<{ id: st
 
     useEffect(() => {
         loadData();
-    }, [projectId]);
+    }, [projectId, hasOperator, hasPermission, loadingPermissions]);
+
+    const canReadAccountability = hasPermission('ACCOUNTABILITY_READ');
+    const canReviewAccountability = hasPermission('ACCOUNTABILITY_REVIEW');
+    const formLocked = loadingPermissions || !hasOperator || !canReviewAccountability;
 
     return (
         <InstitutionalLayout title="Parecer fiscal" activePath="/prestacao-contas">
             <div className="space-y-6">
                 <AccountabilityProjectNav projectId={projectId} active="/parecer" />
+
+                {!loadingPermissions && (!hasOperator || !canReadAccountability) && (
+                    <PermissionRequired message="Selecione um operador com permissao de leitura de prestacao de contas." />
+                )}
+                {!loadingPermissions && hasOperator && canReadAccountability && !canReviewAccountability && (
+                    <PermissionRequired message="O operador atual pode consultar, mas nao pode registrar parecer fiscal." />
+                )}
 
                 {(error || message) && (
                     <div className={`flex items-center gap-3 rounded-lg border p-4 text-sm ${message
@@ -121,7 +149,7 @@ export default function FiscalOpinionPage({ params }: { params: Promise<{ id: st
 
                         <form onSubmit={handleSubmit} className="rounded-lg border border-slate-800 bg-slate-900 p-6">
                             <h3 className="text-lg font-semibold text-slate-100">Registrar parecer</h3>
-                            <div className="mt-5 space-y-5">
+                            <fieldset disabled={formLocked || saving} className="mt-5 space-y-5 disabled:opacity-70">
                                 <div>
                                     <label className={labelClass}>Usuario do Conselho Fiscal</label>
                                     <input required value={councilUserId} onChange={(event) => setCouncilUserId(event.target.value)} className={inputClass} />
@@ -137,9 +165,9 @@ export default function FiscalOpinionPage({ params }: { params: Promise<{ id: st
                                     <label className={labelClass}>Observacoes</label>
                                     <textarea rows={8} value={notes} onChange={(event) => setNotes(event.target.value)} className={inputClass} />
                                 </div>
-                            </div>
+                            </fieldset>
                             <div className="mt-6 flex justify-end border-t border-slate-800 pt-6">
-                                <button type="submit" disabled={saving} className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60">
+                                <button type="submit" disabled={saving || formLocked} className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60">
                                     <Save size={17} />
                                     {saving ? 'Registrando...' : 'Registrar parecer'}
                                 </button>

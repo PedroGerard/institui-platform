@@ -6,7 +6,9 @@ import { useRouter } from 'next/navigation';
 import { AlertCircle, ArrowLeft, CheckCircle, Save } from 'lucide-react';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
 import { AssociationRequired } from '@/components/layout/AssociationRequired';
+import { PermissionRequired } from '@/components/layout/PermissionRequired';
 import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
+import { useActiveOperator } from '@/contexts/ActiveOperatorContext';
 import { api } from '@/services/api';
 import { FinancialAccount } from '@/types/financial';
 
@@ -16,6 +18,7 @@ const labelClass = "mb-2 block text-xs font-semibold uppercase text-slate-500";
 export default function NewPaymentRequestPage() {
     const router = useRouter();
     const { associationId, hasAssociation } = useActiveAssociation();
+    const { hasOperator, hasPermission, loadingPermissions } = useActiveOperator();
     const [accounts, setAccounts] = useState<FinancialAccount[]>([]);
     const [loadingRefs, setLoadingRefs] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -48,6 +51,15 @@ export default function NewPaymentRequestPage() {
                 return;
             }
 
+            if (loadingPermissions) return;
+
+            if (!hasOperator || !hasPermission('TREASURY_READ')) {
+                setAccounts([]);
+                setLoadingRefs(false);
+                setError('Usuario operador sem permissao para consultar contas financeiras.');
+                return;
+            }
+
             try {
                 setLoadingRefs(true);
                 setAccounts(await api.listFinancialAccounts(associationId));
@@ -59,7 +71,7 @@ export default function NewPaymentRequestPage() {
         }
 
         loadAccounts();
-    }, [associationId]);
+    }, [associationId, hasOperator, hasPermission, loadingPermissions]);
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -70,6 +82,10 @@ export default function NewPaymentRequestPage() {
         try {
             if (!associationId) {
                 throw new Error('Defina a associacao ativa antes de solicitar pagamento.');
+            }
+
+            if (!hasOperator || !hasPermission('TREASURY_MANAGE')) {
+                throw new Error('Usuario operador sem permissao para solicitar pagamentos.');
             }
 
             const payment = await api.createPaymentRequest({
@@ -97,6 +113,10 @@ export default function NewPaymentRequestPage() {
         }
     }
 
+    const canReadTreasury = hasPermission('TREASURY_READ');
+    const canManageTreasury = hasPermission('TREASURY_MANAGE');
+    const formLocked = !hasAssociation || loadingPermissions || !hasOperator || !canReadTreasury || !canManageTreasury;
+
     return (
         <InstitutionalLayout title="Novo pagamento" activePath="/tesouraria/pagamentos">
             <div className="mx-auto max-w-5xl space-y-6">
@@ -121,8 +141,12 @@ export default function NewPaymentRequestPage() {
                 )}
 
                 {!hasAssociation && <AssociationRequired message="Informe a associacao ativa no topo antes de solicitar pagamento." />}
+                {hasAssociation && !loadingPermissions && (!hasOperator || !canReadTreasury || !canManageTreasury) && (
+                    <PermissionRequired message="Selecione um operador com permissao para ler e gerenciar a tesouraria." />
+                )}
 
                 <form onSubmit={handleSubmit} className="rounded-lg border border-slate-800 bg-slate-900 p-6">
+                    <fieldset disabled={formLocked || saving} className="disabled:opacity-70">
                     <div className="grid gap-5 md:grid-cols-2">
                         <div className="md:col-span-2">
                             <label className={labelClass}>Associacao</label>
@@ -204,8 +228,10 @@ export default function NewPaymentRequestPage() {
                         </div>
                     </div>
 
+                    </fieldset>
+
                     <div className="mt-6 flex justify-end border-t border-slate-800 pt-6">
-                        <button type="submit" disabled={saving || !hasAssociation} className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60">
+                        <button type="submit" disabled={saving || formLocked} className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60">
                             <Save size={17} />
                             {saving ? 'Salvando...' : 'Salvar solicitacao'}
                         </button>

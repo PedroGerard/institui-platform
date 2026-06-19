@@ -3,6 +3,8 @@
 import { FormEvent, use, useEffect, useState } from 'react';
 import { AccountabilityProjectNav } from '@/components/accountability/AccountabilityProjectNav';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
+import { PermissionRequired } from '@/components/layout/PermissionRequired';
+import { useActiveOperator } from '@/contexts/ActiveOperatorContext';
 import { api } from '@/services/api';
 import { AccountabilityDocumentDTO, DocumentType } from '@/types/dtos';
 import { documentTypeLabels, formatDate } from '@/lib/institutional';
@@ -14,6 +16,7 @@ const documentTypes = Object.keys(documentTypeLabels) as DocumentType[];
 
 export default function AccountabilityDocumentsPage({ params }: { params: Promise<{ id: string }> }) {
     const { id: projectId } = use(params);
+    const { hasOperator, hasPermission, loadingPermissions } = useActiveOperator();
     const [documents, setDocuments] = useState<AccountabilityDocumentDTO[]>([]);
     const [type, setType] = useState<DocumentType>('REX');
     const [fileUrl, setFileUrl] = useState('');
@@ -23,6 +26,15 @@ export default function AccountabilityDocumentsPage({ params }: { params: Promis
     const [message, setMessage] = useState<string | null>(null);
 
     async function loadDocuments() {
+        if (loadingPermissions) return;
+
+        if (!hasOperator || !hasPermission('ACCOUNTABILITY_READ')) {
+            setDocuments([]);
+            setLoading(false);
+            setError('Usuario operador sem permissao para consultar documentos da prestacao.');
+            return;
+        }
+
         try {
             setLoading(true);
             setError(null);
@@ -41,6 +53,10 @@ export default function AccountabilityDocumentsPage({ params }: { params: Promis
         setError(null);
 
         try {
+            if (!hasOperator || !hasPermission('ACCOUNTABILITY_MANAGE')) {
+                throw new Error('Usuario operador sem permissao para anexar documentos.');
+            }
+
             await api.uploadAccountabilityDocument(projectId, { type, fileUrl });
             setFileUrl('');
             setMessage('Documento anexado.');
@@ -54,6 +70,10 @@ export default function AccountabilityDocumentsPage({ params }: { params: Promis
 
     async function validateDocument(documentId: string, validated: boolean) {
         try {
+            if (!hasOperator || !hasPermission('ACCOUNTABILITY_MANAGE')) {
+                throw new Error('Usuario operador sem permissao para validar documentos.');
+            }
+
             setMessage(null);
             setError(null);
             await api.validateAccountabilityDocument(documentId, validated);
@@ -66,12 +86,23 @@ export default function AccountabilityDocumentsPage({ params }: { params: Promis
 
     useEffect(() => {
         loadDocuments();
-    }, [projectId]);
+    }, [projectId, hasOperator, hasPermission, loadingPermissions]);
+
+    const canReadAccountability = hasPermission('ACCOUNTABILITY_READ');
+    const canManageAccountability = hasPermission('ACCOUNTABILITY_MANAGE');
+    const formLocked = loadingPermissions || !hasOperator || !canManageAccountability;
 
     return (
         <InstitutionalLayout title="Documentos da prestacao" activePath="/prestacao-contas">
             <div className="space-y-6">
                 <AccountabilityProjectNav projectId={projectId} active="/documentos" />
+
+                {!loadingPermissions && (!hasOperator || !canReadAccountability) && (
+                    <PermissionRequired message="Selecione um operador com permissao de leitura de prestacao de contas." />
+                )}
+                {!loadingPermissions && hasOperator && canReadAccountability && !canManageAccountability && (
+                    <PermissionRequired message="O operador atual pode consultar, mas nao pode anexar ou validar documentos." />
+                )}
 
                 {(error || message) && (
                     <div className={`flex items-center gap-3 rounded-lg border p-4 text-sm ${message
@@ -95,7 +126,7 @@ export default function AccountabilityDocumentsPage({ params }: { params: Promis
                             <label className={labelClass}>Arquivo ou URL</label>
                             <input required value={fileUrl} onChange={(event) => setFileUrl(event.target.value)} placeholder="/uploads/nota-fiscal.pdf" className={inputClass} />
                         </div>
-                        <button type="submit" disabled={saving} className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60">
+                        <button type="submit" disabled={saving || formLocked} className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60">
                             <FileUp size={17} />
                             {saving ? 'Anexando...' : 'Anexar'}
                         </button>
@@ -123,7 +154,7 @@ export default function AccountabilityDocumentsPage({ params }: { params: Promis
                                         <a href={document.fileUrl} className="truncate text-blue-300 hover:text-blue-200">{document.fileUrl}</a>
                                         <span className="text-slate-300">{formatDate(document.uploadedAt)}</span>
                                         <span className={document.validated ? 'text-emerald-300' : 'text-amber-300'}>{document.validated ? 'Validado' : 'Nao validado'}</span>
-                                        <button onClick={() => validateDocument(document.id, !document.validated)} className="ml-auto inline-flex items-center gap-2 rounded-lg border border-slate-700 px-3 py-2 text-xs font-medium text-slate-200 hover:bg-slate-800">
+                                        <button disabled={formLocked} onClick={() => validateDocument(document.id, !document.validated)} className="ml-auto inline-flex items-center gap-2 rounded-lg border border-slate-700 px-3 py-2 text-xs font-medium text-slate-200 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60">
                                             <RefreshCw size={14} />
                                             {document.validated ? 'Reabrir' : 'Validar'}
                                         </button>

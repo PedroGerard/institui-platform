@@ -6,7 +6,9 @@ import { useRouter } from 'next/navigation';
 import { AlertCircle, ArrowLeft, Save } from 'lucide-react';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
 import { AssociationRequired } from '@/components/layout/AssociationRequired';
+import { PermissionRequired } from '@/components/layout/PermissionRequired';
 import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
+import { useActiveOperator } from '@/contexts/ActiveOperatorContext';
 import { api } from '@/services/api';
 import { ProcurementJudgmentCriterion } from '@/types/dtos';
 import { procurementJudgmentCriterionLabels } from '@/lib/institutional';
@@ -17,6 +19,7 @@ const labelClass = "mb-2 block text-xs font-semibold uppercase text-slate-500";
 export default function NewProcurementProcessPage() {
     const router = useRouter();
     const { associationId, hasAssociation } = useActiveAssociation();
+    const { hasOperator, hasPermission, loadingPermissions } = useActiveOperator();
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [form, setForm] = useState({
@@ -45,6 +48,10 @@ export default function NewProcurementProcessPage() {
                 throw new Error('Defina a associacao ativa antes de criar um processo de compra.');
             }
 
+            if (!hasOperator || !hasPermission('PROCUREMENT_MANAGE')) {
+                throw new Error('Usuario operador sem permissao para criar processos de compra.');
+            }
+
             const process = await api.createProcurementProcess({
                 associationId,
                 ...form,
@@ -67,6 +74,9 @@ export default function NewProcurementProcessPage() {
         }
     }
 
+    const canManageProcurement = hasPermission('PROCUREMENT_MANAGE');
+    const formLocked = !hasAssociation || loadingPermissions || !hasOperator || !canManageProcurement;
+
     return (
         <InstitutionalLayout title="Novo Processo de Compra" activePath="/compras">
             <div className="mx-auto max-w-5xl space-y-6">
@@ -88,8 +98,12 @@ export default function NewProcurementProcessPage() {
                 )}
 
                 {!hasAssociation && <AssociationRequired message="Informe a associacao ativa no topo antes de criar um processo de compra." />}
+                {hasAssociation && !loadingPermissions && (!hasOperator || !canManageProcurement) && (
+                    <PermissionRequired message="Selecione um operador com permissao para gerenciar compras MROSC." />
+                )}
 
                 <form onSubmit={handleSubmit} className="space-y-6 rounded-lg border border-slate-800 bg-slate-900 p-6">
+                    <fieldset disabled={formLocked || saving} className="space-y-6 disabled:opacity-70">
                     <div className="grid gap-4 md:grid-cols-2">
                         <div>
                             <label className={labelClass}>Titulo do processo</label>
@@ -157,10 +171,12 @@ export default function NewProcurementProcessPage() {
                         </div>
                     </div>
 
+                    </fieldset>
+
                     <div className="flex justify-end border-t border-slate-800 pt-6">
                         <button
                             type="submit"
-                            disabled={saving || !hasAssociation}
+                            disabled={saving || formLocked}
                             className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                             <Save size={16} />
