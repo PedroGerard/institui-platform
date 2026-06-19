@@ -4,7 +4,9 @@ import { FormEvent, use, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
 import { AssociationRequired } from '@/components/layout/AssociationRequired';
+import { PermissionRequired } from '@/components/layout/PermissionRequired';
 import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
+import { useActiveOperator } from '@/contexts/ActiveOperatorContext';
 import { api } from '@/services/api';
 import { GovernanceBodyDTO, GovernanceBodyMemberRole, MemberDTO } from '@/types/dtos';
 import { formatDate, governanceBodyCategoryLabels, governanceBodyMemberRoleLabels } from '@/lib/institutional';
@@ -16,6 +18,7 @@ const labelClass = "mb-2 block text-xs font-semibold uppercase text-slate-500";
 export default function GovernanceBodyDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const { associationId, hasAssociation } = useActiveAssociation();
+    const { hasOperator, hasPermission, loadingPermissions } = useActiveOperator();
     const [body, setBody] = useState<GovernanceBodyDTO | null>(null);
     const [members, setMembers] = useState<MemberDTO[]>([]);
     const [loading, setLoading] = useState(true);
@@ -39,6 +42,16 @@ export default function GovernanceBodyDetailPage({ params }: { params: Promise<{
     );
 
     async function loadData() {
+        if (loadingPermissions) return;
+
+        if (!hasOperator || !hasPermission('GOVERNANCE_READ') || !hasPermission('MEMBERS_READ')) {
+            setBody(null);
+            setMembers([]);
+            setLoading(false);
+            setError('Usuario operador sem permissao para consultar orgaos e membros.');
+            return;
+        }
+
         try {
             setLoading(true);
             setError(null);
@@ -55,7 +68,7 @@ export default function GovernanceBodyDetailPage({ params }: { params: Promise<{
 
     useEffect(() => {
         loadData();
-    }, [associationId, id]);
+    }, [associationId, id, hasOperator, hasPermission, loadingPermissions]);
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -64,6 +77,10 @@ export default function GovernanceBodyDetailPage({ params }: { params: Promise<{
         setSuccess(null);
 
         try {
+            if (!hasOperator || !hasPermission('GOVERNANCE_MANAGE')) {
+                throw new Error('Usuario operador sem permissao para alterar orgaos de governanca.');
+            }
+
             await api.addGovernanceBodyMember(id, {
                 memberId: formData.memberId || undefined,
                 externalName: formData.memberId ? undefined : formData.externalName || undefined,
@@ -93,6 +110,10 @@ export default function GovernanceBodyDetailPage({ params }: { params: Promise<{
 
     async function closeMember(memberId: string) {
         try {
+            if (!hasOperator || !hasPermission('GOVERNANCE_MANAGE')) {
+                throw new Error('Usuario operador sem permissao para encerrar participacoes em orgaos.');
+            }
+
             setClosingId(memberId);
             setError(null);
             setSuccess(null);
@@ -105,6 +126,10 @@ export default function GovernanceBodyDetailPage({ params }: { params: Promise<{
             setClosingId(null);
         }
     }
+
+    const canReadGovernanceBody = hasPermission('GOVERNANCE_READ') && hasPermission('MEMBERS_READ');
+    const canManageGovernance = hasPermission('GOVERNANCE_MANAGE');
+    const managementLocked = loadingPermissions || !hasOperator || !canManageGovernance;
 
     return (
         <InstitutionalLayout title="Orgao de governanca" activePath="/orgaos">
@@ -129,6 +154,12 @@ export default function GovernanceBodyDetailPage({ params }: { params: Promise<{
                 )}
 
                 {!hasAssociation && <AssociationRequired message="A tela usa a associacao do orgao para carregar membros, mas defina a associacao ativa no topo para operar a governanca com consistencia." />}
+                {!loadingPermissions && (!hasOperator || !canReadGovernanceBody) && (
+                    <PermissionRequired message="Selecione um operador com permissao de leitura de governanca e membros." />
+                )}
+                {!loadingPermissions && hasOperator && canReadGovernanceBody && !canManageGovernance && (
+                    <PermissionRequired message="O operador atual pode consultar, mas nao pode alterar integrantes de orgaos." />
+                )}
 
                 {loading ? (
                     <div className="rounded-lg border border-slate-800 bg-slate-900 p-8 text-center text-sm text-slate-400">Carregando orgao...</div>
@@ -188,7 +219,7 @@ export default function GovernanceBodyDetailPage({ params }: { params: Promise<{
                                                             <button
                                                                 type="button"
                                                                 onClick={() => closeMember(item.id)}
-                                                                disabled={closingId === item.id}
+                                                                disabled={closingId === item.id || managementLocked}
                                                                 className="inline-flex items-center gap-2 rounded-lg border border-slate-700 px-3 py-2 text-xs font-medium text-slate-200 hover:bg-slate-800 disabled:opacity-60"
                                                             >
                                                                 <XCircle size={14} />
@@ -285,7 +316,7 @@ export default function GovernanceBodyDetailPage({ params }: { params: Promise<{
                                 <div className="mt-6 border-t border-slate-800 pt-6">
                                     <button
                                         type="submit"
-                                        disabled={saving}
+                                        disabled={saving || managementLocked}
                                         className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
                                     >
                                         <Plus size={17} />

@@ -4,7 +4,9 @@ import { FormEvent, use, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
 import { AssociationRequired } from '@/components/layout/AssociationRequired';
+import { PermissionRequired } from '@/components/layout/PermissionRequired';
 import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
+import { useActiveOperator } from '@/contexts/ActiveOperatorContext';
 import { api } from '@/services/api';
 import { ElectionDTO, ElectionSlateDTO, GovernanceRole, MemberDTO } from '@/types/dtos';
 import { electionSlateStatusLabels, electionStatusLabels, formatDate, governanceRoleLabels, memberStatusLabels } from '@/lib/institutional';
@@ -16,6 +18,7 @@ const labelClass = "mb-2 block text-xs font-semibold uppercase text-slate-500";
 export default function ElectionDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const { associationId, hasAssociation } = useActiveAssociation();
+    const { hasOperator, hasPermission, loadingPermissions } = useActiveOperator();
     const [election, setElection] = useState<ElectionDTO | null>(null);
     const [members, setMembers] = useState<MemberDTO[]>([]);
     const [loading, setLoading] = useState(true);
@@ -39,6 +42,16 @@ export default function ElectionDetailPage({ params }: { params: Promise<{ id: s
     const electedSlate = election?.slates.find((slate) => slate.status === 'ELECTED');
 
     async function loadData() {
+        if (loadingPermissions) return;
+
+        if (!hasOperator || !hasPermission('GOVERNANCE_READ') || !hasPermission('MEMBERS_READ')) {
+            setElection(null);
+            setMembers([]);
+            setLoading(false);
+            setError('Usuario operador sem permissao para consultar eleicoes e membros.');
+            return;
+        }
+
         try {
             setLoading(true);
             setError(null);
@@ -60,7 +73,7 @@ export default function ElectionDetailPage({ params }: { params: Promise<{ id: s
 
     useEffect(() => {
         loadData();
-    }, [associationId, id]);
+    }, [associationId, id, hasOperator, hasPermission, loadingPermissions]);
 
     async function addSlate(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -69,6 +82,10 @@ export default function ElectionDetailPage({ params }: { params: Promise<{ id: s
         setSuccess(null);
 
         try {
+            if (!hasOperator || !hasPermission('GOVERNANCE_MANAGE')) {
+                throw new Error('Usuario operador sem permissao para registrar chapas.');
+            }
+
             const slate = await api.addElectionSlate(id, {
                 name: slateForm.name,
                 number: slateForm.number || undefined
@@ -91,6 +108,10 @@ export default function ElectionDetailPage({ params }: { params: Promise<{ id: s
         setSuccess(null);
 
         try {
+            if (!hasOperator || !hasPermission('GOVERNANCE_MANAGE')) {
+                throw new Error('Usuario operador sem permissao para incluir candidatos.');
+            }
+
             await api.addElectionCandidate(candidateForm.slateId, {
                 memberId: candidateForm.memberId,
                 role: candidateForm.role,
@@ -118,6 +139,10 @@ export default function ElectionDetailPage({ params }: { params: Promise<{ id: s
         setSuccess(null);
 
         try {
+            if (!hasOperator || !hasPermission('GOVERNANCE_MANAGE')) {
+                throw new Error('Usuario operador sem permissao para homologar chapas.');
+            }
+
             await api.approveElection(id, {
                 slateId: slate.id,
                 votes: votesBySlate[slate.id] ? Number(votesBySlate[slate.id]) : undefined
@@ -137,6 +162,10 @@ export default function ElectionDetailPage({ params }: { params: Promise<{ id: s
         setSuccess(null);
 
         try {
+            if (!hasOperator || !hasPermission('GOVERNANCE_MANAGE')) {
+                throw new Error('Usuario operador sem permissao para gerar mandatos.');
+            }
+
             const mandates = await api.createElectionMandates(id);
             setSuccess(`${mandates.length} mandatos gerados a partir da eleicao.`);
             await loadData();
@@ -146,6 +175,10 @@ export default function ElectionDetailPage({ params }: { params: Promise<{ id: s
             setSaving(null);
         }
     }
+
+    const canReadElection = hasPermission('GOVERNANCE_READ') && hasPermission('MEMBERS_READ');
+    const canManageGovernance = hasPermission('GOVERNANCE_MANAGE');
+    const managementLocked = loadingPermissions || !hasOperator || !canManageGovernance;
 
     return (
         <InstitutionalLayout title="Eleicao" activePath="/eleicoes">
@@ -170,6 +203,12 @@ export default function ElectionDetailPage({ params }: { params: Promise<{ id: s
                 )}
 
                 {!hasAssociation && <AssociationRequired message="A tela usa a associacao da eleicao para carregar membros, mas defina a associacao ativa no topo para operar eleicoes e mandatos com consistencia." />}
+                {!loadingPermissions && (!hasOperator || !canReadElection) && (
+                    <PermissionRequired message="Selecione um operador com permissao de leitura de governanca e membros." />
+                )}
+                {!loadingPermissions && hasOperator && canReadElection && !canManageGovernance && (
+                    <PermissionRequired message="O operador atual pode consultar, mas nao pode alterar eleicoes." />
+                )}
 
                 {loading ? (
                     <div className="rounded-lg border border-slate-800 bg-slate-900 p-8 text-center text-sm text-slate-400">Carregando eleicao...</div>
@@ -226,7 +265,7 @@ export default function ElectionDetailPage({ params }: { params: Promise<{ id: s
                                         />
                                     </div>
                                 </div>
-                                <button type="submit" disabled={saving === 'slate' || election.status === 'MANDATES_CREATED'} className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60">
+                                <button type="submit" disabled={saving === 'slate' || election.status === 'MANDATES_CREATED' || managementLocked} className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60">
                                     <Plus size={16} />
                                     Adicionar chapa
                                 </button>
@@ -297,7 +336,7 @@ export default function ElectionDetailPage({ params }: { params: Promise<{ id: s
                                         />
                                     </div>
                                 </div>
-                                <button type="submit" disabled={saving === 'candidate' || election.slates.length === 0 || election.status === 'MANDATES_CREATED'} className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60">
+                                <button type="submit" disabled={saving === 'candidate' || election.slates.length === 0 || election.status === 'MANDATES_CREATED' || managementLocked} className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60">
                                     <Plus size={16} />
                                     Adicionar candidato
                                 </button>
@@ -333,7 +372,7 @@ export default function ElectionDetailPage({ params }: { params: Promise<{ id: s
                                             <button
                                                 type="button"
                                                 onClick={() => approveSlate(slate)}
-                                                disabled={saving === `approve-${slate.id}` || slate.candidates.length === 0 || election.status === 'MANDATES_CREATED'}
+                                                disabled={saving === `approve-${slate.id}` || slate.candidates.length === 0 || election.status === 'MANDATES_CREATED' || managementLocked}
                                                 className="inline-flex items-center gap-2 rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
                                             >
                                                 <CheckCircle size={16} />
@@ -380,7 +419,7 @@ export default function ElectionDetailPage({ params }: { params: Promise<{ id: s
                                 <button
                                     type="button"
                                     onClick={createMandates}
-                                    disabled={saving === 'mandates' || election.status !== 'APPROVED'}
+                                    disabled={saving === 'mandates' || election.status !== 'APPROVED' || managementLocked}
                                     className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
                                 >
                                     <Save size={16} />

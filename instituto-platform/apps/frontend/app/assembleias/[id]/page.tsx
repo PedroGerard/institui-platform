@@ -4,7 +4,9 @@ import { FormEvent, use, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
 import { AssociationRequired } from '@/components/layout/AssociationRequired';
+import { PermissionRequired } from '@/components/layout/PermissionRequired';
 import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
+import { useActiveOperator } from '@/contexts/ActiveOperatorContext';
 import { api } from '@/services/api';
 import { AssemblyDTO, GeneratedDocumentDTO, MemberDTO } from '@/types/dtos';
 import { assemblyStatusLabels, assemblyTypeLabels, formatDate } from '@/lib/institutional';
@@ -16,6 +18,7 @@ const labelClass = "mb-2 block text-xs font-semibold uppercase text-slate-500";
 export default function AssemblyDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const { associationId, hasAssociation } = useActiveAssociation();
+    const { hasOperator, hasPermission, loadingPermissions } = useActiveOperator();
     const [assembly, setAssembly] = useState<AssemblyDTO | null>(null);
     const [members, setMembers] = useState<MemberDTO[]>([]);
     const [loading, setLoading] = useState(true);
@@ -48,6 +51,16 @@ export default function AssemblyDetailPage({ params }: { params: Promise<{ id: s
     const activeMembers = useMemo(() => members.filter((member) => member.status === 'ACTIVE'), [members]);
 
     async function loadData() {
+        if (loadingPermissions) return;
+
+        if (!hasOperator || !hasPermission('GOVERNANCE_READ') || !hasPermission('MEMBERS_READ')) {
+            setAssembly(null);
+            setMembers([]);
+            setLoading(false);
+            setError('Usuario operador sem permissao para consultar assembleias e membros.');
+            return;
+        }
+
         try {
             setLoading(true);
             setError(null);
@@ -73,7 +86,7 @@ export default function AssemblyDetailPage({ params }: { params: Promise<{ id: s
 
     useEffect(() => {
         loadData();
-    }, [associationId, id]);
+    }, [associationId, id, hasOperator, hasPermission, loadingPermissions]);
 
     async function addAttendance(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -82,6 +95,10 @@ export default function AssemblyDetailPage({ params }: { params: Promise<{ id: s
         setSuccess(null);
 
         try {
+            if (!hasOperator || !hasPermission('GOVERNANCE_MANAGE')) {
+                throw new Error('Usuario operador sem permissao para registrar presencas em assembleias.');
+            }
+
             await api.addAssemblyAttendance(id, {
                 memberId: attendanceForm.memberId || undefined,
                 externalName: attendanceForm.memberId ? undefined : attendanceForm.externalName || undefined,
@@ -106,6 +123,10 @@ export default function AssemblyDetailPage({ params }: { params: Promise<{ id: s
         setSuccess(null);
 
         try {
+            if (!hasOperator || !hasPermission('GOVERNANCE_MANAGE')) {
+                throw new Error('Usuario operador sem permissao para validar assembleias.');
+            }
+
             await api.holdAssembly(id, {
                 heldAt: new Date().toISOString(),
                 heldCallNumber: holdForm.heldCallNumber,
@@ -130,6 +151,10 @@ export default function AssemblyDetailPage({ params }: { params: Promise<{ id: s
         setSuccess(null);
 
         try {
+            if (!hasOperator || !hasPermission('GOVERNANCE_MANAGE')) {
+                throw new Error('Usuario operador sem permissao para registrar deliberacoes.');
+            }
+
             await api.addAssemblyDeliberation(id, {
                 agendaItem: deliberationForm.agendaItem,
                 decision: deliberationForm.decision,
@@ -155,6 +180,10 @@ export default function AssemblyDetailPage({ params }: { params: Promise<{ id: s
         setSuccess(null);
 
         try {
+            if (!hasOperator || !hasPermission('GOVERNANCE_MANAGE')) {
+                throw new Error('Usuario operador sem permissao para registrar atas.');
+            }
+
             await api.registerMinutes(id, minutesContent);
             setSuccess('Ata registrada.');
             await loadData();
@@ -167,6 +196,10 @@ export default function AssemblyDetailPage({ params }: { params: Promise<{ id: s
 
     async function generate(kind: 'minute' | 'presence') {
         try {
+            if (!hasOperator || !hasPermission('DOCUMENTS_GENERATE')) {
+                throw new Error('Usuario operador sem permissao para gerar documentos oficiais.');
+            }
+
             setSaving(kind);
             setError(null);
             setDocument(kind === 'minute'
@@ -179,6 +212,12 @@ export default function AssemblyDetailPage({ params }: { params: Promise<{ id: s
             setSaving(null);
         }
     }
+
+    const canReadAssembly = hasPermission('GOVERNANCE_READ') && hasPermission('MEMBERS_READ');
+    const canManageGovernance = hasPermission('GOVERNANCE_MANAGE');
+    const canGenerateDocuments = hasPermission('DOCUMENTS_GENERATE');
+    const managementLocked = loadingPermissions || !hasOperator || !canManageGovernance;
+    const documentLocked = loadingPermissions || !hasOperator || !canGenerateDocuments;
 
     return (
         <InstitutionalLayout title="Assembleia" activePath="/assembleias">
@@ -213,6 +252,12 @@ export default function AssemblyDetailPage({ params }: { params: Promise<{ id: s
                 )}
 
                 {!hasAssociation && <AssociationRequired message="A tela usa a associacao da assembleia para carregar os membros, mas defina a associacao ativa no topo para operar o modulo com consistencia." />}
+                {!loadingPermissions && (!hasOperator || !canReadAssembly) && (
+                    <PermissionRequired message="Selecione um operador com permissao de leitura de governanca e membros." />
+                )}
+                {!loadingPermissions && hasOperator && canReadAssembly && !canManageGovernance && (
+                    <PermissionRequired message="O operador atual pode consultar, mas nao pode alterar assembleias." />
+                )}
 
                 {loading ? (
                     <div className="rounded-lg border border-slate-800 bg-slate-900 p-8 text-center text-sm text-slate-400">Carregando assembleia...</div>
@@ -261,7 +306,7 @@ export default function AssemblyDetailPage({ params }: { params: Promise<{ id: s
                                         <label className={labelClass}>Nome externo</label>
                                         <input value={attendanceForm.externalName} onChange={(event) => setAttendanceForm({ ...attendanceForm, externalName: event.target.value })} className={inputClass} disabled={Boolean(attendanceForm.memberId)} />
                                     </div>
-                                    <button type="submit" disabled={saving === 'attendance'} className="mt-6 inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60">
+                                    <button type="submit" disabled={saving === 'attendance' || managementLocked} className="mt-6 inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60">
                                         <Plus size={16} />
                                         Adicionar
                                     </button>
@@ -314,7 +359,7 @@ export default function AssemblyDetailPage({ params }: { params: Promise<{ id: s
                                         </select>
                                     </div>
                                 </div>
-                                <button type="submit" disabled={saving === 'hold' || assembly.status !== 'CALLED'} className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60">
+                                <button type="submit" disabled={saving === 'hold' || assembly.status !== 'CALLED' || managementLocked} className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60">
                                     <Save size={16} />
                                     Validar realizacao
                                 </button>
@@ -352,7 +397,7 @@ export default function AssemblyDetailPage({ params }: { params: Promise<{ id: s
                                         <div><label className={labelClass}>Abstencoes</label><input type="number" min={0} value={deliberationForm.abstentions} onChange={(event) => setDeliberationForm({ ...deliberationForm, abstentions: event.target.value })} className={inputClass} /></div>
                                     </div>
                                 </div>
-                                <button type="submit" disabled={saving === 'deliberation'} className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60">
+                                <button type="submit" disabled={saving === 'deliberation' || managementLocked} className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60">
                                     <Plus size={16} />
                                     Registrar deliberacao
                                 </button>
@@ -377,15 +422,15 @@ export default function AssemblyDetailPage({ params }: { params: Promise<{ id: s
                                 <label className={labelClass}>Teor da ata</label>
                                 <textarea required value={minutesContent} onChange={(event) => setMinutesContent(event.target.value)} className={`${inputClass} min-h-64 font-mono`} />
                                 <div className="mt-5 grid gap-3 md:grid-cols-3">
-                                    <button type="submit" disabled={saving === 'minutes' || assembly.status === 'CALLED'} className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60">
+                                    <button type="submit" disabled={saving === 'minutes' || assembly.status === 'CALLED' || managementLocked} className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60">
                                         <Save size={16} />
                                         Registrar ata
                                     </button>
-                                    <button type="button" onClick={() => generate('minute')} disabled={Boolean(saving)} className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-700 px-4 py-2.5 text-sm font-medium text-slate-200 hover:bg-slate-800 disabled:opacity-60">
+                                    <button type="button" onClick={() => generate('minute')} disabled={Boolean(saving) || documentLocked} className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-700 px-4 py-2.5 text-sm font-medium text-slate-200 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60">
                                         <FileText size={16} />
                                         Gerar ata
                                     </button>
-                                    <button type="button" onClick={() => generate('presence')} disabled={Boolean(saving)} className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-700 px-4 py-2.5 text-sm font-medium text-slate-200 hover:bg-slate-800 disabled:opacity-60">
+                                    <button type="button" onClick={() => generate('presence')} disabled={Boolean(saving) || documentLocked} className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-700 px-4 py-2.5 text-sm font-medium text-slate-200 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60">
                                         <ListChecks size={16} />
                                         Presenca
                                     </button>

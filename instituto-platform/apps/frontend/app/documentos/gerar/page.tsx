@@ -4,7 +4,9 @@ import { FormEvent, useState } from 'react';
 import Link from 'next/link';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
 import { AssociationRequired } from '@/components/layout/AssociationRequired';
+import { PermissionRequired } from '@/components/layout/PermissionRequired';
 import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
+import { useActiveOperator } from '@/contexts/ActiveOperatorContext';
 import { api } from '@/services/api';
 import { GeneratedDocumentDTO, GeneratedDocumentType } from '@/types/dtos';
 import { generatedDocumentTypeLabels } from '@/lib/institutional';
@@ -16,6 +18,7 @@ const documentTypes = Object.keys(generatedDocumentTypeLabels) as GeneratedDocum
 
 export default function GenerateDocumentPage() {
     const { associationId, hasAssociation } = useActiveAssociation();
+    const { hasOperator, hasPermission, loadingPermissions } = useActiveOperator();
     const [type, setType] = useState<GeneratedDocumentType>('ATA');
     const [referenceId, setReferenceId] = useState('');
     const [title, setTitle] = useState('Oficio institucional');
@@ -33,8 +36,12 @@ export default function GenerateDocumentPage() {
         setGeneratedDocument(null);
 
         try {
-            if (!associationId && (type === 'ESTATUTO' || type === 'OFICIO')) {
-                throw new Error('Defina a associacao ativa antes de gerar este documento.');
+            if (!associationId) {
+                throw new Error('Defina a associacao ativa antes de gerar documentos.');
+            }
+
+            if (!hasOperator || !hasPermission('DOCUMENTS_GENERATE')) {
+                throw new Error('Usuario operador sem permissao para gerar documentos oficiais.');
             }
 
             let document: GeneratedDocumentDTO;
@@ -69,6 +76,9 @@ export default function GenerateDocumentPage() {
         }
     }
 
+    const canGenerateDocuments = hasPermission('DOCUMENTS_GENERATE');
+    const formLocked = !hasAssociation || loadingPermissions || !hasOperator || !canGenerateDocuments;
+
     return (
         <InstitutionalLayout title="Gerar documento" activePath="/documentos/gerar">
             <div className="mx-auto max-w-4xl space-y-6">
@@ -102,10 +112,13 @@ export default function GenerateDocumentPage() {
                     </div>
                 )}
 
-                {!hasAssociation && <AssociationRequired message="Informe a associacao ativa no topo para gerar estatuto consolidado ou oficio." />}
+                {!hasAssociation && <AssociationRequired message="Informe a associacao ativa no topo para gerar documentos oficiais." />}
+                {hasAssociation && !loadingPermissions && (!hasOperator || !canGenerateDocuments) && (
+                    <PermissionRequired message="Selecione um operador com permissao para gerar documentos oficiais." />
+                )}
 
                 <form onSubmit={handleSubmit} className="rounded-lg border border-slate-800 bg-slate-900 p-6">
-                    <div className="grid gap-5 md:grid-cols-2">
+                    <fieldset disabled={formLocked || saving} className="grid gap-5 disabled:opacity-70 md:grid-cols-2">
                         <div>
                             <label className={labelClass}>Tipo</label>
                             <select
@@ -206,7 +219,7 @@ export default function GenerateDocumentPage() {
                                 </div>
                             </>
                         )}
-                    </div>
+                    </fieldset>
 
                     <div className="mt-6 flex flex-col gap-3 border-t border-slate-800 pt-6 sm:flex-row sm:items-center sm:justify-between">
                         <Link href="/documentos/gerados" className="text-sm text-slate-400 hover:text-white">
@@ -214,7 +227,7 @@ export default function GenerateDocumentPage() {
                         </Link>
                         <button
                             type="submit"
-                            disabled={saving || (!hasAssociation && (type === 'ESTATUTO' || type === 'OFICIO'))}
+                            disabled={saving || formLocked}
                             className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                             <FilePlus size={17} />

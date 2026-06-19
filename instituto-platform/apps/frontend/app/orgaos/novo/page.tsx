@@ -5,7 +5,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
 import { AssociationRequired } from '@/components/layout/AssociationRequired';
+import { PermissionRequired } from '@/components/layout/PermissionRequired';
 import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
+import { useActiveOperator } from '@/contexts/ActiveOperatorContext';
 import { api } from '@/services/api';
 import { GovernanceBodyCategory } from '@/types/dtos';
 import { governanceBodyCategoryLabels } from '@/lib/institutional';
@@ -17,6 +19,7 @@ const labelClass = "mb-2 block text-xs font-semibold uppercase text-slate-500";
 export default function NewGovernanceBodyPage() {
     const router = useRouter();
     const { associationId, hasAssociation } = useActiveAssociation();
+    const { hasOperator, hasPermission, loadingPermissions } = useActiveOperator();
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
@@ -39,6 +42,10 @@ export default function NewGovernanceBodyPage() {
                 throw new Error('Defina a associacao ativa antes de criar um orgao.');
             }
 
+            if (!hasOperator || !hasPermission('GOVERNANCE_MANAGE')) {
+                throw new Error('Usuario operador sem permissao para criar orgaos de governanca.');
+            }
+
             await api.createGovernanceBody({
                 ...formData,
                 associationId,
@@ -52,6 +59,9 @@ export default function NewGovernanceBodyPage() {
             setSaving(false);
         }
     }
+
+    const canManageGovernance = hasPermission('GOVERNANCE_MANAGE');
+    const formLocked = !hasAssociation || loadingPermissions || !hasOperator || !canManageGovernance;
 
     return (
         <InstitutionalLayout title="Novo orgao" activePath="/orgaos/novo">
@@ -77,9 +87,12 @@ export default function NewGovernanceBodyPage() {
                 )}
 
                 {!hasAssociation && <AssociationRequired message="Informe a associacao ativa no topo antes de cadastrar um orgao de governanca." />}
+                {hasAssociation && !loadingPermissions && (!hasOperator || !canManageGovernance) && (
+                    <PermissionRequired message="Selecione um operador com permissao para configurar orgaos de governanca." />
+                )}
 
                 <form onSubmit={handleSubmit} className="rounded-lg border border-slate-800 bg-slate-900 p-6">
-                    <div className="grid gap-5 md:grid-cols-2">
+                    <fieldset disabled={formLocked || saving} className="grid gap-5 disabled:opacity-70 md:grid-cols-2">
                         <div className="md:col-span-2">
                             <label className={labelClass}>Associacao</label>
                             <input
@@ -143,12 +156,12 @@ export default function NewGovernanceBodyPage() {
                             />
                             Orgao ativo
                         </label>
-                    </div>
+                    </fieldset>
 
                     <div className="mt-6 flex justify-end border-t border-slate-800 pt-6">
                         <button
                             type="submit"
-                            disabled={saving || !hasAssociation}
+                            disabled={saving || formLocked}
                             className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                             <Save size={17} />
