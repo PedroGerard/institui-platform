@@ -2,18 +2,22 @@
     "name": "institui-plus-monorepo",
     "private": true,
     "workspaces": [
-        "apps/*",
-        "packages/*"
+        "instituto-platform/apps/*",
+        "instituto-platform/packages/*"
     ],
     "scripts": {
-        "dev:frontend": "npm run dev --workspace=apps/frontend",
-        "dev:api": "npm run dev --workspace=apps/api",
-        "prisma:validate": "prisma validate --schema apps/api/prisma/schema.prisma",
-        "prisma:generate": "prisma generate --schema apps/api/prisma/schema.prisma",
-        "test:api": "npm run test --workspace=apps/api -- --run",
-        "build:api": "npm run build --workspace=apps/api",
-        "build:frontend": "npm run build --workspace=apps/frontend",
-        "build": "npm run build:api && npm run build:frontend",
-        "ci": "npm run prisma:validate && npm run prisma:generate && npm run test:api && npm run build"
+        "dev:frontend": "npm run dev --workspace=instituto-platform/apps/frontend",
+        "dev:api": "npm run dev --workspace=instituto-platform/apps/api",
+        "dev:site": "npm run dev --prefix instituto-incentive-site",
+        "prisma:validate": "prisma validate --schema instituto-platform/apps/api/prisma/schema.prisma",
+        "prisma:generate": "prisma generate --schema instituto-platform/apps/api/prisma/schema.prisma",
+        "seed:pilot": "npm run seed --workspace=instituto-platform/apps/api",
+        "test:api": "npm run test --workspace=instituto-platform/apps/api -- --run",
+        "build:api": "npm run build --workspace=instituto-platform/apps/api",
+        "build:frontend": "npm run build --workspace=instituto-platform/apps/frontend",
+        "build:platform": "npm run build:api && npm run build:frontend",
+        "build:site": "npm run build --prefix instituto-incentive-site",
+        "build": "npm run build:platform && npm run build:site",
+        "ci": "npm run prisma:validate && npm run prisma:generate && npm run test:api && npm run build:platform && npm ci --prefix instituto-incentive-site && npm run build:site"
     }
 }
