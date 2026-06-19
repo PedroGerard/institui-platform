@@ -129,6 +129,12 @@ Rode a API:
 npm run dev:api
 ```
 
+Carregue a base piloto do ERP, quando houver banco configurado:
+
+```bash
+npm run seed:pilot
+```
+
 Rode o site institucional:
 
 ```bash

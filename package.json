@@ -11,6 +11,7 @@
         "dev:site": "npm run dev --prefix instituto-incentive-site",
         "prisma:validate": "prisma validate --schema instituto-platform/apps/api/prisma/schema.prisma",
         "prisma:generate": "prisma generate --schema instituto-platform/apps/api/prisma/schema.prisma",
+        "seed:pilot": "npm run seed --workspace=instituto-platform/apps/api",
         "test:api": "npm run test --workspace=instituto-platform/apps/api -- --run",
         "build:api": "npm run build --workspace=instituto-platform/apps/api",
         "build:frontend": "npm run build --workspace=instituto-platform/apps/frontend",

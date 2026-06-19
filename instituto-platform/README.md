@@ -16,9 +16,27 @@ Executar a partir da raiz do repositorio:
 npm run dev:api
 npm run dev:frontend
 npm run prisma:validate
+npm run seed:pilot
 npm run test:api
 npm run build:platform
 ```
+
+## Carga piloto
+
+Para iniciar um ambiente com a fundacao operacional do Instituto Incentive, rode:
+
+```bash
+npm run seed:pilot
+```
+
+A carga e idempotente e cria/atualiza:
+
+- associacao piloto do Instituto Incentive;
+- usuarios operacionais iniciais;
+- membros, orgaos configuraveis, conselhos e mandatos;
+- assembleia piloto com presenca e deliberacoes;
+- estatuto consolidado piloto;
+- plano de contas, fundos e prestacao de contas inicial.
 
 ## Foco atual
 
