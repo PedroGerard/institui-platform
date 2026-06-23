@@ -168,8 +168,8 @@ export class TreasuryReconciliationService {
         }));
     }
 
-    async reconcile(id: string, input: ReconcileBankStatementEntryDTO, performedById?: string) {
-        const statementEntry = await this.getRawById(id);
+    async reconcile(id: string, input: ReconcileBankStatementEntryDTO, performedById?: string, associationId?: string) {
+        const statementEntry = await this.getRawById(id, associationId);
 
         if (statementEntry.status === BankStatementEntryStatus.IGNORED) {
             throw new Error("Movimento ignorado nao pode ser conciliado.");
@@ -219,8 +219,8 @@ export class TreasuryReconciliationService {
         return this.toDTO(reconciled);
     }
 
-    async unreconcile(id: string, performedById?: string) {
-        const statementEntry = await this.getRawById(id);
+    async unreconcile(id: string, performedById?: string, associationId?: string) {
+        const statementEntry = await this.getRawById(id, associationId);
 
         const updated = await this.prisma.bankStatementEntry.update({
             where: { id },
@@ -248,8 +248,8 @@ export class TreasuryReconciliationService {
         return this.toDTO(updated);
     }
 
-    async ignore(id: string, reason?: string, performedById?: string) {
-        const statementEntry = await this.getRawById(id);
+    async ignore(id: string, reason?: string, performedById?: string, associationId?: string) {
+        const statementEntry = await this.getRawById(id, associationId);
 
         const updated = await this.prisma.bankStatementEntry.update({
             where: { id },
@@ -278,7 +278,7 @@ export class TreasuryReconciliationService {
         return this.toDTO(updated);
     }
 
-    private async getRawById(id: string) {
+    private async getRawById(id: string, associationId?: string) {
         const entry = await this.prisma.bankStatementEntry.findUnique({
             where: { id },
             include: this.defaultInclude()
@@ -286,6 +286,10 @@ export class TreasuryReconciliationService {
 
         if (!entry) {
             throw new Error("Movimento bancario nao encontrado.");
+        }
+
+        if (associationId && entry.associationId !== associationId) {
+            throw new Error("Movimento bancario nao pertence a associacao ativa.");
         }
 
         return entry;

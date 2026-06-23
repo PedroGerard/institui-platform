@@ -4,7 +4,9 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
 import { AssociationRequired } from '@/components/layout/AssociationRequired';
+import { PermissionRequired } from '@/components/layout/PermissionRequired';
 import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
+import { useActiveOperator } from '@/contexts/ActiveOperatorContext';
 import { api } from '@/services/api';
 import { MemberDTO } from '@/types/dtos';
 import { formatDate, memberStatusLabels, memberTypeLabels } from '@/lib/institutional';
@@ -18,6 +20,7 @@ function formatCpf(cpf: string) {
 
 export default function MembersPage() {
     const { associationId, hasAssociation } = useActiveAssociation();
+    const { hasOperator, hasPermission, loadingPermissions } = useActiveOperator();
     const [members, setMembers] = useState<MemberDTO[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -34,6 +37,15 @@ export default function MembersPage() {
             return;
         }
 
+        if (loadingPermissions) return;
+
+        if (!hasOperator || !hasPermission('MEMBERS_READ')) {
+            setMembers([]);
+            setLoading(false);
+            setError('Usuario operador sem permissao para consultar membros.');
+            return;
+        }
+
         try {
             setLoading(true);
             setError(null);
@@ -47,7 +59,10 @@ export default function MembersPage() {
 
     useEffect(() => {
         loadMembers();
-    }, [associationId]);
+    }, [associationId, hasOperator, hasPermission, loadingPermissions]);
+
+    const canReadMembers = hasPermission('MEMBERS_READ');
+    const canManageMembers = hasPermission('MEMBERS_MANAGE');
 
     return (
         <InstitutionalLayout title="Membros" activePath="/membros">
@@ -66,13 +81,20 @@ export default function MembersPage() {
                             <RefreshCw size={16} />
                             Atualizar
                         </button>
-                        <Link
-                            href="/membros/novo"
-                            className="app-button app-button-primary"
-                        >
-                            <Plus size={16} />
-                            Novo membro
-                        </Link>
+                        {canManageMembers ? (
+                            <Link
+                                href="/membros/novo"
+                                className="app-button app-button-primary"
+                            >
+                                <Plus size={16} />
+                                Novo membro
+                            </Link>
+                        ) : (
+                            <span className="app-button app-button-secondary cursor-not-allowed opacity-70">
+                                <Plus size={16} />
+                                Novo membro
+                            </span>
+                        )}
                     </div>
                 </div>
 
@@ -84,6 +106,9 @@ export default function MembersPage() {
                 )}
 
                 {!hasAssociation && <AssociationRequired />}
+                {hasAssociation && !loadingPermissions && (!hasOperator || !canReadMembers) && (
+                    <PermissionRequired message="Selecione um operador com permissao de leitura de membros." />
+                )}
 
                 <div className="app-table">
                     <div className="min-w-[760px]">

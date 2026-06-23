@@ -6,6 +6,7 @@ import { PrismaMemberRepository } from '../../../infrastructure/database/PrismaM
 import { prisma } from '../../../infrastructure/database/prisma';
 import { Member, MemberStatus, MemberType } from '../../../domain/entities/Member';
 import { UniqueEntityID } from '../../../domain/shared/Entity';
+import { requireOperationalPermission } from '../OperationalAuth';
 
 const dateFromString = z.string().transform((value) => new Date(value));
 
@@ -49,6 +50,12 @@ export class MemberController {
     static async register(req: FastifyRequest, reply: FastifyReply) {
         try {
             const data = registerMemberSchema.parse(req.body);
+            const auth = await requireOperationalPermission(req, reply, {
+                permission: 'MEMBERS_MANAGE',
+                associationId: data.associationId
+            });
+            if (!auth) return;
+
             const repo = new PrismaMemberRepository(prisma);
             const useCase = new RegisterMember(repo);
             const member = await useCase.execute({
@@ -66,9 +73,15 @@ export class MemberController {
         try {
             const query = req.query as { associationId?: string };
             const associationId = query.associationId || (req.headers['x-association-id'] as string | undefined);
+            const auth = await requireOperationalPermission(req, reply, {
+                permission: 'MEMBERS_READ',
+                associationId
+            });
+            if (!auth) return;
+
             const repo = new PrismaMemberRepository(prisma);
             const useCase = new ListMembers(repo);
-            const members = await useCase.execute(associationId);
+            const members = await useCase.execute(auth.associationId);
 
             return reply.send(members.map(memberToDTO));
         } catch (err: any) {
@@ -79,10 +92,13 @@ export class MemberController {
     static async getById(req: FastifyRequest, reply: FastifyReply) {
         try {
             const { id } = req.params as { id: string };
+            const auth = await requireOperationalPermission(req, reply, { permission: 'MEMBERS_READ' });
+            if (!auth) return;
+
             const repo = new PrismaMemberRepository(prisma);
             const member = await repo.findById(new UniqueEntityID(id));
 
-            if (!member) {
+            if (!member || member.associationId.toString() !== auth.associationId) {
                 return reply.status(404).send({ error: "Member not found" });
             }
 
@@ -96,10 +112,13 @@ export class MemberController {
         try {
             const { id } = req.params as { id: string };
             const data = updateStatusSchema.parse(req.body);
+            const auth = await requireOperationalPermission(req, reply, { permission: 'MEMBERS_MANAGE' });
+            if (!auth) return;
+
             const repo = new PrismaMemberRepository(prisma);
             const member = await repo.findById(new UniqueEntityID(id));
 
-            if (!member) {
+            if (!member || member.associationId.toString() !== auth.associationId) {
                 return reply.status(404).send({ error: "Member not found" });
             }
 

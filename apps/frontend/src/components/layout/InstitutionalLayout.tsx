@@ -1,9 +1,11 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
-import { BarChart3, Building2, FileText, History, Landmark, LayoutDashboard, LucideIcon, Network, RefreshCcw, Scale, ScrollText, Search, ShoppingCart, TrendingUp, Users, Vote, Wallet } from 'lucide-react';
+import { BarChart3, Building2, FileText, History, Landmark, LayoutDashboard, LucideIcon, Network, RefreshCcw, Scale, ScrollText, Search, ShoppingCart, TrendingUp, UserCheck, UserCog, Users, Vote, Wallet } from 'lucide-react';
 import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
+import { useActiveOperator } from '@/contexts/ActiveOperatorContext';
+import { userRoleLabels } from '@/lib/institutional';
 
 interface SidebarItemProps {
     href: string;
@@ -18,6 +20,7 @@ const navGroups = [
         items: [
             { href: "/dashboard", icon: LayoutDashboard, label: "Visao Geral" },
             { href: "/institucional", icon: Scale, label: "Institucional" },
+            { href: "/usuarios", icon: UserCog, label: "Usuarios" },
             { href: "/orgaos", icon: Network, label: "Orgaos e Comites" },
             { href: "/eleicoes", icon: Vote, label: "Eleicoes" },
             { href: "/mandatos", icon: Users, label: "Mandatos" },
@@ -78,6 +81,146 @@ const NavSection = ({ children }: { children: React.ReactNode }) => (
     </div>
 );
 
+function AssociationSwitcher() {
+    const {
+        associationId,
+        activeAssociation,
+        associations,
+        loadingAssociations,
+        associationError,
+        hasAssociation,
+        setAssociationId,
+        refreshAssociations
+    } = useActiveAssociation();
+
+    const selectedAssociationIsMissing = Boolean(associationId && !activeAssociation);
+    const helperText = loadingAssociations
+        ? 'Carregando entidades cadastradas.'
+        : associationError
+            ? `Nao foi possivel carregar: ${associationError}`
+            : activeAssociation
+                ? `${activeAssociation.cnpjFormatted || activeAssociation.cnpj} - ${activeAssociation.counts?.members || 0} membros`
+                : associations.length === 0
+                    ? 'Cadastre uma entidade na tela Institucional.'
+                    : 'Selecione a OSC que sera operada.';
+
+    return (
+        <section className="w-full min-w-0 rounded-lg border border-slate-800 bg-slate-950 p-2 lg:min-w-[310px]" aria-label="Associacao ativa">
+            <div className="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.08em] text-slate-500">
+                <Building2 size={14} aria-hidden="true" />
+                Associacao ativa
+            </div>
+            <div className="flex gap-2">
+                <select
+                    aria-label="Selecionar associacao ativa"
+                    value={associationId}
+                    disabled={loadingAssociations || associations.length === 0}
+                    onChange={(event) => setAssociationId(event.target.value)}
+                    className="h-9 min-w-0 flex-1 rounded-md border border-slate-800 bg-slate-900 px-3 text-xs text-slate-100 outline-none focus:border-blue-500 disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                    <option value="">Selecionar OSC</option>
+                    {selectedAssociationIsMissing && (
+                        <option value={associationId}>Associacao salva nao encontrada</option>
+                    )}
+                    {associations.map((association) => (
+                        <option key={association.id} value={association.id}>
+                            {association.name}
+                        </option>
+                    ))}
+                </select>
+                <button
+                    type="button"
+                    onClick={refreshAssociations}
+                    disabled={loadingAssociations}
+                    className="flex h-9 w-9 items-center justify-center rounded-md border border-slate-800 bg-slate-900 text-slate-300 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                    aria-label="Atualizar associacoes"
+                    title="Atualizar associacoes"
+                >
+                    <RefreshCcw size={15} aria-hidden="true" className={loadingAssociations ? 'animate-spin' : ''} />
+                </button>
+            </div>
+            <div className={`mt-1 text-[11px] ${hasAssociation ? 'text-slate-400' : 'text-amber-300'}`} aria-live="polite">
+                {helperText}
+            </div>
+        </section>
+    );
+}
+
+function OperatorSwitcher() {
+    const { associationId } = useActiveAssociation();
+    const {
+        operatorId,
+        activeOperator,
+        operators,
+        permissions,
+        loadingOperators,
+        loadingPermissions,
+        operatorError,
+        permissionError,
+        hasOperator,
+        setOperatorId,
+        refreshOperators
+    } = useActiveOperator();
+
+    const selectedOperatorIsMissing = Boolean(operatorId && !activeOperator);
+    const helperText = !associationId
+        ? 'Selecione uma OSC antes do operador.'
+        : loadingOperators
+            ? 'Carregando usuarios da associacao.'
+            : operatorError
+                ? `Nao foi possivel carregar: ${operatorError}`
+                : activeOperator
+                    ? loadingPermissions
+                        ? `${userRoleLabels[activeOperator.role]} - carregando acessos`
+                        : permissionError
+                            ? `${userRoleLabels[activeOperator.role]} - acessos indisponiveis`
+                            : `${userRoleLabels[activeOperator.role]} - ${permissions.length} acessos ativos`
+                    : operators.length === 0
+                        ? 'Cadastre usuarios para registrar auditoria.'
+                        : 'Selecione quem esta operando.';
+
+    return (
+        <section className="w-full min-w-0 rounded-lg border border-slate-800 bg-slate-950 p-2 lg:min-w-[260px]" aria-label="Usuario operador ativo">
+            <div className="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.08em] text-slate-500">
+                <UserCheck size={14} aria-hidden="true" />
+                Operador
+            </div>
+            <div className="flex gap-2">
+                <select
+                    aria-label="Selecionar usuario operador"
+                    value={operatorId}
+                    disabled={!associationId || loadingOperators || operators.length === 0}
+                    onChange={(event) => setOperatorId(event.target.value)}
+                    className="h-9 min-w-0 flex-1 rounded-md border border-slate-800 bg-slate-900 px-3 text-xs text-slate-100 outline-none focus:border-blue-500 disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                    <option value="">Selecionar operador</option>
+                    {selectedOperatorIsMissing && (
+                        <option value={operatorId}>Operador salvo nao encontrado</option>
+                    )}
+                    {operators.map((operator) => (
+                        <option key={operator.id} value={operator.id}>
+                            {operator.name}
+                        </option>
+                    ))}
+                </select>
+                <button
+                    type="button"
+                    onClick={refreshOperators}
+                    disabled={!associationId || loadingOperators}
+                    className="flex h-9 w-9 items-center justify-center rounded-md border border-slate-800 bg-slate-900 text-slate-300 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                    aria-label="Atualizar operadores"
+                    title="Atualizar operadores"
+                >
+                    <RefreshCcw size={15} aria-hidden="true" className={loadingOperators ? 'animate-spin' : ''} />
+                </button>
+            </div>
+            <div className={`mt-1 text-[11px] ${hasOperator ? 'text-slate-400' : 'text-amber-300'}`} aria-live="polite">
+                {helperText}
+            </div>
+        </section>
+    );
+}
+
 export default function InstitutionalLayout({
     children,
     title = "Visao Geral",
@@ -87,16 +230,7 @@ export default function InstitutionalLayout({
     title?: string;
     activePath?: string;
 }) {
-    const { associationId, hasAssociation, setAssociationId } = useActiveAssociation();
-    const [draftAssociationId, setDraftAssociationId] = useState('');
-
-    useEffect(() => {
-        setDraftAssociationId(associationId);
-    }, [associationId]);
-
-    function applyAssociationId() {
-        setAssociationId(draftAssociationId);
-    }
+    const { activeOperator, permissions, loadingPermissions, permissionError } = useActiveOperator();
 
     return (
         <div className="app-shell flex min-h-screen font-sans">
@@ -134,10 +268,20 @@ export default function InstitutionalLayout({
 
                 <div className="app-sidebar-border border-t p-4">
                     <div className="flex items-center gap-3 rounded-lg bg-white/8 px-3 py-3">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-xs font-bold text-[#0c2144]">AD</div>
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-xs font-bold text-[#0c2144]">
+                            {activeOperator?.name.slice(0, 2).toUpperCase() || 'OP'}
+                        </div>
                         <div className="text-sm">
-                            <div className="font-semibold text-white">Usuario operador</div>
-                            <div className="text-xs text-[#b9cbe3]">Perfil operacional</div>
+                            <div className="font-semibold text-white">{activeOperator?.name || 'Usuario operador'}</div>
+                            <div className="text-xs text-[#b9cbe3]">
+                                {activeOperator
+                                    ? loadingPermissions
+                                        ? 'Carregando acessos'
+                                        : permissionError
+                                            ? 'Acessos indisponiveis'
+                                            : `${userRoleLabels[activeOperator.role]} - ${permissions.length} acessos`
+                                    : 'Selecione para auditoria'}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -159,36 +303,14 @@ export default function InstitutionalLayout({
                                 type="search"
                             />
                         </label>
-                        <div className="min-w-[310px] rounded-lg border border-slate-800 bg-slate-950 p-2">
-                            <div className="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.08em] text-slate-500">
-                                <Building2 size={14} aria-hidden="true" />
-                                Associacao ativa
-                            </div>
-                            <div className="flex gap-2">
-                                <input
-                                    aria-label="ID da associacao ativa"
-                                    value={draftAssociationId}
-                                    onChange={(event) => setDraftAssociationId(event.target.value)}
-                                    onKeyDown={(event) => {
-                                        if (event.key === 'Enter') applyAssociationId();
-                                    }}
-                                    className="h-9 min-w-0 flex-1 rounded-md border border-slate-800 bg-slate-900 px-3 text-xs text-slate-100 outline-none focus:border-blue-500"
-                                    placeholder="ID da associacao"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={applyAssociationId}
-                                    className="h-9 rounded-md bg-blue-600 px-3 text-xs font-semibold text-white hover:bg-blue-700"
-                                >
-                                    Aplicar
-                                </button>
-                            </div>
-                            <div className="mt-1 text-[11px] text-slate-500">
-                                {hasAssociation ? 'Usada por membros, mandatos, compras, tesouraria e documentos.' : 'Informe uma associacao para carregar dados operacionais.'}
-                            </div>
-                        </div>
+                        <AssociationSwitcher />
+                        <OperatorSwitcher />
                     </div>
                 </header>
+                <div className="space-y-3 border-b border-slate-800 bg-slate-900/50 p-4 lg:hidden">
+                    <AssociationSwitcher />
+                    <OperatorSwitcher />
+                </div>
                 <nav className="app-mobile-nav border-b border-slate-800 bg-slate-900/50" aria-label="Modulos do sistema em telas menores">
                     {mobileNavItems.map((item) => {
                         const Icon = item.icon;

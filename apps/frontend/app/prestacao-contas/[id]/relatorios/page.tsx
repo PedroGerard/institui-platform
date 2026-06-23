@@ -3,6 +3,8 @@
 import { use, useEffect, useState } from 'react';
 import { AccountabilityProjectNav } from '@/components/accountability/AccountabilityProjectNav';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
+import { PermissionRequired } from '@/components/layout/PermissionRequired';
+import { useActiveOperator } from '@/contexts/ActiveOperatorContext';
 import { api } from '@/services/api';
 import { AccountabilityReportDTO, ReportType } from '@/types/dtos';
 import { formatDate, reportTypeLabels } from '@/lib/institutional';
@@ -10,6 +12,7 @@ import { AlertCircle, CheckCircle, Download, FileSpreadsheet, FileText, RefreshC
 
 export default function AccountabilityReportsPage({ params }: { params: Promise<{ id: string }> }) {
     const { id: projectId } = use(params);
+    const { hasOperator, hasPermission, loadingPermissions } = useActiveOperator();
     const [reports, setReports] = useState<AccountabilityReportDTO[]>([]);
     const [loading, setLoading] = useState(true);
     const [generating, setGenerating] = useState<ReportType | null>(null);
@@ -17,6 +20,15 @@ export default function AccountabilityReportsPage({ params }: { params: Promise<
     const [message, setMessage] = useState<string | null>(null);
 
     async function loadReports() {
+        if (loadingPermissions) return;
+
+        if (!hasOperator || !hasPermission('ACCOUNTABILITY_READ')) {
+            setReports([]);
+            setLoading(false);
+            setError('Usuario operador sem permissao para consultar relatorios.');
+            return;
+        }
+
         try {
             setLoading(true);
             setError(null);
@@ -30,6 +42,10 @@ export default function AccountabilityReportsPage({ params }: { params: Promise<
 
     async function generateReport(type: ReportType) {
         try {
+            if (!hasOperator || !hasPermission('ACCOUNTABILITY_MANAGE')) {
+                throw new Error('Usuario operador sem permissao para gerar relatorios de prestacao.');
+            }
+
             setGenerating(type);
             setMessage(null);
             setError(null);
@@ -45,12 +61,23 @@ export default function AccountabilityReportsPage({ params }: { params: Promise<
 
     useEffect(() => {
         loadReports();
-    }, [projectId]);
+    }, [projectId, hasOperator, hasPermission, loadingPermissions]);
+
+    const canReadAccountability = hasPermission('ACCOUNTABILITY_READ');
+    const canManageAccountability = hasPermission('ACCOUNTABILITY_MANAGE');
+    const actionLocked = loadingPermissions || !hasOperator || !canManageAccountability;
 
     return (
         <InstitutionalLayout title="Relatorios" activePath="/prestacao-contas">
             <div className="space-y-6">
                 <AccountabilityProjectNav projectId={projectId} active="/relatorios" />
+
+                {!loadingPermissions && (!hasOperator || !canReadAccountability) && (
+                    <PermissionRequired message="Selecione um operador com permissao de leitura de prestacao de contas." />
+                )}
+                {!loadingPermissions && hasOperator && canReadAccountability && !canManageAccountability && (
+                    <PermissionRequired message="O operador atual pode consultar, mas nao pode gerar relatorios." />
+                )}
 
                 {(error || message) && (
                     <div className={`flex items-center gap-3 rounded-lg border p-4 text-sm ${message
@@ -63,14 +90,14 @@ export default function AccountabilityReportsPage({ params }: { params: Promise<
                 )}
 
                 <div className="grid gap-4 md:grid-cols-2">
-                    <button onClick={() => generateReport('PDF')} disabled={Boolean(generating)} className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-900 p-5 text-left hover:border-blue-500/60 disabled:cursor-not-allowed disabled:opacity-60">
+                    <button onClick={() => generateReport('PDF')} disabled={Boolean(generating) || actionLocked} className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-900 p-5 text-left hover:border-blue-500/60 disabled:cursor-not-allowed disabled:opacity-60">
                         <span>
                             <span className="block text-lg font-semibold text-slate-100">Gerar PDF</span>
                             <span className="mt-1 block text-sm text-slate-400">Relatorio oficial para leitura e arquivo.</span>
                         </span>
                         <FileText className="text-blue-300" size={24} />
                     </button>
-                    <button onClick={() => generateReport('XLS')} disabled={Boolean(generating)} className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-900 p-5 text-left hover:border-blue-500/60 disabled:cursor-not-allowed disabled:opacity-60">
+                    <button onClick={() => generateReport('XLS')} disabled={Boolean(generating) || actionLocked} className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-900 p-5 text-left hover:border-blue-500/60 disabled:cursor-not-allowed disabled:opacity-60">
                         <span>
                             <span className="block text-lg font-semibold text-slate-100">Gerar XLS</span>
                             <span className="mt-1 block text-sm text-slate-400">Planilha tabular para conferencia externa.</span>

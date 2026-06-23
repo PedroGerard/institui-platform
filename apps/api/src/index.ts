@@ -16,6 +16,8 @@ import { LegalEventController } from "./interfaces/http/controllers/LegalEventCo
 import { AssemblyController } from "./interfaces/http/controllers/AssemblyController.js";
 
 import { AssociationStatusController } from "./interfaces/http/controllers/AssociationStatusController.js";
+import { AssociationController } from "./interfaces/http/controllers/AssociationController.js";
+import { AuditLogController } from "./interfaces/http/controllers/AuditLogController.js";
 
 const server = Fastify({ logger: true });
 
@@ -60,6 +62,26 @@ server.addHook("onRequest", async (request, reply) => {
 });
 
 // --- Routes ---
+
+server.post("/associations", async (req, reply) => {
+    await AssociationController.create(req, reply);
+});
+
+server.get("/associations", async (req, reply) => {
+    await AssociationController.list(req, reply);
+});
+
+server.get<{ Params: { id: string } }>("/associations/:id", async (req, reply) => {
+    await AssociationController.getById(req, reply);
+});
+
+server.patch<{ Params: { id: string } }>("/associations/:id", async (req, reply) => {
+    await AssociationController.update(req, reply);
+});
+
+server.get("/audit-logs", async (req, reply) => {
+    await AuditLogController.list(req, reply);
+});
 
 server.post("/assemblies/call", async (req, reply) => {
     await callAssemblyController.execute(req, reply);
@@ -281,6 +303,29 @@ server.post<{ Params: { id: string } }>("/procurements/:id/contracts", async (re
 
 // --- Member Routes ---
 import { MemberController } from "./interfaces/http/controllers/MemberController.js";
+import { UserController } from "./interfaces/http/controllers/UserController.js";
+
+// --- User Routes ---
+
+server.post("/users", async (req, reply) => {
+    await UserController.create(req, reply);
+});
+
+server.get("/users", async (req, reply) => {
+    await UserController.list(req, reply);
+});
+
+server.get("/users/me/context", async (req, reply) => {
+    await UserController.getOperationalContext(req, reply);
+});
+
+server.get<{ Params: { id: string } }>("/users/:id", async (req, reply) => {
+    await UserController.getById(req, reply);
+});
+
+server.patch<{ Params: { id: string } }>("/users/:id/role", async (req, reply) => {
+    await UserController.updateRole(req, reply);
+});
 
 server.post("/members", async (req, reply) => {
     await MemberController.register(req, reply);

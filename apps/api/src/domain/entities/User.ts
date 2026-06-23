@@ -4,7 +4,8 @@ import { Entity, UniqueEntityID } from "../shared/Entity";
 export enum UserRole {
     ADM = "ADM", // Secretary / President / Administrator
     MEMBER = "MEMBER", // Regular associate (Read only mainly)
-    AUDITOR = "AUDITOR" // Fiscal Council
+    AUDITOR = "AUDITOR", // Fiscal Council
+    SYSTEM = "SYSTEM" // Internal automation user for audit fallback
 }
 
 export interface UserProps {

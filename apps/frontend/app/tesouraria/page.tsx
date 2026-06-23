@@ -5,13 +5,16 @@ import Link from 'next/link';
 import { AlertCircle, ArrowRight, Clock, FileText, Plus, RefreshCw, ShieldAlert, TrendingUp, Wallet } from 'lucide-react';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
 import { AssociationRequired } from '@/components/layout/AssociationRequired';
+import { PermissionRequired } from '@/components/layout/PermissionRequired';
 import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
+import { useActiveOperator } from '@/contexts/ActiveOperatorContext';
 import { api } from '@/services/api';
 import { PaymentRequestDTO, PaymentRequestSummaryDTO } from '@/types/dtos';
 import { formatCurrency, formatDate, paymentRequestStatusLabels } from '@/lib/institutional';
 
 export default function TreasuryDashboard() {
     const { associationId, hasAssociation } = useActiveAssociation();
+    const { hasOperator, hasPermission, loadingPermissions } = useActiveOperator();
     const [summary, setSummary] = useState<PaymentRequestSummaryDTO | null>(null);
     const [payments, setPayments] = useState<PaymentRequestDTO[]>([]);
     const [loading, setLoading] = useState(true);
@@ -22,6 +25,16 @@ export default function TreasuryDashboard() {
             setSummary(null);
             setPayments([]);
             setLoading(false);
+            return;
+        }
+
+        if (loadingPermissions) return;
+
+        if (!hasOperator || !hasPermission('TREASURY_READ')) {
+            setSummary(null);
+            setPayments([]);
+            setLoading(false);
+            setError('Usuario operador sem permissao para consultar tesouraria.');
             return;
         }
 
@@ -39,7 +52,7 @@ export default function TreasuryDashboard() {
         } finally {
             setLoading(false);
         }
-    }, [associationId]);
+    }, [associationId, hasOperator, hasPermission, loadingPermissions]);
 
     useEffect(() => {
         loadData();
@@ -75,6 +88,8 @@ export default function TreasuryDashboard() {
             bg: 'bg-amber-500/10'
         }
     ];
+    const canManageTreasury = hasPermission('TREASURY_MANAGE');
+    const canReadTreasury = hasPermission('TREASURY_READ');
 
     return (
         <InstitutionalLayout title="Tesouraria" activePath="/tesouraria">
@@ -93,13 +108,20 @@ export default function TreasuryDashboard() {
                             <RefreshCw size={16} />
                             Atualizar
                         </button>
-                        <Link
-                            href="/tesouraria/pagamentos/novo"
-                            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-                        >
-                            <Plus size={16} />
-                            Solicitar pagamento
-                        </Link>
+                        {canManageTreasury ? (
+                            <Link
+                                href="/tesouraria/pagamentos/novo"
+                                className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                            >
+                                <Plus size={16} />
+                                Solicitar pagamento
+                            </Link>
+                        ) : (
+                            <span className="inline-flex cursor-not-allowed items-center gap-2 rounded-lg bg-slate-700 px-4 py-2 text-sm font-medium text-slate-300 opacity-70">
+                                <Plus size={16} />
+                                Solicitar pagamento
+                            </span>
+                        )}
                     </div>
                 </div>
 
@@ -111,6 +133,9 @@ export default function TreasuryDashboard() {
                 )}
 
                 {!hasAssociation && <AssociationRequired />}
+                {hasAssociation && !loadingPermissions && (!hasOperator || !canReadTreasury) && (
+                    <PermissionRequired message="Selecione um operador com permissao de leitura da tesouraria." />
+                )}
 
                 <div className="grid gap-4 md:grid-cols-4">
                     {cards.map((card) => (

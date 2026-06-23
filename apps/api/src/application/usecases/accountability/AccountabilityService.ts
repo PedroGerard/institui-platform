@@ -149,7 +149,7 @@ export class AccountabilityService {
         });
     }
 
-    async getProject(id: string) {
+    async getProject(id: string, associationId?: string) {
         const project = await this.prisma.accountabilityProject.findUnique({
             where: { id },
             include: this.projectInclude()
@@ -159,11 +159,15 @@ export class AccountabilityService {
             throw new Error("Accountability project not found");
         }
 
+        if (associationId && project.associationId !== associationId) {
+            throw new Error("Projeto de prestacao nao pertence a associacao ativa.");
+        }
+
         return project;
     }
 
-    async updateStatus(id: string, status: AccountabilityStatus, performedById?: string) {
-        const project = await this.getProject(id);
+    async updateStatus(id: string, status: AccountabilityStatus, performedById?: string, associationId?: string) {
+        const project = await this.getProject(id, associationId);
 
         const updated = await this.prisma.accountabilityProject.update({
             where: { id },
@@ -183,8 +187,8 @@ export class AccountabilityService {
         return updated;
     }
 
-    async uploadDocument(projectId: string, input: UploadAccountabilityDocumentInput) {
-        const project = await this.getProject(projectId);
+    async uploadDocument(projectId: string, input: UploadAccountabilityDocumentInput, associationId?: string) {
+        const project = await this.getProject(projectId, associationId);
         const document = await this.prisma.accountabilityDocument.create({
             data: {
                 projectId,
@@ -207,8 +211,8 @@ export class AccountabilityService {
         return document;
     }
 
-    async listDocuments(projectId: string) {
-        await this.getProject(projectId);
+    async listDocuments(projectId: string, associationId?: string) {
+        await this.getProject(projectId, associationId);
 
         return this.prisma.accountabilityDocument.findMany({
             where: { projectId },
@@ -216,7 +220,7 @@ export class AccountabilityService {
         });
     }
 
-    async validateDocument(documentId: string, validated: boolean, performedById?: string) {
+    async validateDocument(documentId: string, validated: boolean, performedById?: string, associationId?: string) {
         const current = await this.prisma.accountabilityDocument.findUnique({
             where: { id: documentId },
             include: { project: true }
@@ -224,6 +228,10 @@ export class AccountabilityService {
 
         if (!current) {
             throw new Error("Accountability document not found");
+        }
+
+        if (associationId && current.project.associationId !== associationId) {
+            throw new Error("Documento de prestacao nao pertence a associacao ativa.");
         }
 
         const document = await this.prisma.accountabilityDocument.update({
@@ -243,8 +251,8 @@ export class AccountabilityService {
         return document;
     }
 
-    async generateChecklist(projectId: string): Promise<AccountabilityChecklist> {
-        const project = await this.getProject(projectId);
+    async generateChecklist(projectId: string, associationId?: string): Promise<AccountabilityChecklist> {
+        const project = await this.getProject(projectId, associationId);
         const documents = project.documents;
 
         const items = REQUIRED_ACCOUNTABILITY_DOCUMENTS.map((type) => {
@@ -296,8 +304,8 @@ export class AccountabilityService {
         };
     }
 
-    async registerFiscalOpinion(projectId: string, input: RegisterFiscalOpinionInput) {
-        const project = await this.getProject(projectId);
+    async registerFiscalOpinion(projectId: string, input: RegisterFiscalOpinionInput, associationId?: string) {
+        const project = await this.getProject(projectId, associationId);
         await this.assertFiscalCouncilUser(project.associationId, input.councilUserId);
 
         const opinion = await this.prisma.fiscalOpinion.create({
@@ -322,8 +330,8 @@ export class AccountabilityService {
         return opinion;
     }
 
-    async listFiscalOpinions(projectId: string) {
-        await this.getProject(projectId);
+    async listFiscalOpinions(projectId: string, associationId?: string) {
+        await this.getProject(projectId, associationId);
 
         return this.prisma.fiscalOpinion.findMany({
             where: { projectId },
@@ -331,8 +339,8 @@ export class AccountabilityService {
         });
     }
 
-    async generateReport(projectId: string, type: ReportType, performedById?: string) {
-        const project = await this.getProject(projectId);
+    async generateReport(projectId: string, type: ReportType, performedById?: string, associationId?: string) {
+        const project = await this.getProject(projectId, associationId);
         await mkdir(this.reportStorageDir, { recursive: true });
 
         const content = this.buildReportContent(project);
@@ -371,8 +379,8 @@ export class AccountabilityService {
         return report;
     }
 
-    async listReports(projectId: string) {
-        await this.getProject(projectId);
+    async listReports(projectId: string, associationId?: string) {
+        await this.getProject(projectId, associationId);
 
         return this.prisma.accountabilityReport.findMany({
             where: { projectId },
@@ -380,9 +388,9 @@ export class AccountabilityService {
         });
     }
 
-    async submitProject(projectId: string, performedById?: string) {
-        const project = await this.getProject(projectId);
-        const checklist = await this.generateChecklist(projectId);
+    async submitProject(projectId: string, performedById?: string, associationId?: string) {
+        const project = await this.getProject(projectId, associationId);
+        const checklist = await this.generateChecklist(projectId, project.associationId);
 
         if (!checklist.canSubmit) {
             throw new Error(`Submission blocked: ${checklist.blockingReasons.join("; ")}`);

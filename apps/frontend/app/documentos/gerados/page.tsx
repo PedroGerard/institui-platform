@@ -3,6 +3,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
+import { AssociationRequired } from '@/components/layout/AssociationRequired';
+import { PermissionRequired } from '@/components/layout/PermissionRequired';
+import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
+import { useActiveOperator } from '@/contexts/ActiveOperatorContext';
 import { api } from '@/services/api';
 import { GeneratedDocumentDTO, GeneratedDocumentType } from '@/types/dtos';
 import { formatDate, generatedDocumentTypeLabels } from '@/lib/institutional';
@@ -11,6 +15,8 @@ import { AlertCircle, Download, FileText, Plus, RefreshCw } from 'lucide-react';
 const documentTypes = Object.keys(generatedDocumentTypeLabels) as GeneratedDocumentType[];
 
 export default function GeneratedDocumentsPage() {
+    const { associationId, hasAssociation } = useActiveAssociation();
+    const { hasOperator, hasPermission, loadingPermissions } = useActiveOperator();
     const [documents, setDocuments] = useState<GeneratedDocumentDTO[]>([]);
     const [typeFilter, setTypeFilter] = useState<GeneratedDocumentType | 'ALL'>('ALL');
     const [loading, setLoading] = useState(true);
@@ -19,10 +25,26 @@ export default function GeneratedDocumentsPage() {
     const filteredDocuments = useMemo(() => documents, [documents]);
 
     async function loadDocuments() {
+        if (!associationId) {
+            setDocuments([]);
+            setLoading(false);
+            return;
+        }
+
+        if (loadingPermissions) return;
+
+        if (!hasOperator || !hasPermission('DOCUMENTS_READ')) {
+            setDocuments([]);
+            setLoading(false);
+            setError('Usuario operador sem permissao para consultar documentos.');
+            return;
+        }
+
         try {
             setLoading(true);
             setError(null);
             setDocuments(await api.listGeneratedDocuments({
+                associationId,
                 type: typeFilter === 'ALL' ? undefined : typeFilter
             }));
         } catch (err: unknown) {
@@ -34,7 +56,10 @@ export default function GeneratedDocumentsPage() {
 
     useEffect(() => {
         loadDocuments();
-    }, [typeFilter]);
+    }, [associationId, typeFilter, hasOperator, hasPermission, loadingPermissions]);
+
+    const canReadDocuments = hasPermission('DOCUMENTS_READ');
+    const canGenerateDocuments = hasPermission('DOCUMENTS_GENERATE');
 
     return (
         <InstitutionalLayout title="Documentos gerados" activePath="/documentos/gerados">
@@ -63,13 +88,20 @@ export default function GeneratedDocumentsPage() {
                             <RefreshCw size={16} />
                             Atualizar
                         </button>
-                        <Link
-                            href="/documentos/gerar"
-                            className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-                        >
-                            <Plus size={16} />
-                            Gerar
-                        </Link>
+                        {canGenerateDocuments ? (
+                            <Link
+                                href="/documentos/gerar"
+                                className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                            >
+                                <Plus size={16} />
+                                Gerar
+                            </Link>
+                        ) : (
+                            <span className="inline-flex cursor-not-allowed items-center justify-center gap-2 rounded-lg bg-slate-700 px-4 py-2 text-sm font-medium text-slate-300 opacity-70">
+                                <Plus size={16} />
+                                Gerar
+                            </span>
+                        )}
                     </div>
                 </div>
 
@@ -78,6 +110,11 @@ export default function GeneratedDocumentsPage() {
                         <AlertCircle size={18} />
                         {error}
                     </div>
+                )}
+
+                {!hasAssociation && <AssociationRequired />}
+                {hasAssociation && !loadingPermissions && (!hasOperator || !canReadDocuments) && (
+                    <PermissionRequired message="Selecione um operador com permissao de leitura de documentos." />
                 )}
 
                 <div className="overflow-x-auto rounded-lg border border-slate-800 bg-slate-900">

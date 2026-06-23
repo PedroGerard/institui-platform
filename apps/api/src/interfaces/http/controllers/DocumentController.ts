@@ -10,6 +10,7 @@ import { PrismaAssociationRepository } from '../../../infrastructure/database/Pr
 import { DocumentTemplateService } from '../../../domain/services/DocumentTemplateService';
 import { PdfGeneratorService } from '../../../domain/services/PdfGeneratorService';
 import { prisma } from '../../../infrastructure/database/prisma';
+import { requireOperationalPermission } from '../OperationalAuth';
 
 const officialLetterSchema = z.object({
     associationId: z.string().uuid(),
@@ -52,6 +53,21 @@ export class DocumentController {
         );
 
         try {
+            const assembly = await prisma.assembly.findUnique({
+                where: { id: assemblyId },
+                select: { associationId: true }
+            });
+
+            if (!assembly) {
+                return reply.status(404).send({ error: "Assembly not found" });
+            }
+
+            const auth = await requireOperationalPermission(req, reply, {
+                permission: 'DOCUMENTS_READ',
+                associationId: assembly.associationId
+            });
+            if (!auth) return;
+
             const buffer = await useCase.execute(assemblyId);
 
             reply.header('Content-Type', 'application/pdf');
@@ -64,6 +80,21 @@ export class DocumentController {
 
     static async generateAssemblyMinute(req: FastifyRequest<{ Params: { assemblyId: string } }>, reply: FastifyReply) {
         try {
+            const assembly = await prisma.assembly.findUnique({
+                where: { id: req.params.assemblyId },
+                select: { associationId: true }
+            });
+
+            if (!assembly) {
+                return reply.status(404).send({ error: "Assembly not found" });
+            }
+
+            const auth = await requireOperationalPermission(req, reply, {
+                permission: 'DOCUMENTS_GENERATE',
+                associationId: assembly.associationId
+            });
+            if (!auth) return;
+
             const document = await this.generatedDocumentService().generateAssemblyMinute(
                 req.params.assemblyId,
                 this.generatedBy(req)
@@ -77,6 +108,21 @@ export class DocumentController {
 
     static async generatePresenceList(req: FastifyRequest<{ Params: { assemblyId: string } }>, reply: FastifyReply) {
         try {
+            const assembly = await prisma.assembly.findUnique({
+                where: { id: req.params.assemblyId },
+                select: { associationId: true }
+            });
+
+            if (!assembly) {
+                return reply.status(404).send({ error: "Assembly not found" });
+            }
+
+            const auth = await requireOperationalPermission(req, reply, {
+                permission: 'DOCUMENTS_GENERATE',
+                associationId: assembly.associationId
+            });
+            if (!auth) return;
+
             const document = await this.generatedDocumentService().generatePresenceList(
                 req.params.assemblyId,
                 this.generatedBy(req)
@@ -90,6 +136,12 @@ export class DocumentController {
 
     static async generateStatute(req: FastifyRequest<{ Params: { associationId: string } }>, reply: FastifyReply) {
         try {
+            const auth = await requireOperationalPermission(req, reply, {
+                permission: 'DOCUMENTS_GENERATE',
+                associationId: req.params.associationId
+            });
+            if (!auth) return;
+
             const document = await this.generatedDocumentService().generateStatute(
                 req.params.associationId,
                 this.generatedBy(req)
@@ -104,6 +156,12 @@ export class DocumentController {
     static async generateOfficialLetter(req: FastifyRequest, reply: FastifyReply) {
         try {
             const body = officialLetterSchema.parse(req.body);
+            const auth = await requireOperationalPermission(req, reply, {
+                permission: 'DOCUMENTS_GENERATE',
+                associationId: body.associationId
+            });
+            if (!auth) return;
+
             const document = await this.generatedDocumentService().generateOfficialLetter({
                 ...body,
                 generatedById: body.generatedById || this.generatedBy(req)
@@ -117,6 +175,21 @@ export class DocumentController {
 
     static async generateFiscalOpinion(req: FastifyRequest<{ Params: { projectId: string } }>, reply: FastifyReply) {
         try {
+            const project = await prisma.accountabilityProject.findUnique({
+                where: { id: req.params.projectId },
+                select: { associationId: true }
+            });
+
+            if (!project) {
+                return reply.status(404).send({ error: "Accountability project not found" });
+            }
+
+            const auth = await requireOperationalPermission(req, reply, {
+                permission: 'DOCUMENTS_GENERATE',
+                associationId: project.associationId
+            });
+            if (!auth) return;
+
             const document = await this.generatedDocumentService().generateFiscalOpinion(
                 req.params.projectId,
                 this.generatedBy(req)
@@ -131,7 +204,17 @@ export class DocumentController {
     static async listGenerated(req: FastifyRequest, reply: FastifyReply) {
         try {
             const query = generatedDocumentQuerySchema.parse(req.query);
-            const documents = await this.generatedDocumentService().list(query);
+            const associationId = query.associationId || (req.headers['x-association-id'] as string | undefined);
+            const auth = await requireOperationalPermission(req, reply, {
+                permission: 'DOCUMENTS_READ',
+                associationId
+            });
+            if (!auth) return;
+
+            const documents = await this.generatedDocumentService().list({
+                ...query,
+                associationId: auth.associationId
+            });
 
             return reply.send(documents);
         } catch (err: any) {
@@ -147,6 +230,12 @@ export class DocumentController {
                 return reply.status(404).send({ error: "Generated document not found" });
             }
 
+            const auth = await requireOperationalPermission(req, reply, {
+                permission: 'DOCUMENTS_READ',
+                associationId: document.associationId
+            });
+            if (!auth) return;
+
             return reply.send(document);
         } catch (err: any) {
             return reply.status(400).send({ error: err.message });
@@ -161,6 +250,12 @@ export class DocumentController {
             if (!document) {
                 return reply.status(404).send({ error: "Generated document not found" });
             }
+
+            const auth = await requireOperationalPermission(req, reply, {
+                permission: 'DOCUMENTS_READ',
+                associationId: document.associationId
+            });
+            if (!auth) return;
 
             const filePath = service.getAbsoluteFilePath(document.id);
             await access(filePath);

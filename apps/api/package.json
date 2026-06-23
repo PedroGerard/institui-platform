@@ -6,6 +6,7 @@
         "dev": "tsc -w",
         "build": "tsc",
         "start": "node dist/index.js",
+        "seed": "ts-node prisma/seed.ts",
         "test": "vitest"
     },
     "dependencies": {

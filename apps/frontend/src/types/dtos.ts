@@ -1,5 +1,5 @@
 
-// Mirror of apps/api/src/interfaces/http/dtos/DashboardDTOs.ts
+// Mirror of instituto-platform/apps/api/src/interfaces/http/dtos/DashboardDTOs.ts
 
 export interface LegalEventDTO {
     id: string;
@@ -16,6 +16,82 @@ export interface AssociationStatusDTO {
     hasActiveMandate: boolean;
     pendingMinutes: number;
     complianceLevel: "GREEN" | "YELLOW" | "RED";
+}
+
+export interface AssociationDTO {
+    id: string;
+    name: string;
+    cnpj: string;
+    cnpjFormatted?: string;
+    foundationDate: string;
+    activeStatuteId?: string;
+    createdAt?: string;
+    updatedAt?: string;
+    counts?: {
+        members: number;
+        mandates: number;
+        governanceBodies: number;
+        assemblies: number;
+        accountabilityProjects: number;
+    };
+}
+
+export type UserRole = "ADM" | "MEMBER" | "AUDITOR" | "SYSTEM";
+export type AuditAction = "CREATE" | "UPDATE" | "DELETE" | "APPROVE" | "REJECT";
+export type PermissionKey =
+    | "DASHBOARD_READ"
+    | "ASSOCIATION_READ"
+    | "ASSOCIATION_CONFIGURE"
+    | "USERS_READ"
+    | "USERS_MANAGE"
+    | "MEMBERS_READ"
+    | "MEMBERS_MANAGE"
+    | "GOVERNANCE_READ"
+    | "GOVERNANCE_MANAGE"
+    | "TREASURY_READ"
+    | "TREASURY_MANAGE"
+    | "PROCUREMENT_READ"
+    | "PROCUREMENT_MANAGE"
+    | "ACCOUNTABILITY_READ"
+    | "ACCOUNTABILITY_MANAGE"
+    | "ACCOUNTABILITY_REVIEW"
+    | "DOCUMENTS_READ"
+    | "DOCUMENTS_GENERATE"
+    | "AUDIT_READ"
+    | "REPORTS_READ";
+
+export interface UserDTO {
+    id: string;
+    associationId: string;
+    name: string;
+    email: string;
+    role: UserRole;
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+export interface OperationalContextDTO {
+    associationId: string;
+    user: UserDTO;
+    permissions: PermissionKey[];
+    generatedAt: string;
+}
+
+export interface AuditLogDTO {
+    id: string;
+    associationId: string;
+    entity: string;
+    entityId: string;
+    action: AuditAction;
+    performedById: string;
+    performedBy: {
+        id: string;
+        name: string;
+        email: string;
+        role: UserRole;
+    };
+    metadata: Record<string, unknown> | unknown[];
+    createdAt: string;
 }
 
 export type MemberType = "FOUNDER" | "EFFECTIVE" | "BENEFACTOR" | "COLLABORATOR" | "HONORARY";

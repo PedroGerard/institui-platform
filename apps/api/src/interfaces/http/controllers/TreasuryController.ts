@@ -6,6 +6,7 @@ import { ListFinancialAccounts } from '../../../application/usecases/treasury/Li
 import { PaymentRequestService } from '../../../application/usecases/treasury/PaymentRequestService';
 import { TreasuryReportService } from '../../../application/usecases/treasury/TreasuryReportService';
 import { TreasuryReconciliationService } from '../../../application/usecases/treasury/TreasuryReconciliationService';
+import { requireOperationalPermission } from '../OperationalAuth';
 import {
     createBankStatementEntrySchema,
     createPaymentRequestSchema,
@@ -47,11 +48,11 @@ export class TreasuryController {
     }
 
     async list(request: FastifyRequest, reply: FastifyReply) {
-        const associationId = request.headers['x-association-id'] as string;
-        if (!associationId) return reply.status(400).send({ error: 'Association ID is required' });
+        const auth = await requireOperationalPermission(request, reply, { permission: 'TREASURY_READ' });
+        if (!auth) return;
 
         try {
-            const accounts = await this.listAccounts.execute(associationId);
+            const accounts = await this.listAccounts.execute(auth.associationId);
             return reply.send(accounts);
         } catch (error: any) {
             return reply.status(500).send({ error: error.message });
@@ -61,6 +62,11 @@ export class TreasuryController {
     async createPaymentRequest(request: FastifyRequest, reply: FastifyReply) {
         try {
             const data = createPaymentRequestSchema.parse(request.body);
+            const auth = await requireOperationalPermission(request, reply, {
+                permission: 'TREASURY_MANAGE',
+                associationId: data.associationId
+            });
+            if (!auth) return;
             const paymentRequest = await this.paymentRequests.create(data, this.actorId(request));
 
             return reply.status(201).send(paymentRequest);
@@ -73,9 +79,14 @@ export class TreasuryController {
         try {
             const query = listPaymentRequestsSchema.parse(request.query);
             const associationId = query.associationId || (request.headers['x-association-id'] as string | undefined);
+            const auth = await requireOperationalPermission(request, reply, {
+                permission: 'TREASURY_READ',
+                associationId
+            });
+            if (!auth) return;
             const payments = await this.paymentRequests.list({
                 ...query,
-                associationId
+                associationId: auth.associationId
             });
 
             return reply.send(payments);
@@ -86,7 +97,9 @@ export class TreasuryController {
 
     async getPaymentRequest(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
         try {
-            return reply.send(await this.paymentRequests.getById(request.params.id));
+            const auth = await requireOperationalPermission(request, reply, { permission: 'TREASURY_READ' });
+            if (!auth) return;
+            return reply.send(await this.paymentRequests.getById(request.params.id, auth.associationId));
         } catch (error: any) {
             return reply.status(404).send({ error: error.message });
         }
@@ -99,10 +112,15 @@ export class TreasuryController {
                 accountabilityProjectId: true
             }).parse(request.query);
             const associationId = query.associationId || (request.headers['x-association-id'] as string | undefined);
+            const auth = await requireOperationalPermission(request, reply, {
+                permission: 'TREASURY_READ',
+                associationId
+            });
+            if (!auth) return;
 
             return reply.send(await this.paymentRequests.summary({
                 ...query,
-                associationId
+                associationId: auth.associationId
             }));
         } catch (error: any) {
             return reply.status(400).send({ error: error.message });
@@ -111,8 +129,10 @@ export class TreasuryController {
 
     async regularizePaymentRequest(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
         try {
+            const auth = await requireOperationalPermission(request, reply, { permission: 'TREASURY_MANAGE' });
+            if (!auth) return;
             const data = updatePaymentRequestComplianceSchema.parse(request.body || {});
-            const payment = await this.paymentRequests.updateCompliance(request.params.id, data, this.actorId(request));
+            const payment = await this.paymentRequests.updateCompliance(request.params.id, data, this.actorId(request), auth.associationId);
 
             return reply.send(payment);
         } catch (error: any) {
@@ -122,8 +142,10 @@ export class TreasuryController {
 
     async approvePaymentRequest(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
         try {
+            const auth = await requireOperationalPermission(request, reply, { permission: 'TREASURY_MANAGE' });
+            if (!auth) return;
             const data = paymentApprovalSchema.parse(request.body);
-            const payment = await this.paymentRequests.approve(request.params.id, data, this.actorId(request));
+            const payment = await this.paymentRequests.approve(request.params.id, data, this.actorId(request), auth.associationId);
 
             return reply.send(payment);
         } catch (error: any) {
@@ -133,8 +155,10 @@ export class TreasuryController {
 
     async rejectPaymentRequest(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
         try {
+            const auth = await requireOperationalPermission(request, reply, { permission: 'TREASURY_MANAGE' });
+            if (!auth) return;
             const data = paymentApprovalSchema.parse(request.body);
-            const payment = await this.paymentRequests.reject(request.params.id, data, this.actorId(request));
+            const payment = await this.paymentRequests.reject(request.params.id, data, this.actorId(request), auth.associationId);
 
             return reply.send(payment);
         } catch (error: any) {
@@ -144,8 +168,10 @@ export class TreasuryController {
 
     async payPaymentRequest(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
         try {
+            const auth = await requireOperationalPermission(request, reply, { permission: 'TREASURY_MANAGE' });
+            if (!auth) return;
             const data = payPaymentRequestSchema.parse(request.body || {});
-            const payment = await this.paymentRequests.pay(request.params.id, data, this.actorId(request));
+            const payment = await this.paymentRequests.pay(request.params.id, data, this.actorId(request), auth.associationId);
 
             return reply.send(payment);
         } catch (error: any) {
@@ -155,7 +181,9 @@ export class TreasuryController {
 
     async getPaymentRequestBlocks(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
         try {
-            return reply.send(await this.paymentRequests.getBlockingReasons(request.params.id));
+            const auth = await requireOperationalPermission(request, reply, { permission: 'TREASURY_READ' });
+            if (!auth) return;
+            return reply.send(await this.paymentRequests.getBlockingReasons(request.params.id, auth.associationId));
         } catch (error: any) {
             return reply.status(404).send({ error: error.message });
         }
@@ -173,10 +201,15 @@ export class TreasuryController {
         try {
             const query = listTreasuryReportsSchema.parse(request.query);
             const associationId = query.associationId || (request.headers['x-association-id'] as string | undefined);
+            const auth = await requireOperationalPermission(request, reply, {
+                permission: 'TREASURY_READ',
+                associationId
+            });
+            if (!auth) return;
 
             return reply.send(await this.treasuryReports.list({
                 ...query,
-                associationId
+                associationId: auth.associationId
             }));
         } catch (error: any) {
             return reply.status(400).send({ error: error.message });
@@ -185,7 +218,9 @@ export class TreasuryController {
 
     async downloadTreasuryReport(request: FastifyRequest<{ Params: { fileName: string } }>, reply: FastifyReply) {
         try {
-            const stream = await this.treasuryReports.getFileStream(request.params.fileName);
+            const auth = await requireOperationalPermission(request, reply, { permission: 'TREASURY_READ' });
+            if (!auth) return;
+            const stream = await this.treasuryReports.getFileStream(request.params.fileName, auth.associationId);
 
             reply.header("Content-Type", this.treasuryReports.getContentType(request.params.fileName));
             reply.header("Content-Disposition", `attachment; filename="${request.params.fileName}"`);
@@ -198,6 +233,11 @@ export class TreasuryController {
     async createBankStatementEntry(request: FastifyRequest, reply: FastifyReply) {
         try {
             const data = createBankStatementEntrySchema.parse(request.body);
+            const auth = await requireOperationalPermission(request, reply, {
+                permission: 'TREASURY_MANAGE',
+                associationId: data.associationId
+            });
+            if (!auth) return;
             const entry = await this.reconciliation.create(data, this.actorId(request));
 
             return reply.status(201).send(entry);
@@ -210,10 +250,15 @@ export class TreasuryController {
         try {
             const query = listBankStatementEntriesSchema.parse(request.query);
             const associationId = query.associationId || (request.headers['x-association-id'] as string | undefined);
+            const auth = await requireOperationalPermission(request, reply, {
+                permission: 'TREASURY_READ',
+                associationId
+            });
+            if (!auth) return;
 
             return reply.send(await this.reconciliation.list({
                 ...query,
-                associationId
+                associationId: auth.associationId
             }));
         } catch (error: any) {
             return reply.status(400).send({ error: error.message });
@@ -224,12 +269,13 @@ export class TreasuryController {
         try {
             const query = listBankStatementEntriesSchema.pick({ associationId: true }).parse(request.query);
             const associationId = query.associationId || (request.headers['x-association-id'] as string | undefined);
+            const auth = await requireOperationalPermission(request, reply, {
+                permission: 'TREASURY_READ',
+                associationId
+            });
+            if (!auth) return;
 
-            if (!associationId) {
-                return reply.status(400).send({ error: "Association ID is required" });
-            }
-
-            return reply.send(await this.reconciliation.summary(associationId));
+            return reply.send(await this.reconciliation.summary(auth.associationId));
         } catch (error: any) {
             return reply.status(400).send({ error: error.message });
         }
@@ -239,10 +285,15 @@ export class TreasuryController {
         try {
             const query = listReconciliationCandidatesSchema.parse(request.query);
             const associationId = query.associationId || (request.headers['x-association-id'] as string | undefined);
+            const auth = await requireOperationalPermission(request, reply, {
+                permission: 'TREASURY_READ',
+                associationId
+            });
+            if (!auth) return;
 
             return reply.send(await this.reconciliation.listCandidates({
                 ...query,
-                associationId
+                associationId: auth.associationId
             }));
         } catch (error: any) {
             return reply.status(400).send({ error: error.message });
@@ -251,8 +302,10 @@ export class TreasuryController {
 
     async reconcileBankStatementEntry(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
         try {
+            const auth = await requireOperationalPermission(request, reply, { permission: 'TREASURY_MANAGE' });
+            if (!auth) return;
             const data = reconcileBankStatementEntrySchema.parse(request.body);
-            const entry = await this.reconciliation.reconcile(request.params.id, data, this.actorId(request));
+            const entry = await this.reconciliation.reconcile(request.params.id, data, this.actorId(request), auth.associationId);
 
             return reply.send(entry);
         } catch (error: any) {
@@ -262,7 +315,9 @@ export class TreasuryController {
 
     async unreconcileBankStatementEntry(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
         try {
-            const entry = await this.reconciliation.unreconcile(request.params.id, this.actorId(request));
+            const auth = await requireOperationalPermission(request, reply, { permission: 'TREASURY_MANAGE' });
+            if (!auth) return;
+            const entry = await this.reconciliation.unreconcile(request.params.id, this.actorId(request), auth.associationId);
 
             return reply.send(entry);
         } catch (error: any) {
@@ -272,8 +327,10 @@ export class TreasuryController {
 
     async ignoreBankStatementEntry(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
         try {
+            const auth = await requireOperationalPermission(request, reply, { permission: 'TREASURY_MANAGE' });
+            if (!auth) return;
             const data = ignoreBankStatementEntrySchema.parse(request.body || {});
-            const entry = await this.reconciliation.ignore(request.params.id, data.reason, this.actorId(request));
+            const entry = await this.reconciliation.ignore(request.params.id, data.reason, this.actorId(request), auth.associationId);
 
             return reply.send(entry);
         } catch (error: any) {
@@ -288,8 +345,13 @@ export class TreasuryController {
     ) {
         try {
             const data = generateTreasuryReportSchema.parse(request.body);
+            const auth = await requireOperationalPermission(request, reply, {
+                permission: 'TREASURY_MANAGE',
+                associationId: data.associationId
+            });
+            if (!auth) return;
             const report = await this.treasuryReports.generatePaymentSummary({
-                associationId: data.associationId,
+                associationId: auth.associationId,
                 type,
                 performedById: this.actorId(request)
             });
@@ -304,12 +366,14 @@ export class TreasuryController {
         const associationId = request.headers['x-association-id'] as string;
         const actorId = this.actorId(request) || 'system';
 
-        if (!associationId) {
-            return reply.status(400).send({ error: 'Association ID is required' });
-        }
+        const auth = await requireOperationalPermission(request, reply, {
+            permission: 'TREASURY_MANAGE',
+            associationId
+        });
+        if (!auth) return;
 
         try {
-            const entry = await useCase.execute(request.body, associationId, actorId);
+            const entry = await useCase.execute(request.body, auth.associationId, actorId);
             return reply.status(201).send(entry);
         } catch (error: any) {
             if (error.message.includes('obrigatório')) {

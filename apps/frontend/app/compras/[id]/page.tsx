@@ -5,7 +5,9 @@ import Link from 'next/link';
 import { AlertCircle, ArrowLeft, CheckCircle, FileText, Plus, Save, ShieldCheck } from 'lucide-react';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
 import { AssociationRequired } from '@/components/layout/AssociationRequired';
+import { PermissionRequired } from '@/components/layout/PermissionRequired';
 import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
+import { useActiveOperator } from '@/contexts/ActiveOperatorContext';
 import { api } from '@/services/api';
 import { ProcurementPriceMapDTO, ProcurementProcessDTO, SupplierDTO } from '@/types/dtos';
 import {
@@ -22,6 +24,7 @@ const labelClass = "mb-2 block text-xs font-semibold uppercase text-slate-500";
 export default function ProcurementProcessDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const { associationId, hasAssociation } = useActiveAssociation();
+    const { hasOperator, hasPermission, loadingPermissions } = useActiveOperator();
     const [process, setProcess] = useState<ProcurementProcessDTO | null>(null);
     const [priceMap, setPriceMap] = useState<ProcurementPriceMapDTO | null>(null);
     const [suppliers, setSuppliers] = useState<SupplierDTO[]>([]);
@@ -49,6 +52,17 @@ export default function ProcurementProcessDetailPage({ params }: { params: Promi
     }, [process]);
 
     async function loadData() {
+        if (loadingPermissions) return;
+
+        if (!hasOperator || !hasPermission('PROCUREMENT_READ')) {
+            setProcess(null);
+            setPriceMap(null);
+            setSuppliers([]);
+            setLoading(false);
+            setError('Usuario operador sem permissao para consultar compras MROSC.');
+            return;
+        }
+
         try {
             setLoading(true);
             setError(null);
@@ -70,10 +84,14 @@ export default function ProcurementProcessDetailPage({ params }: { params: Promi
 
     useEffect(() => {
         loadData();
-    }, [associationId, id]);
+    }, [associationId, id, hasOperator, hasPermission, loadingPermissions]);
 
     async function runAction(action: string, fn: () => Promise<unknown>, message: string) {
         try {
+            if (!hasOperator || !hasPermission('PROCUREMENT_MANAGE')) {
+                throw new Error('Usuario operador sem permissao para alterar compras MROSC.');
+            }
+
             setSaving(action);
             setError(null);
             setSuccess(null);
@@ -152,6 +170,10 @@ export default function ProcurementProcessDetailPage({ params }: { params: Promi
         }, 'Contrato registrado.');
     }
 
+    const canReadProcurement = hasPermission('PROCUREMENT_READ');
+    const canManageProcurement = hasPermission('PROCUREMENT_MANAGE');
+    const managementLocked = loadingPermissions || !hasOperator || !canManageProcurement;
+
     if (loading && !process) {
         return (
             <InstitutionalLayout title="Compras MROSC" activePath="/compras">
@@ -188,7 +210,7 @@ export default function ProcurementProcessDetailPage({ params }: { params: Promi
                     <div className="flex flex-wrap gap-3">
                         <button
                             type="button"
-                            disabled={saving === 'select' || !priceMap?.canSelectSuppliers}
+                            disabled={saving === 'select' || !priceMap?.canSelectSuppliers || managementLocked}
                             onClick={() => runAction('select', () => api.selectProcurementSuppliers(id), 'Fornecedores selecionados e ata registrada.')}
                             className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
                         >
@@ -197,7 +219,7 @@ export default function ProcurementProcessDetailPage({ params }: { params: Promi
                         </button>
                         <button
                             type="button"
-                            disabled={saving === 'homologate' || process.status !== 'SUPPLIERS_SELECTED'}
+                            disabled={saving === 'homologate' || process.status !== 'SUPPLIERS_SELECTED' || managementLocked}
                             onClick={() => runAction('homologate', () => api.homologateProcurement(id), 'Homologacao registrada.')}
                             className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
                         >
@@ -221,6 +243,12 @@ export default function ProcurementProcessDetailPage({ params }: { params: Promi
                 )}
 
                 {!hasAssociation && <AssociationRequired message="A tela usa a associacao do processo para carregar dados, mas defina a associacao ativa no topo para operar novos cadastros com rastreabilidade." />}
+                {!loadingPermissions && (!hasOperator || !canReadProcurement) && (
+                    <PermissionRequired message="Selecione um operador com permissao de leitura de compras MROSC." />
+                )}
+                {!loadingPermissions && hasOperator && canReadProcurement && !canManageProcurement && (
+                    <PermissionRequired message="O operador atual pode consultar, mas nao pode alterar processos de compra." />
+                )}
 
                 <div className="grid gap-4 md:grid-cols-4">
                     <div className="rounded-lg border border-slate-800 bg-slate-900 p-5">
@@ -249,7 +277,7 @@ export default function ProcurementProcessDetailPage({ params }: { params: Promi
                             <input className={inputClass} placeholder="Un." value={itemForm.unit} onChange={(event) => setItemForm({ ...itemForm, unit: event.target.value })} />
                             <input required min="0.01" step="0.01" type="number" className={inputClass} placeholder="Qtd." value={itemForm.quantity} onChange={(event) => setItemForm({ ...itemForm, quantity: event.target.value })} />
                             <input min="0.01" step="0.01" type="number" className={inputClass} placeholder="Estimado" value={itemForm.estimatedUnitPrice} onChange={(event) => setItemForm({ ...itemForm, estimatedUnitPrice: event.target.value })} />
-                            <button type="submit" disabled={saving === 'item'} className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">
+                            <button type="submit" disabled={saving === 'item' || managementLocked} className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50">
                                 <Plus size={16} />
                                 Item
                             </button>
@@ -274,7 +302,7 @@ export default function ProcurementProcessDetailPage({ params }: { params: Promi
                             <input type="email" className={inputClass} placeholder="E-mail" value={supplierForm.email} onChange={(event) => setSupplierForm({ ...supplierForm, email: event.target.value })} />
                             <input className={inputClass} placeholder="Telefone" value={supplierForm.phone} onChange={(event) => setSupplierForm({ ...supplierForm, phone: event.target.value })} />
                         </div>
-                        <button type="submit" disabled={saving === 'supplier'} className="mt-4 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">
+                        <button type="submit" disabled={saving === 'supplier' || managementLocked} className="mt-4 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50">
                             <Save size={16} />
                             Cadastrar fornecedor
                         </button>
@@ -312,7 +340,7 @@ export default function ProcurementProcessDetailPage({ params }: { params: Promi
                             </div>
                         ))}
                     </div>
-                    <button type="submit" disabled={saving === 'proposal' || !process.items.length} className="mt-4 inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50">
+                    <button type="submit" disabled={saving === 'proposal' || !process.items.length || managementLocked} className="mt-4 inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50">
                         <Save size={16} />
                         Registrar proposta
                     </button>
@@ -393,7 +421,7 @@ export default function ProcurementProcessDetailPage({ params }: { params: Promi
                             <input required type="date" className={inputClass} value={contractForm.startDate} onChange={(event) => setContractForm({ ...contractForm, startDate: event.target.value })} />
                             <input type="date" className={inputClass} value={contractForm.endDate} onChange={(event) => setContractForm({ ...contractForm, endDate: event.target.value })} />
                         </div>
-                        <button type="submit" disabled={saving === 'contract' || process.status !== 'HOMOLOGATED'} className="mt-4 inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50">
+                        <button type="submit" disabled={saving === 'contract' || process.status !== 'HOMOLOGATED' || managementLocked} className="mt-4 inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50">
                             <Save size={16} />
                             Registrar contrato
                         </button>

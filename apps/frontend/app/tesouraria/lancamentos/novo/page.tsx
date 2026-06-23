@@ -6,7 +6,9 @@ import { useRouter } from 'next/navigation';
 import { AlertCircle, ArrowLeft, CheckCircle, Save } from 'lucide-react';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
 import { AssociationRequired } from '@/components/layout/AssociationRequired';
+import { PermissionRequired } from '@/components/layout/PermissionRequired';
 import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
+import { useActiveOperator } from '@/contexts/ActiveOperatorContext';
 import { api } from '@/services/api';
 import { FinancialAccount } from '@/types/financial';
 
@@ -16,6 +18,7 @@ const labelClass = "mb-2 block text-xs font-semibold uppercase text-slate-500";
 export default function NewTransactionPage() {
     const router = useRouter();
     const { associationId, hasAssociation } = useActiveAssociation();
+    const { hasOperator, hasPermission, loadingPermissions } = useActiveOperator();
     const [type, setType] = useState<'REVENUE' | 'EXPENSE'>('REVENUE');
     const [accounts, setAccounts] = useState<FinancialAccount[]>([]);
     const [loading, setLoading] = useState(false);
@@ -37,6 +40,14 @@ export default function NewTransactionPage() {
                 return;
             }
 
+            if (loadingPermissions) return;
+
+            if (!hasOperator || !hasPermission('TREASURY_READ')) {
+                setAccounts([]);
+                setError('Usuario operador sem permissao para consultar plano de contas.');
+                return;
+            }
+
             try {
                 setAccounts(await api.listFinancialAccounts(associationId));
             } catch (err: unknown) {
@@ -45,7 +56,7 @@ export default function NewTransactionPage() {
         }
 
         fetchAccounts();
-    }, [associationId]);
+    }, [associationId, hasOperator, hasPermission, loadingPermissions]);
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -56,6 +67,10 @@ export default function NewTransactionPage() {
         try {
             if (!associationId) {
                 throw new Error('Defina a associacao ativa antes de registrar um lancamento.');
+            }
+
+            if (!hasOperator || !hasPermission('TREASURY_MANAGE')) {
+                throw new Error('Usuario operador sem permissao para registrar lancamentos financeiros.');
             }
 
             await api.createTreasuryTransaction(type, associationId, {
@@ -72,6 +87,10 @@ export default function NewTransactionPage() {
             setLoading(false);
         }
     }
+
+    const canReadTreasury = hasPermission('TREASURY_READ');
+    const canManageTreasury = hasPermission('TREASURY_MANAGE');
+    const formLocked = !hasAssociation || loadingPermissions || !hasOperator || !canReadTreasury || !canManageTreasury;
 
     return (
         <InstitutionalLayout title="Novo Lancamento" activePath="/tesouraria/lancamentos">
@@ -101,8 +120,12 @@ export default function NewTransactionPage() {
                 )}
 
                 {!hasAssociation && <AssociationRequired message="Informe a associacao ativa no topo antes de registrar um lancamento financeiro." />}
+                {hasAssociation && !loadingPermissions && (!hasOperator || !canReadTreasury || !canManageTreasury) && (
+                    <PermissionRequired message="Selecione um operador com permissao para ler e gerenciar a tesouraria." />
+                )}
 
                 <form onSubmit={handleSubmit} className="space-y-6 rounded-lg border border-slate-800 bg-slate-900 p-6">
+                    <fieldset disabled={formLocked || loading} className="space-y-6 disabled:opacity-70">
                     <fieldset>
                         <legend className={labelClass}>Tipo de lancamento</legend>
                         <div className="inline-flex rounded-lg border border-slate-800 bg-slate-950 p-1">
@@ -158,8 +181,10 @@ export default function NewTransactionPage() {
                         <input id="documentId" required className={inputClass} value={formData.documentId} onChange={(event) => setFormData({ ...formData, documentId: event.target.value })} placeholder="ID do documento comprobatorio" />
                     </div>
 
+                    </fieldset>
+
                     <div className="flex justify-end border-t border-slate-800 pt-6">
-                        <button type="submit" disabled={loading || !hasAssociation} className="app-primary-button inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60">
+                        <button type="submit" disabled={loading || formLocked} className="app-primary-button inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60">
                             <Save size={16} aria-hidden="true" />
                             {loading ? 'Gravando...' : 'Gravar lancamento'}
                         </button>

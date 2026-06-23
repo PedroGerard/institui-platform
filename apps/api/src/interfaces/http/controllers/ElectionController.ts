@@ -2,6 +2,7 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import { z } from "zod";
 import { GovernanceRole } from "../../../domain/entities/Mandate";
 import { prisma } from "../../../infrastructure/database/prisma";
+import { requireOperationalPermission } from "../OperationalAuth";
 
 const dateFromString = z.string().transform((value) => new Date(value));
 
@@ -129,6 +130,11 @@ export class ElectionController {
     static async create(req: FastifyRequest, reply: FastifyReply) {
         try {
             const data = createElectionSchema.parse(req.body);
+            const auth = await requireOperationalPermission(req, reply, {
+                permission: "GOVERNANCE_MANAGE",
+                associationId: data.associationId
+            });
+            if (!auth) return;
 
             if (data.assemblyId) {
                 const assembly = await prisma.assembly.findFirst({
@@ -179,10 +185,16 @@ export class ElectionController {
                 governanceBodyId?: string;
                 assemblyId?: string;
             };
+            const associationId = query.associationId || (req.headers["x-association-id"] as string | undefined);
+            const auth = await requireOperationalPermission(req, reply, {
+                permission: "GOVERNANCE_READ",
+                associationId
+            });
+            if (!auth) return;
 
             const elections = await prisma.election.findMany({
                 where: {
-                    ...(query.associationId ? { associationId: query.associationId } : {}),
+                    associationId: auth.associationId,
                     ...(query.status ? { status: query.status as any } : {}),
                     ...(query.governanceBodyId ? { governanceBodyId: query.governanceBodyId } : {}),
                     ...(query.assemblyId ? { assemblyId: query.assemblyId } : {})
@@ -200,12 +212,15 @@ export class ElectionController {
     static async getById(req: FastifyRequest, reply: FastifyReply) {
         try {
             const { id } = req.params as { id: string };
+            const auth = await requireOperationalPermission(req, reply, { permission: "GOVERNANCE_READ" });
+            if (!auth) return;
+
             const election = await prisma.election.findUnique({
                 where: { id },
                 include: electionInclude
             });
 
-            if (!election) {
+            if (!election || election.associationId !== auth.associationId) {
                 return reply.status(404).send({ error: "Eleicao nao encontrada." });
             }
 
@@ -224,6 +239,12 @@ export class ElectionController {
             if (!election) {
                 return reply.status(404).send({ error: "Eleicao nao encontrada." });
             }
+
+            const auth = await requireOperationalPermission(req, reply, {
+                permission: "GOVERNANCE_MANAGE",
+                associationId: election.associationId
+            });
+            if (!auth) return;
 
             if (election.status === "MANDATES_CREATED") {
                 return reply.status(400).send({ error: "Eleicao ja possui mandatos gerados." });
@@ -255,6 +276,12 @@ export class ElectionController {
             if (!slate) {
                 return reply.status(404).send({ error: "Chapa nao encontrada." });
             }
+
+            const auth = await requireOperationalPermission(req, reply, {
+                permission: "GOVERNANCE_MANAGE",
+                associationId: slate.election.associationId
+            });
+            if (!auth) return;
 
             if (slate.election.status === "MANDATES_CREATED") {
                 return reply.status(400).send({ error: "Eleicao ja possui mandatos gerados." });
@@ -321,6 +348,12 @@ export class ElectionController {
             if (!election) {
                 return reply.status(404).send({ error: "Eleicao nao encontrada." });
             }
+
+            const auth = await requireOperationalPermission(req, reply, {
+                permission: "GOVERNANCE_MANAGE",
+                associationId: election.associationId
+            });
+            if (!auth) return;
 
             const electedSlate = election.slates.find((slate) => slate.id === data.slateId);
 
@@ -403,6 +436,12 @@ export class ElectionController {
             if (!election) {
                 return reply.status(404).send({ error: "Eleicao nao encontrada." });
             }
+
+            const auth = await requireOperationalPermission(req, reply, {
+                permission: "GOVERNANCE_MANAGE",
+                associationId: election.associationId
+            });
+            if (!auth) return;
 
             if (election.status !== "APPROVED") {
                 return reply.status(400).send({ error: "Apenas eleicao homologada pode gerar mandatos." });

@@ -1,19 +1,20 @@
 {
-    "name": "institui-plus-monorepo",
-    "private": true,
-    "workspaces": [
-        "apps/*",
-        "packages/*"
-    ],
-    "scripts": {
-        "dev:frontend": "npm run dev --workspace=apps/frontend",
-        "dev:api": "npm run dev --workspace=apps/api",
-        "prisma:validate": "prisma validate --schema apps/api/prisma/schema.prisma",
-        "prisma:generate": "prisma generate --schema apps/api/prisma/schema.prisma",
-        "test:api": "npm run test --workspace=apps/api -- --run",
-        "build:api": "npm run build --workspace=apps/api",
-        "build:frontend": "npm run build --workspace=apps/frontend",
-        "build": "npm run build:api && npm run build:frontend",
-        "ci": "npm run prisma:validate && npm run prisma:generate && npm run test:api && npm run build"
-    }
+  "name": "institui-platform",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:frontend": "npm run dev --workspace=apps/frontend",
+    "dev:api": "npm run dev --workspace=apps/api",
+    "prisma:validate": "prisma validate --schema apps/api/prisma/schema.prisma",
+    "prisma:generate": "prisma generate --schema apps/api/prisma/schema.prisma",
+    "seed:pilot": "npm run seed --workspace=apps/api",
+    "test:api": "npm run test --workspace=apps/api -- --run",
+    "build:api": "npm run build --workspace=apps/api",
+    "build:frontend": "npm run build --workspace=apps/frontend",
+    "build:platform": "npm run build:api && npm run build:frontend",
+    "ci": "npm run prisma:validate && npm run prisma:generate && npm run test:api && npm run build:platform"
+  }
 }

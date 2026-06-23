@@ -4,6 +4,8 @@ import { FormEvent, use, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { AlertCircle, ArrowLeft, CheckCircle, FileText, Save, ShieldCheck, Wallet, XCircle } from 'lucide-react';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
+import { PermissionRequired } from '@/components/layout/PermissionRequired';
+import { useActiveOperator } from '@/contexts/ActiveOperatorContext';
 import { api } from '@/services/api';
 import { PaymentApprovalRole, PaymentRequestDTO } from '@/types/dtos';
 import { formatCurrency, formatDate, paymentApprovalRoleLabels, paymentRequestStatusLabels } from '@/lib/institutional';
@@ -13,6 +15,7 @@ const labelClass = "mb-2 block text-xs font-semibold uppercase text-slate-500";
 
 export default function PaymentRequestDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
+    const { hasOperator, hasPermission, loadingPermissions } = useActiveOperator();
     const [payment, setPayment] = useState<PaymentRequestDTO | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState<string | null>(null);
@@ -35,6 +38,15 @@ export default function PaymentRequestDetailPage({ params }: { params: Promise<{
     });
 
     async function loadData() {
+        if (loadingPermissions) return;
+
+        if (!hasOperator || !hasPermission('TREASURY_READ')) {
+            setPayment(null);
+            setLoading(false);
+            setError('Usuario operador sem permissao para consultar pagamentos.');
+            return;
+        }
+
         try {
             setLoading(true);
             setError(null);
@@ -58,7 +70,7 @@ export default function PaymentRequestDetailPage({ params }: { params: Promise<{
 
     useEffect(() => {
         loadData();
-    }, [id]);
+    }, [id, hasOperator, hasPermission, loadingPermissions]);
 
     async function approve(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -67,6 +79,10 @@ export default function PaymentRequestDetailPage({ params }: { params: Promise<{
         setSuccess(null);
 
         try {
+            if (!hasOperator || !hasPermission('TREASURY_MANAGE')) {
+                throw new Error('Usuario operador sem permissao para aprovar pagamentos.');
+            }
+
             await api.approvePaymentRequest(id, {
                 approvedById: approvalForm.approvedById || undefined,
                 role: approvalForm.role,
@@ -89,6 +105,10 @@ export default function PaymentRequestDetailPage({ params }: { params: Promise<{
         setSuccess(null);
 
         try {
+            if (!hasOperator || !hasPermission('TREASURY_MANAGE')) {
+                throw new Error('Usuario operador sem permissao para regularizar pagamentos.');
+            }
+
             await api.regularizePaymentRequest(id, {
                 documentId: complianceForm.documentId || undefined,
                 accountabilityProjectId: complianceForm.accountabilityProjectId || undefined,
@@ -113,6 +133,10 @@ export default function PaymentRequestDetailPage({ params }: { params: Promise<{
         setSuccess(null);
 
         try {
+            if (!hasOperator || !hasPermission('TREASURY_MANAGE')) {
+                throw new Error('Usuario operador sem permissao para rejeitar pagamentos.');
+            }
+
             await api.rejectPaymentRequest(id, {
                 approvedById: approvalForm.approvedById || undefined,
                 role: approvalForm.role,
@@ -133,6 +157,10 @@ export default function PaymentRequestDetailPage({ params }: { params: Promise<{
         setSuccess(null);
 
         try {
+            if (!hasOperator || !hasPermission('TREASURY_MANAGE')) {
+                throw new Error('Usuario operador sem permissao para baixar pagamentos.');
+            }
+
             await api.payPaymentRequest(id, {
                 paidAt
             });
@@ -144,6 +172,10 @@ export default function PaymentRequestDetailPage({ params }: { params: Promise<{
             setSaving(null);
         }
     }
+
+    const canReadTreasury = hasPermission('TREASURY_READ');
+    const canManageTreasury = hasPermission('TREASURY_MANAGE');
+    const managementLocked = loadingPermissions || !hasOperator || !canManageTreasury;
 
     return (
         <InstitutionalLayout title="Pagamento" activePath="/tesouraria/pagamentos">
@@ -165,6 +197,13 @@ export default function PaymentRequestDetailPage({ params }: { params: Promise<{
                         <CheckCircle size={18} />
                         {success}
                     </div>
+                )}
+
+                {!loadingPermissions && (!hasOperator || !canReadTreasury) && (
+                    <PermissionRequired message="Selecione um operador com permissao de leitura da tesouraria." />
+                )}
+                {!loadingPermissions && hasOperator && canReadTreasury && !canManageTreasury && (
+                    <PermissionRequired message="O operador atual pode consultar, mas nao pode aprovar, regularizar ou baixar pagamentos." />
                 )}
 
                 {loading ? (
@@ -253,7 +292,7 @@ export default function PaymentRequestDetailPage({ params }: { params: Promise<{
                                         <input type="date" value={complianceForm.negativeCertificateExpiresAt} onChange={(event) => setComplianceForm({ ...complianceForm, negativeCertificateExpiresAt: event.target.value })} className={inputClass} disabled={!complianceForm.requiresNegativeCertificate} />
                                     </div>
                                 </div>
-                                <button type="submit" disabled={saving === 'regularize' || payment.status === 'PAID' || payment.status === 'CANCELED'} className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60">
+                                <button type="submit" disabled={saving === 'regularize' || payment.status === 'PAID' || payment.status === 'CANCELED' || managementLocked} className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60">
                                     <Save size={16} />
                                     Salvar regularizacao
                                 </button>
@@ -285,11 +324,11 @@ export default function PaymentRequestDetailPage({ params }: { params: Promise<{
                                     </div>
                                 </div>
                                 <div className="mt-5 grid gap-3 md:grid-cols-2">
-                                    <button type="submit" disabled={saving === 'approve' || payment.status === 'PAID'} className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60">
+                                    <button type="submit" disabled={saving === 'approve' || payment.status === 'PAID' || managementLocked} className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60">
                                         <CheckCircle size={16} />
                                         Aprovar
                                     </button>
-                                    <button type="button" onClick={reject} disabled={saving === 'reject' || payment.status === 'PAID'} className="inline-flex items-center justify-center gap-2 rounded-lg border border-rose-500/50 px-4 py-2.5 text-sm font-medium text-rose-300 hover:bg-rose-500/10 disabled:cursor-not-allowed disabled:opacity-60">
+                                    <button type="button" onClick={reject} disabled={saving === 'reject' || payment.status === 'PAID' || managementLocked} className="inline-flex items-center justify-center gap-2 rounded-lg border border-rose-500/50 px-4 py-2.5 text-sm font-medium text-rose-300 hover:bg-rose-500/10 disabled:cursor-not-allowed disabled:opacity-60">
                                         <XCircle size={16} />
                                         Rejeitar
                                     </button>
@@ -325,8 +364,8 @@ export default function PaymentRequestDetailPage({ params }: { params: Promise<{
                                     <h3 className="font-semibold">Baixa financeira</h3>
                                 </div>
                                 <label className={labelClass}>Data do pagamento</label>
-                                <input type="date" value={paidAt} onChange={(event) => setPaidAt(event.target.value)} className={inputClass} />
-                                <button type="button" onClick={pay} disabled={saving === 'pay' || payment.status !== 'APPROVED'} className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60">
+                                <input type="date" value={paidAt} onChange={(event) => setPaidAt(event.target.value)} disabled={managementLocked} className={inputClass} />
+                                <button type="button" onClick={pay} disabled={saving === 'pay' || payment.status !== 'APPROVED' || managementLocked} className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60">
                                     <Save size={16} />
                                     Baixar pagamento
                                 </button>

@@ -4,10 +4,14 @@ import { use } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, BookOpenCheck } from 'lucide-react';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
+import { PermissionRequired } from '@/components/layout/PermissionRequired';
 import { RegisterMinutesForm } from '@/components/assemblies/RegisterMinutesForm';
+import { useActiveOperator } from '@/contexts/ActiveOperatorContext';
 
 export default function RegisterMinutesPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
+    const { hasOperator, hasPermission, loadingPermissions } = useActiveOperator();
+    const canManageGovernance = hasPermission('GOVERNANCE_MANAGE');
 
     return (
         <InstitutionalLayout title="Registro de ata" activePath="/assembleias">
@@ -30,7 +34,13 @@ export default function RegisterMinutesPage({ params }: { params: Promise<{ id: 
                 </div>
 
                 <div className="rounded-lg border border-slate-800 bg-slate-900 p-6 md:p-8">
-                    <RegisterMinutesForm assemblyId={id} onSuccess={() => undefined} />
+                    {loadingPermissions ? (
+                        <div className="text-sm text-slate-400">Validando permissoes operacionais...</div>
+                    ) : !hasOperator || !canManageGovernance ? (
+                        <PermissionRequired message="Selecione um operador com permissao para registrar atas oficiais." />
+                    ) : (
+                        <RegisterMinutesForm assemblyId={id} onSuccess={() => undefined} />
+                    )}
                 </div>
             </div>
         </InstitutionalLayout>

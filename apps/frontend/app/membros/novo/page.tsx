@@ -5,7 +5,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
 import { AssociationRequired } from '@/components/layout/AssociationRequired';
+import { PermissionRequired } from '@/components/layout/PermissionRequired';
 import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
+import { useActiveOperator } from '@/contexts/ActiveOperatorContext';
 import { api } from '@/services/api';
 import { MemberType } from '@/types/dtos';
 import { memberTypeLabels } from '@/lib/institutional';
@@ -17,6 +19,7 @@ const labelClass = "mb-2 block text-xs font-semibold uppercase text-slate-500";
 export default function NewMemberPage() {
     const router = useRouter();
     const { associationId, hasAssociation } = useActiveAssociation();
+    const { hasOperator, hasPermission, loadingPermissions } = useActiveOperator();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
@@ -42,6 +45,10 @@ export default function NewMemberPage() {
                 throw new Error('Defina a associacao ativa antes de cadastrar um membro.');
             }
 
+            if (!hasOperator || !hasPermission('MEMBERS_MANAGE')) {
+                throw new Error('Usuario operador sem permissao para cadastrar membros.');
+            }
+
             await api.createMember({ ...formData, associationId });
             setSuccess(true);
             setTimeout(() => router.push('/membros'), 700);
@@ -51,6 +58,9 @@ export default function NewMemberPage() {
             setLoading(false);
         }
     }
+
+    const canManageMembers = hasPermission('MEMBERS_MANAGE');
+    const formLocked = !hasAssociation || loadingPermissions || !hasOperator || !canManageMembers;
 
     return (
         <InstitutionalLayout title="Novo membro" activePath="/membros/novo">
@@ -76,9 +86,12 @@ export default function NewMemberPage() {
                 )}
 
                 {!hasAssociation && <AssociationRequired message="Informe a associacao ativa no topo antes de cadastrar um membro." />}
+                {hasAssociation && !loadingPermissions && (!hasOperator || !canManageMembers) && (
+                    <PermissionRequired message="Selecione um operador com permissao para cadastrar membros." />
+                )}
 
                 <form onSubmit={handleSubmit} className="rounded-lg border border-slate-800 bg-slate-900 p-6">
-                    <div className="grid gap-5 md:grid-cols-2">
+                    <fieldset disabled={formLocked || loading} className="grid gap-5 disabled:opacity-70 md:grid-cols-2">
                         <div className="md:col-span-2">
                             <label className={labelClass}>Associacao</label>
                             <input
@@ -173,12 +186,12 @@ export default function NewMemberPage() {
                                 ))}
                             </select>
                         </div>
-                    </div>
+                    </fieldset>
 
                     <div className="mt-6 flex justify-end border-t border-slate-800 pt-6">
                         <button
                             type="submit"
-                            disabled={loading || !hasAssociation}
+                            disabled={loading || formLocked}
                             className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                             <Save size={17} />

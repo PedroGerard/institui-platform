@@ -5,10 +5,13 @@ import {
     AccountabilityProjectDTO,
     AccountabilityReportDTO,
     AccountabilityStatus,
+    AuditAction,
+    AuditLogDTO,
     AssemblyAttendanceDTO,
     AssemblyDTO,
     AssemblyDeliberationDTO,
     AssemblyType,
+    AssociationDTO,
     AssociationStatusDTO,
     DocumentType,
     ElectionCandidateDTO,
@@ -30,6 +33,7 @@ import {
     MemberDTO,
     MemberStatus,
     MemberType,
+    OperationalContextDTO,
     BankReconciliationSummaryDTO,
     BankStatementEntryDTO,
     BankStatementEntryStatus,
@@ -46,11 +50,24 @@ import {
     PaymentRequestStatus,
     SupplierDTO,
     TreasuryReportDTO,
-    TreasuryReportType
+    TreasuryReportType,
+    UserDTO,
+    UserRole
 } from "../types/dtos";
 import { FinancialAccount } from "../types/financial";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3333";
+const ACTIVE_ASSOCIATION_STORAGE_KEY = "institui.activeAssociationId";
+const ACTIVE_OPERATOR_STORAGE_KEY = "institui.activeUserId";
+
+function getStoredValue(key: string) {
+    if (typeof window === "undefined") return "";
+    return window.localStorage.getItem(key) || "";
+}
+
+function hasHeader(headers: Record<string, string>, headerName: string) {
+    return Object.keys(headers).some((key) => key.toLowerCase() === headerName.toLowerCase());
+}
 
 class ApiService {
     public getBaseUrl() {
@@ -61,9 +78,19 @@ class ApiService {
         const headers: Record<string, string> = {
             ...(options?.headers as Record<string, string> | undefined),
         };
+        const activeAssociationId = getStoredValue(ACTIVE_ASSOCIATION_STORAGE_KEY);
+        const activeOperatorId = getStoredValue(ACTIVE_OPERATOR_STORAGE_KEY);
 
         if (options?.body && !headers["Content-Type"]) {
             headers["Content-Type"] = "application/json";
+        }
+
+        if (activeAssociationId && !hasHeader(headers, "x-association-id")) {
+            headers["x-association-id"] = activeAssociationId;
+        }
+
+        if (activeAssociationId && activeOperatorId && !hasHeader(headers, "x-user-id")) {
+            headers["x-user-id"] = activeOperatorId;
         }
 
         const response = await fetch(`${API_BASE_URL}${endpoint}`, {
@@ -85,6 +112,14 @@ class ApiService {
 
     // --- Read Components ---
 
+    public async listAssociations(): Promise<AssociationDTO[]> {
+        return this.fetch<AssociationDTO[]>('/associations');
+    }
+
+    public async getAssociation(id: string): Promise<AssociationDTO> {
+        return this.fetch<AssociationDTO>(`/associations/${id}`);
+    }
+
     public async getLegalEvents(associationId: string): Promise<LegalEventDTO[]> {
         return this.fetch<LegalEventDTO[]>(`/legal-events/${associationId}`);
     }
@@ -93,7 +128,78 @@ class ApiService {
         return this.fetch<AssociationStatusDTO>(`/association/status/${associationId}`);
     }
 
+    public async listAuditLogs(filters: {
+        associationId: string;
+        action?: AuditAction | "";
+        entity?: string;
+        performedById?: string;
+        dateFrom?: string;
+        dateTo?: string;
+        limit?: number;
+    }): Promise<AuditLogDTO[]> {
+        const params = new URLSearchParams();
+
+        params.set("associationId", filters.associationId);
+        if (filters.action) params.set("action", filters.action);
+        if (filters.entity) params.set("entity", filters.entity);
+        if (filters.performedById) params.set("performedById", filters.performedById);
+        if (filters.dateFrom) params.set("dateFrom", filters.dateFrom);
+        if (filters.dateTo) params.set("dateTo", filters.dateTo);
+        if (filters.limit) params.set("limit", String(filters.limit));
+
+        return this.fetch<AuditLogDTO[]>(`/audit-logs?${params.toString()}`);
+    }
+
     // --- Write Components ---
+
+    public async createAssociation(payload: {
+        name: string;
+        cnpj: string;
+        foundationDate: string;
+    }): Promise<AssociationDTO> {
+        return this.fetch<AssociationDTO>('/associations', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+    }
+
+    public async updateAssociation(id: string, payload: {
+        name?: string;
+        cnpj?: string;
+        foundationDate?: string;
+    }): Promise<AssociationDTO> {
+        return this.fetch<AssociationDTO>(`/associations/${id}`, {
+            method: 'PATCH',
+            body: JSON.stringify(payload)
+        });
+    }
+
+    public async listUsers(associationId: string): Promise<UserDTO[]> {
+        return this.fetch<UserDTO[]>(`/users?associationId=${associationId}`);
+    }
+
+    public async getOperationalContext(): Promise<OperationalContextDTO> {
+        return this.fetch<OperationalContextDTO>('/users/me/context');
+    }
+
+    public async createUser(payload: {
+        associationId: string;
+        name: string;
+        email: string;
+        role: Exclude<UserRole, "SYSTEM">;
+    }): Promise<UserDTO> {
+        return this.fetch<UserDTO>('/users', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+    }
+
+    public async updateUserRole(id: string, role: Exclude<UserRole, "SYSTEM">): Promise<UserDTO> {
+        return this.fetch<UserDTO>(`/users/${id}/role`, {
+            method: 'PATCH',
+            body: JSON.stringify({ role })
+        });
+    }
 
     public async callAssembly(payload: {
         associationId: string;

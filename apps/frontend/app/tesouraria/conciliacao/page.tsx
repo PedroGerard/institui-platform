@@ -4,7 +4,9 @@ import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { AlertCircle, CheckCircle2, RefreshCw, Save, ShieldCheck, XCircle } from 'lucide-react';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
 import { AssociationRequired } from '@/components/layout/AssociationRequired';
+import { PermissionRequired } from '@/components/layout/PermissionRequired';
 import { useActiveAssociation } from '@/contexts/ActiveAssociationContext';
+import { useActiveOperator } from '@/contexts/ActiveOperatorContext';
 import { api } from '@/services/api';
 import {
     BankReconciliationSummaryDTO,
@@ -32,6 +34,7 @@ const initialForm = {
 
 export default function BankReconciliationPage() {
     const { associationId, hasAssociation } = useActiveAssociation();
+    const { hasOperator, hasPermission, loadingPermissions } = useActiveOperator();
     const [accounts, setAccounts] = useState<FinancialAccount[]>([]);
     const [entries, setEntries] = useState<BankStatementEntryDTO[]>([]);
     const [candidates, setCandidates] = useState<FinancialEntryDTO[]>([]);
@@ -53,6 +56,18 @@ export default function BankReconciliationPage() {
             setSummary(null);
             setCandidates([]);
             setLoading(false);
+            return;
+        }
+
+        if (loadingPermissions) return;
+
+        if (!hasOperator || !hasPermission('TREASURY_READ')) {
+            setAccounts([]);
+            setEntries([]);
+            setSummary(null);
+            setCandidates([]);
+            setLoading(false);
+            setError('Usuario operador sem permissao para consultar conciliacao bancaria.');
             return;
         }
 
@@ -82,7 +97,7 @@ export default function BankReconciliationPage() {
 
     useEffect(() => {
         loadData();
-    }, [associationId, status]);
+    }, [associationId, status, hasOperator, hasPermission, loadingPermissions]);
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -93,6 +108,10 @@ export default function BankReconciliationPage() {
         try {
             if (!associationId) {
                 throw new Error('Defina a associacao ativa antes de registrar movimento bancario.');
+            }
+
+            if (!hasOperator || !hasPermission('TREASURY_MANAGE')) {
+                throw new Error('Usuario operador sem permissao para registrar movimento bancario.');
             }
 
             await api.createBankStatementEntry({
@@ -124,6 +143,10 @@ export default function BankReconciliationPage() {
         if (!financialEntryId) return;
 
         try {
+            if (!hasOperator || !hasPermission('TREASURY_MANAGE')) {
+                throw new Error('Usuario operador sem permissao para conciliar movimentos.');
+            }
+
             setError(null);
             setSuccess(null);
             await api.reconcileBankStatementEntry(entryId, financialEntryId);
@@ -137,6 +160,10 @@ export default function BankReconciliationPage() {
 
     async function handleUnreconcile(entryId: string) {
         try {
+            if (!hasOperator || !hasPermission('TREASURY_MANAGE')) {
+                throw new Error('Usuario operador sem permissao para desfazer conciliacao.');
+            }
+
             setError(null);
             setSuccess(null);
             await api.unreconcileBankStatementEntry(entryId);
@@ -149,6 +176,10 @@ export default function BankReconciliationPage() {
 
     async function handleIgnore(entryId: string) {
         try {
+            if (!hasOperator || !hasPermission('TREASURY_MANAGE')) {
+                throw new Error('Usuario operador sem permissao para ignorar movimento bancario.');
+            }
+
             setError(null);
             setSuccess(null);
             await api.ignoreBankStatementEntry(entryId, 'Ignorado pela tesouraria');
@@ -175,6 +206,10 @@ export default function BankReconciliationPage() {
         if (statusValue === 'IGNORED') return 'bg-slate-700 text-slate-300';
         return 'bg-amber-500/10 text-amber-300';
     }
+
+    const canReadTreasury = hasPermission('TREASURY_READ');
+    const canManageTreasury = hasPermission('TREASURY_MANAGE');
+    const managementLocked = !hasAssociation || loadingPermissions || !hasOperator || !canManageTreasury;
 
     return (
         <InstitutionalLayout title="Conciliacao Bancaria" activePath="/tesouraria/conciliacao">
@@ -223,6 +258,12 @@ export default function BankReconciliationPage() {
                 )}
 
                 {!hasAssociation && <AssociationRequired message="Informe a associacao ativa no topo antes de conciliar movimentos bancarios." />}
+                {hasAssociation && !loadingPermissions && (!hasOperator || !canReadTreasury) && (
+                    <PermissionRequired message="Selecione um operador com permissao de leitura da tesouraria." />
+                )}
+                {hasAssociation && !loadingPermissions && hasOperator && canReadTreasury && !canManageTreasury && (
+                    <PermissionRequired message="O operador atual pode consultar, mas nao pode conciliar movimentos bancarios." />
+                )}
 
                 <div className="grid gap-4 md:grid-cols-4">
                     <div className="rounded-lg border border-slate-800 bg-slate-900 p-5">
@@ -320,7 +361,7 @@ export default function BankReconciliationPage() {
                         />
                         <button
                             type="submit"
-                            disabled={saving || !hasAssociation}
+                            disabled={saving || managementLocked}
                             className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                             <Save size={16} />
@@ -399,7 +440,7 @@ export default function BankReconciliationPage() {
                                                     <>
                                                         <button
                                                             type="button"
-                                                            disabled={!selectedCandidates[entry.id]}
+                                                            disabled={!selectedCandidates[entry.id] || managementLocked}
                                                             onClick={() => handleReconcile(entry.id)}
                                                             className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
                                                         >
@@ -409,7 +450,8 @@ export default function BankReconciliationPage() {
                                                         <button
                                                             type="button"
                                                             onClick={() => handleIgnore(entry.id)}
-                                                            className="inline-flex items-center gap-2 rounded-lg border border-slate-700 px-3 py-2 text-xs font-medium text-slate-300 hover:bg-slate-800"
+                                                            disabled={managementLocked}
+                                                            className="inline-flex items-center gap-2 rounded-lg border border-slate-700 px-3 py-2 text-xs font-medium text-slate-300 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
                                                         >
                                                             <XCircle size={14} />
                                                             Ignorar
@@ -420,7 +462,8 @@ export default function BankReconciliationPage() {
                                                     <button
                                                         type="button"
                                                         onClick={() => handleUnreconcile(entry.id)}
-                                                        className="inline-flex items-center gap-2 rounded-lg border border-slate-700 px-3 py-2 text-xs font-medium text-slate-300 hover:bg-slate-800"
+                                                        disabled={managementLocked}
+                                                        className="inline-flex items-center gap-2 rounded-lg border border-slate-700 px-3 py-2 text-xs font-medium text-slate-300 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
                                                     >
                                                         <RefreshCw size={14} />
                                                         Desfazer

@@ -42,7 +42,7 @@ function loadLocalEnvFiles() {
     const cwd = process.env.INSTITUI_ENV_DIR || process.cwd();
 
     loadEnvFile(resolve(cwd, ".env"));
-    loadEnvFile(resolve(cwd, "apps/api/.env"));
+    loadEnvFile(resolve(cwd, "instituto-platform/apps/api/.env"));
 }
 
 loadLocalEnvFiles();

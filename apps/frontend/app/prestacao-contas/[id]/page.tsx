@@ -4,6 +4,8 @@ import { use, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { AccountabilityProjectNav } from '@/components/accountability/AccountabilityProjectNav';
 import InstitutionalLayout from '@/components/layout/InstitutionalLayout';
+import { PermissionRequired } from '@/components/layout/PermissionRequired';
+import { useActiveOperator } from '@/contexts/ActiveOperatorContext';
 import { api } from '@/services/api';
 import { AccountabilityChecklistDTO, AccountabilityProjectDTO, AccountabilityStatus, GeneratedDocumentDTO } from '@/types/dtos';
 import { accountabilityStatusLabels, formatDate, instrumentTypeLabels } from '@/lib/institutional';
@@ -21,6 +23,7 @@ function MetricCard({ label, value, hint }: { label: string; value: string; hint
 
 export default function AccountabilityProjectPage({ params }: { params: Promise<{ id: string }> }) {
     const { id: projectId } = use(params);
+    const { hasOperator, hasPermission, loadingPermissions } = useActiveOperator();
     const [project, setProject] = useState<AccountabilityProjectDTO | null>(null);
     const [checklist, setChecklist] = useState<AccountabilityChecklistDTO | null>(null);
     const [loading, setLoading] = useState(true);
@@ -32,6 +35,16 @@ export default function AccountabilityProjectPage({ params }: { params: Promise<
     const latestOpinion = useMemo(() => project?.fiscalOpinions?.[0], [project]);
 
     async function loadProject() {
+        if (loadingPermissions) return;
+
+        if (!hasOperator || !hasPermission('ACCOUNTABILITY_READ')) {
+            setProject(null);
+            setChecklist(null);
+            setLoading(false);
+            setError('Usuario operador sem permissao para consultar prestacao de contas.');
+            return;
+        }
+
         try {
             setLoading(true);
             setError(null);
@@ -50,6 +63,10 @@ export default function AccountabilityProjectPage({ params }: { params: Promise<
 
     async function updateStatus(status: AccountabilityStatus) {
         try {
+            if (!hasOperator || !hasPermission('ACCOUNTABILITY_MANAGE')) {
+                throw new Error('Usuario operador sem permissao para alterar status da prestacao.');
+            }
+
             setActionLoading('status');
             setMessage(null);
             setError(null);
@@ -65,6 +82,10 @@ export default function AccountabilityProjectPage({ params }: { params: Promise<
 
     async function submitProject() {
         try {
+            if (!hasOperator || !hasPermission('ACCOUNTABILITY_MANAGE')) {
+                throw new Error('Usuario operador sem permissao para submeter prestacao.');
+            }
+
             setActionLoading('submit');
             setMessage(null);
             setError(null);
@@ -80,6 +101,10 @@ export default function AccountabilityProjectPage({ params }: { params: Promise<
 
     async function generateOfficialFiscalOpinion() {
         try {
+            if (!hasOperator || !hasPermission('DOCUMENTS_GENERATE')) {
+                throw new Error('Usuario operador sem permissao para gerar parecer fiscal oficial.');
+            }
+
             setActionLoading('official-opinion');
             setMessage(null);
             setError(null);
@@ -95,12 +120,25 @@ export default function AccountabilityProjectPage({ params }: { params: Promise<
 
     useEffect(() => {
         loadProject();
-    }, [projectId]);
+    }, [projectId, hasOperator, hasPermission, loadingPermissions]);
+
+    const canReadAccountability = hasPermission('ACCOUNTABILITY_READ');
+    const canManageAccountability = hasPermission('ACCOUNTABILITY_MANAGE');
+    const canGenerateDocuments = hasPermission('DOCUMENTS_GENERATE');
+    const managementLocked = loadingPermissions || !hasOperator || !canManageAccountability;
+    const documentLocked = loadingPermissions || !hasOperator || !canGenerateDocuments;
 
     return (
         <InstitutionalLayout title="Prestacao de contas" activePath="/prestacao-contas">
             <div className="space-y-6">
                 <AccountabilityProjectNav projectId={projectId} active="" />
+
+                {!loadingPermissions && (!hasOperator || !canReadAccountability) && (
+                    <PermissionRequired message="Selecione um operador com permissao de leitura de prestacao de contas." />
+                )}
+                {!loadingPermissions && hasOperator && canReadAccountability && !canManageAccountability && (
+                    <PermissionRequired message="O operador atual pode consultar, mas nao pode alterar ou submeter prestacoes." />
+                )}
 
                 {(error || message) && (
                     <div className={`flex items-center justify-between gap-3 rounded-lg border p-4 text-sm ${message
@@ -132,14 +170,14 @@ export default function AccountabilityProjectPage({ params }: { params: Promise<
                                 </p>
                             </div>
                             <div className="flex flex-col gap-3 sm:flex-row">
-                                <select value={project.status} onChange={(event) => updateStatus(event.target.value as AccountabilityStatus)} disabled={actionLoading === 'status'} className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none focus:border-blue-500">
+                                <select value={project.status} onChange={(event) => updateStatus(event.target.value as AccountabilityStatus)} disabled={actionLoading === 'status' || managementLocked} className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none focus:border-blue-500 disabled:cursor-not-allowed disabled:opacity-60">
                                     {Object.entries(accountabilityStatusLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
                                 </select>
                                 <button onClick={loadProject} className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-slate-800">
                                     <RefreshCw size={16} />
                                     Atualizar
                                 </button>
-                                <button onClick={submitProject} disabled={Boolean(actionLoading)} className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60">
+                                <button onClick={submitProject} disabled={Boolean(actionLoading) || managementLocked} className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60">
                                     <Send size={16} />
                                     Submeter
                                 </button>
@@ -171,7 +209,7 @@ export default function AccountabilityProjectPage({ params }: { params: Promise<
                                 <div className="mt-4 flex flex-wrap gap-3">
                                     <Link href={`/prestacao-contas/${projectId}/documentos`} className="rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-200 hover:bg-slate-800">Anexar documentos</Link>
                                     <Link href={`/prestacao-contas/${projectId}/parecer`} className="rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-200 hover:bg-slate-800">Registrar parecer</Link>
-                                    <button onClick={generateOfficialFiscalOpinion} disabled={Boolean(actionLoading)} className="inline-flex items-center gap-2 rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-200 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60">
+                                    <button onClick={generateOfficialFiscalOpinion} disabled={Boolean(actionLoading) || documentLocked} className="inline-flex items-center gap-2 rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-200 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60">
                                         <FileSignature size={15} />
                                         Gerar Parecer Fiscal
                                     </button>

@@ -2,6 +2,7 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import { z } from "zod";
 import { prisma } from "../../../infrastructure/database/prisma";
 import { AssemblyService } from "../../../domain/services/AssemblyService";
+import { requireOperationalPermission } from "../OperationalAuth";
 
 const attendanceSchema = z.object({
     memberId: z.string().uuid().optional(),
@@ -126,10 +127,15 @@ export class AssemblyController {
         try {
             const query = req.query as { associationId?: string; status?: string; type?: string };
             const associationId = query.associationId || (req.headers["x-association-id"] as string | undefined);
+            const auth = await requireOperationalPermission(req, reply, {
+                permission: "GOVERNANCE_READ",
+                associationId
+            });
+            if (!auth) return;
 
             const assemblies = await prisma.assembly.findMany({
                 where: {
-                    ...(associationId ? { associationId } : {}),
+                    associationId: auth.associationId,
                     ...(query.status ? { status: query.status } : {}),
                     ...(query.type ? { type: query.type } : {})
                 },
@@ -146,12 +152,15 @@ export class AssemblyController {
     static async getById(req: FastifyRequest, reply: FastifyReply) {
         try {
             const { id } = req.params as { id: string };
+            const auth = await requireOperationalPermission(req, reply, { permission: "GOVERNANCE_READ" });
+            if (!auth) return;
+
             const assembly = await prisma.assembly.findUnique({
                 where: { id },
                 include: includeAssemblyDetails
             });
 
-            if (!assembly) {
+            if (!assembly || assembly.associationId !== auth.associationId) {
                 return reply.status(404).send({ error: "Assembly not found" });
             }
 
@@ -173,6 +182,12 @@ export class AssemblyController {
             if (!assembly) {
                 return reply.status(404).send({ error: "Assembly not found" });
             }
+
+            const auth = await requireOperationalPermission(req, reply, {
+                permission: "GOVERNANCE_MANAGE",
+                associationId: assembly.associationId
+            });
+            if (!auth) return;
 
             if (data.memberId) {
                 const member = await prisma.member.findUnique({
@@ -219,12 +234,18 @@ export class AssemblyController {
             const data = deliberationSchema.parse(req.body);
             const assembly = await prisma.assembly.findUnique({
                 where: { id },
-                select: { id: true, presentVotingMembers: true }
+                select: { id: true, associationId: true, presentVotingMembers: true }
             });
 
             if (!assembly) {
                 return reply.status(404).send({ error: "Assembly not found" });
             }
+
+            const auth = await requireOperationalPermission(req, reply, {
+                permission: "GOVERNANCE_MANAGE",
+                associationId: assembly.associationId
+            });
+            if (!auth) return;
 
             const requiresTwoThirds = data.requiredQuorum === "TWO_THIRDS";
             const result = data.result || (

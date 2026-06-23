@@ -1,4 +1,4 @@
-name: CI
+name: Platform
 
 on:
   workflow_dispatch:
@@ -14,16 +14,15 @@ permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
+  group: platform-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   validate:
-    name: Validate monorepo
+    name: Validate ERP platform
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     env:
-      DATABASE_URL: postgresql://institui:institui@localhost:5432/institui_ci
       NEXT_TELEMETRY_DISABLED: "1"
 
     steps:
@@ -40,5 +39,5 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Validate Prisma, API and frontend
+      - name: Validate platform
         run: npm run ci

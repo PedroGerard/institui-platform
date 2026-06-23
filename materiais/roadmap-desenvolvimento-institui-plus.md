@@ -4,7 +4,7 @@ Atualizado em 16 de junho de 2026.
 
 ## Links operacionais
 
-- Repositorio GitHub: https://github.com/PedroGerard/institui-platform
+- Repositorio GitHub atual: https://github.com/PedroGerard/institui-platform
 - GitHub Project: INSTITUI+ Roadmap de Desenvolvimento
 - Figma: INSTITUI Design System e Modulos Operacionais
 - Pull Request aberto: #9 - Sprint 00: contexto de associacao ativa

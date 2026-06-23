@@ -1,16 +1,16 @@
 # Documentacao operacional - INSTITUI+
 
-Atualizado em 16 de junho de 2026.
+Atualizado em 23 de junho de 2026.
 
-Este documento orienta como rodar, validar, contribuir e preparar o INSTITUI+ para a Sprint 01.
+Este documento orienta como rodar, validar, contribuir e preparar o INSTITUI+ Platform, o sistema ERP voltado a gestao, governanca, compliance e prestacao de contas para OSCs.
 
 ## Repositorio e ferramentas
 
-- Repositorio: `PedroGerard/institui-platform`
-- Branch de trabalho atual: `codex/sprint-00-associacao-ativa`
+- Repositorio atual: `PedroGerard/institui-platform`
+- Branch de trabalho atual: `main`
 - GitHub Project: `INSTITUI+ Roadmap de Desenvolvimento`
 - Figma: `INSTITUI Design System e Modulos Operacionais`
-- Workflow principal de validacao: `.github/workflows/frontend.yml`
+- Workflow principal de validacao: `.github/workflows/platform.yml`
 
 ## Preparacao local
 
@@ -37,22 +37,22 @@ Em producao, `CORS_ORIGINS` deve listar origens explicitas e nao pode usar `*`.
 
 ## Rodar localmente
 
-Frontend:
+Frontend administrativo do ERP:
 
 ```bash
-npm run dev --workspace=apps/frontend
+npm run dev:frontend
 ```
 
 API:
 
 ```bash
-npm run dev --workspace=apps/api
+npm run dev:api
 ```
 
 URLs padrao:
 
 ```text
-Frontend: http://localhost:3000
+ERP frontend: http://localhost:3000
 API: http://localhost:3333
 ```
 
@@ -70,7 +70,7 @@ Esse comando executa:
 - geracao do Prisma Client;
 - testes da API;
 - build da API;
-- build do frontend.
+- build do frontend administrativo.
 
 Comandos individuais:
 

@@ -2,6 +2,7 @@ import {
     AssemblyStatus,
     AssemblyType,
     AccountabilityStatus,
+    AuditAction,
     DocumentType,
     ElectionSlateStatus,
     ElectionStatus,
@@ -22,7 +23,8 @@ import {
     ProcurementProcessStatus,
     SupplierProposalStatus,
     ReportType,
-    TreasuryReportType
+    TreasuryReportType,
+    UserRole
 } from "@/types/dtos";
 
 export const memberTypeLabels: Record<MemberType, string> = {
@@ -38,6 +40,21 @@ export const memberStatusLabels: Record<MemberStatus, string> = {
     INACTIVE: "Inativo",
     SUSPENDED: "Suspenso",
     EXCLUDED: "Excluido"
+};
+
+export const userRoleLabels: Record<UserRole, string> = {
+    ADM: "Administrador",
+    MEMBER: "Membro",
+    AUDITOR: "Auditoria/Conselho fiscal",
+    SYSTEM: "Sistema"
+};
+
+export const auditActionLabels: Record<AuditAction, string> = {
+    CREATE: "Criacao",
+    UPDATE: "Atualizacao",
+    DELETE: "Exclusao",
+    APPROVE: "Aprovacao",
+    REJECT: "Rejeicao"
 };
 
 export const governanceRoleLabels: Record<GovernanceRole, string> = {
