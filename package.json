@@ -1,23 +1,29 @@
 {
-    "name": "institui-plus-monorepo",
-    "private": true,
-    "workspaces": [
-        "instituto-platform/apps/*",
-        "instituto-platform/packages/*"
-    ],
-    "scripts": {
-        "dev:frontend": "npm run dev --workspace=instituto-platform/apps/frontend",
-        "dev:api": "npm run dev --workspace=instituto-platform/apps/api",
-        "dev:site": "npm run dev --prefix instituto-incentive-site",
-        "prisma:validate": "prisma validate --schema instituto-platform/apps/api/prisma/schema.prisma",
-        "prisma:generate": "prisma generate --schema instituto-platform/apps/api/prisma/schema.prisma",
-        "seed:pilot": "npm run seed --workspace=instituto-platform/apps/api",
-        "test:api": "npm run test --workspace=instituto-platform/apps/api -- --run",
-        "build:api": "npm run build --workspace=instituto-platform/apps/api",
-        "build:frontend": "npm run build --workspace=instituto-platform/apps/frontend",
-        "build:platform": "npm run build:api && npm run build:frontend",
-        "build:site": "npm run build --prefix instituto-incentive-site",
-        "build": "npm run build:platform && npm run build:site",
-        "ci": "npm run prisma:validate && npm run prisma:generate && npm run test:api && npm run build:platform && npm ci --prefix instituto-incentive-site && npm run build:site"
-    }
+  "name": "instituto-incentive-site",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --webpack",
+    "build": "next build --webpack",
+    "start": "next start",
+    "lint": "eslint app src --ext .js,.jsx,.ts,.tsx"
+  },
+  "dependencies": {
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.0.0",
+    "lucide-react": "^0.562.0",
+    "next": "^16.2.9",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "^16.2.9",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
 }

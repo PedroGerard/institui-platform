@@ -27,11 +27,27 @@ coverage/
 dev-server*.log
 test_output*.txt
 **/storage/
+materiais/**/chrome-profile*/
 git-meta-test/
 git-upload-meta/
 brand-manual-temp/
+instituto-incentive-site/
 materiais/identity_pdf_extract/
 **/.next-dev.pid
+next-env.d.ts
+
+# Workspace-only files. The site repository must not track the ERP.
+/instituto-platform/
+/materiais/construcao-modulo-a-modulo-institui-plus.md
+/materiais/divida-tecnica-sprint-00.md
+/materiais/documentacao-operacional.md
+/materiais/figma-rastreabilidade-sprint-00.md
+/materiais/matriz-estatutaria-instituto-incentive.md
+/materiais/matriz-estatutaria-oscs.md
+/materiais/plano-mvp-piloto-institui-plus.md
+/materiais/proximas-acoes.md
+/materiais/radar-esg-incentive/
+/materiais/roadmap-desenvolvimento-institui-plus.md
 
 # Tooling
 .vercel/

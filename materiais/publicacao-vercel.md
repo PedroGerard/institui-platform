@@ -13,13 +13,37 @@ https://github.com/PedroGerard/instituto-incentive-site
 Ao importar o repositorio, usar:
 
 - Framework Preset: `Next.js`
-- Root Directory: `instituto-incentive-site`
+- Root Directory: vazio / raiz do repositorio
 - Install Command: `npm ci`
 - Build Command: `npm run build`
 - Output Directory: deixar em branco ou manter o padrao do Next.js
 
-Nao selecionar a raiz do repositorio como projeto principal. O site publico esta dentro de `instituto-incentive-site`.
-Tambem nao apontar o deploy publico para `instituto-platform/apps/frontend`, porque essa pasta agora e o sistema de gestao.
+O site publico esta na raiz do repositorio, com `app/`, `src/`, `public/`, `package.json`,
+`next.config.ts` e `vercel.json`.
+
+Nao apontar o deploy publico para `instituto-incentive-site`, `apps/frontend` nem
+`instituto-platform/apps/frontend`. Esses caminhos pertencem a estruturas antigas ou ao sistema de gestao.
+
+## Correcao urgente: erro de Root Directory
+
+Se a Vercel mostrar a mensagem:
+
+```text
+O diretorio raiz especificado "apps/frontend" nao existe.
+```
+
+o projeto esta apontando para o caminho antigo. Corrija no painel da Vercel:
+
+1. Acesse o projeto do site institucional.
+2. Entre em `Settings`.
+3. Abra `Build & Development Settings`.
+4. Em `Root Directory`, clique em `Edit`.
+5. Remova qualquer caminho preenchido e deixe o campo vazio, apontando para a raiz.
+6. Salve.
+7. Volte em `Deployments` e clique em `Redeploy` no ultimo deploy.
+
+Nao use `instituto-incentive-site`, `apps/frontend` nem `instituto-platform/apps/frontend` para o site publico.
+Esses caminhos pertencem ao historico da transicao ou ao sistema administrativo.
 
 ## Passo a passo
 
@@ -27,7 +51,7 @@ Tambem nao apontar o deploy publico para `instituto-platform/apps/frontend`, por
 2. Entrar com a conta GitHub `PedroGerard`.
 3. Clicar em `Add New` e depois `Project`.
 4. Importar o repositorio `instituto-incentive-site`.
-5. Em `Root Directory`, selecionar `instituto-incentive-site`.
+5. Em `Root Directory`, manter vazio para usar a raiz do repositorio.
 6. Conferir se o framework foi detectado como `Next.js`.
 7. Conferir os comandos:
 
@@ -49,6 +73,8 @@ Verificar:
 - Imagens dos projetos aparecem.
 - Links externos do Mapa Cultural abrem em nova aba.
 - Area `/dashboard` nao deve existir no deploy do site; ela pertence ao ERP em `instituto-platform/apps/frontend`.
+- Cabecalhos de seguranca aparecem nas respostas: HSTS, `X-Content-Type-Options`, `X-Frame-Options`,
+  `Referrer-Policy`, `Permissions-Policy`, `Cross-Origin-Opener-Policy` e CSP basica.
 
 ## Dominio
 
@@ -66,4 +92,4 @@ Depois que o deploy estiver aprovado, adicionar o dominio na Vercel e ajustar o 
 - Confirmar endereco publico oficial.
 - Publicar ou preparar documentos oficiais da aba Transparencia.
 - Configurar deploy separado para o ERP administrativo quando a autenticacao estiver pronta.
-- Integrar formulario de contato.
+- Configurar Google Search Console, GA4 ou GTM e variaveis de ambiente na Vercel.

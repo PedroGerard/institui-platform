@@ -1,35 +1,70 @@
-# Próximas ações - Instituto Incentive
+# Proximas acoes - Instituto Incentive
 
-Atualizado em 03 de junho de 2026.
+Atualizado em 06 de julho de 2026.
 
-## 1. Domínio e segurança
+## Concluido
 
-- Adicionar `institutoincentive.org.br` no projeto da Vercel.
-- Adicionar `www.institutoincentive.org.br` e definir redirecionamento para o domínio principal.
-- No DNS do domínio, trocar o registro `A` atual pelo apontamento indicado pela Vercel.
-- No DNS do `www`, trocar o CNAME atual pelo valor indicado pela Vercel.
-- Aguardar emissão automática do certificado SSL na Vercel.
-- Conferir se o navegador deixou de mostrar “Não seguro”.
+- Dominio `institutoincentive.org.br` cadastrado na Vercel.
+- Redirecionamento do dominio raiz para `www.institutoincentive.org.br`.
+- Certificado SSL ativo pela Vercel.
+- Projeto oficial da Vercel apontando para a raiz do repositorio.
+- Site institucional separado da base da plataforma ERP.
+- Paginas publicas principais publicadas: Inicio, Quem Somos, Areas de Atuacao, Projetos, Certificacoes, Transparencia, Emendas Parlamentares, Apoie e Contato.
+- Vercel Web Analytics e Speed Insights instalados.
+- Consentimento de cookies criado para ativar ferramentas opcionais somente apos aceite.
+- Headers basicos de seguranca configurados no Next.js.
+- Dependabot preparado para monitorar dependencias npm e GitHub Actions.
 
-## 2. Portal da Transparência
+## Prioridade 1 - Google e mensuracao
 
-- Incluir o Relatório de Atividades 2026 quando o arquivo estiver acessível localmente.
-- Conferir se os 16 PDFs publicados abrem corretamente após o deploy.
-- Revisar se algum documento contém dados pessoais que não devem ficar públicos.
-- Publicar, quando validados, Código de Conduta, Política de Privacidade e Política de Transparência.
-- Publicar diretoria, mandatos, conselhos e organograma institucional.
-- Publicar instrumentos de parceria pública, planos de trabalho e prestações de contas quando houver.
+- Validar o dominio no Google Search Console.
+- Enviar o sitemap `https://www.institutoincentive.org.br/sitemap.xml`.
+- Criar propriedade GA4 ou container Google Tag Manager.
+- Cadastrar na Vercel as variaveis:
+  - `NEXT_PUBLIC_GA_MEASUREMENT_ID`
+  - `NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID`
+  - `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION`
+- Definir conversoes iniciais para contato, apoio, projetos, documentos e redes sociais.
+- Preparar a conta do Google Ad Grants depois que Search Console e Analytics estiverem funcionando.
 
-## 3. Conteúdo institucional
+## Prioridade 1 - Seguranca operacional
 
-- Revisar textos de Quem Somos, Incentivo Fiscal e Projetos com a diretoria.
-- Confirmar contatos oficiais: e-mail, telefone, domínio e endereço público.
-- Definir se haverá formulário funcional ou apenas canal por e-mail nesta primeira versão.
+- Ativar 2FA nas contas GitHub, Vercel, Registro.br/DNS e Google usadas pelo Instituto.
+- Avaliar Cloudflare ou Vercel Firewall/WAF para protecao adicional de borda.
+- Manter Next.js, React e dependencias atualizados com apoio do Dependabot.
+- Salvar backup externo dos documentos publicos e materiais editoriais.
+- Monitorar disponibilidade do dominio oficial com UptimeRobot, Better Stack ou ferramenta equivalente.
+- Proteger a branch `main` quando o plano do GitHub permitir branch protection em repositorio privado.
 
-## 4. Publicação e verificação
+## Prioridade 2 - Conteudo e experiencia
 
-- Após cada commit, enviar ao GitHub.
-- Acompanhar o deploy na Vercel.
-- Conferir as páginas públicas: `/`, `/quem-somos`, `/areas-de-atuacao`, `/projetos`, `/transparencia` e `/contato`.
-- Testar em celular e desktop.
-- Validar botões, links externos, PDFs e dados de contato.
+- Revisar a pagina inicial com a diretoria apos alguns dias de uso.
+- Validar se o menu principal ficou intuitivo em desktop e celular.
+- Confirmar se a pagina Apoie atende aos objetivos de parcerias, voluntariado e apoio institucional.
+- Revisar o rodape apos definicao final de politicas, contatos e canais oficiais.
+- Manter a curadoria de imagens com fotos profissionais ligadas ao Ceara, Vale do Jaguaribe, Pereiro, cultura, educacao, caatinga e desenvolvimento comunitario.
+
+## Prioridade 3 - Transparencia
+
+- Publicar novas politicas institucionais quando forem validadas pela diretoria.
+- Revisar periodicamente se os PDFs publicados continuam atuais.
+- Adicionar novos documentos oficiais somente apos validacao institucional.
+- Atualizar Emendas Parlamentares imediatamente caso haja recebimento futuro.
+- Registrar data de atualizacao em documentos sensiveis de transparencia.
+
+## Prioridade 4 - Repositorios e organizacao tecnica
+
+- Manter o repositorio `instituto-incentive-site` apenas com o site institucional.
+- Manter o repositorio `institui-platform` apenas com a plataforma ERP.
+- Confirmar se `nextjs-boilerplate` e apenas um modelo antigo sem uso antes de excluir.
+- Proteger a branch `main` nos repositorios principais.
+- Criar um fluxo simples de publicacao: alterar, validar, enviar ao GitHub e acompanhar deploy.
+
+## Checklist apos cada alteracao no site
+
+1. Rodar validacao local.
+2. Rodar build.
+3. Conferir links principais.
+4. Enviar commit ao GitHub.
+5. Acompanhar deploy na Vercel.
+6. Testar `https://www.institutoincentive.org.br`.
