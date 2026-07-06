@@ -1,5 +1,8 @@
 # Relatorio tecnico - pendencias criticas do site institucional
 
+> Documento historico de diagnostico. Para comandos atuais de publicacao,
+> usar `materiais/publicacao-vercel.md`.
+
 Data: 30/06/2026
 
 Projeto: Instituto Incentive - site institucional

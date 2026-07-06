@@ -1,5 +1,8 @@
 # Publicacao do novo site do Instituto Incentive
 
+> Documento historico. Para publicacao atual, usar `materiais/publicacao-vercel.md`.
+> A raiz ativa do site publico hoje e `/` no repositorio `PedroGerard/institui-platform`.
+
 ## Objetivo
 
 Publicar o novo site institucional do Instituto Incentive com as paginas publicas:
@@ -14,7 +17,7 @@ Publicar o novo site institucional do Instituto Incentive com as paginas publica
 
 ## Estrutura local
 
-Aplicacao: `instituto-incentive-site`
+Aplicacao: raiz do repositorio atual
 
 Rotas principais:
 
@@ -29,14 +32,14 @@ Rotas principais:
 Materiais de apoio:
 
 - `materiais/projetos-incentive.md`
-- `instituto-incentive-site/public/images/projects`
+- `public/images/projects`
 
 ## Build
 
 Comando de build do site:
 
 ```bash
-npm run build:site
+npm run build
 ```
 
 O `package.json` do frontend ja usa:
@@ -51,7 +54,7 @@ Opcao simples: Vercel
 
 Configuracao:
 
-- Root directory: `instituto-incentive-site`
+- Root directory: vazio / raiz do repositorio
 - Framework: Next.js
 - Install command: `npm ci`
 - Build command: `npm run build`
@@ -77,7 +80,7 @@ Depois do deploy, apontar DNS do dominio para a hospedagem escolhida.
 
 - Confirmar e-mail oficial de contato.
 - Endereco publico atualizado para Avenida Jose Milton de Morais, 394, Vila Nova, Pereiro-CE, CEP 63.460-000.
-- Confirmar que a area administrativa do ERP esta hospedada separadamente em `instituto-platform/apps/frontend`.
+- Confirmar que a area administrativa do ERP nao esta misturada na raiz publica do site.
 - Integrar o formulario de contato com e-mail, CRM ou ferramenta de formularios.
 - Revisar imagens e autorizacoes de uso dos registros dos projetos.
 

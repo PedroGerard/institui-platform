@@ -5,7 +5,7 @@ Guia rapido para publicar o novo site do Instituto Incentive usando o repositori
 ## Repositorio
 
 ```text
-https://github.com/PedroGerard/instituto-incentive-site
+https://github.com/PedroGerard/institui-platform
 ```
 
 ## Configuracao do projeto na Vercel
@@ -50,7 +50,7 @@ Esses caminhos pertencem ao historico da transicao ou ao sistema administrativo.
 1. Acessar https://vercel.com.
 2. Entrar com a conta GitHub `PedroGerard`.
 3. Clicar em `Add New` e depois `Project`.
-4. Importar o repositorio `instituto-incentive-site`.
+4. Importar o repositorio `institui-platform`.
 5. Em `Root Directory`, manter vazio para usar a raiz do repositorio.
 6. Conferir se o framework foi detectado como `Next.js`.
 7. Conferir os comandos:

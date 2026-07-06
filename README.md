@@ -15,10 +15,12 @@ Este repositorio deve conter somente materiais do site publico:
 - configuracoes de deploy do site na Vercel;
 - materiais editoriais e SEO do site.
 
-O sistema de gestao/ERP INSTITUI+ fica em outro repositorio:
+O sistema de gestao/ERP INSTITUI+ fica fora da raiz publica deste site.
+Nao misturar arquivos de ERP, API, banco de dados ou modulo administrativo nesta base.
 
 ```text
-https://github.com/PedroGerard/institui-platform
+Repositorio atual: https://github.com/PedroGerard/institui-platform
+Raiz ativa do site: /
 ```
 
 ## Estrutura
@@ -90,4 +92,4 @@ Detalhes: [SECURITY.md](SECURITY.md).
 
 ## Observacao importante
 
-Nao adicionar arquivos do ERP, API, banco de dados ou modulo administrativo neste repositorio. Esses materiais pertencem ao repositorio `PedroGerard/institui-platform`.
+Nao adicionar arquivos do ERP, API, banco de dados ou modulo administrativo nesta raiz do site publico.

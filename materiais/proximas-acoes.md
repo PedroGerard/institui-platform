@@ -54,8 +54,8 @@ Atualizado em 06 de julho de 2026.
 
 ## Prioridade 4 - Repositorios e organizacao tecnica
 
-- Manter o repositorio `instituto-incentive-site` apenas com o site institucional.
-- Manter o repositorio `institui-platform` apenas com a plataforma ERP.
+- Manter a raiz atual do repositorio `institui-platform` dedicada ao site institucional publico.
+- Nao misturar ERP, API, banco de dados ou modulo administrativo na raiz publica do site.
 - Confirmar se `nextjs-boilerplate` e apenas um modelo antigo sem uso antes de excluir.
 - Proteger a branch `main` nos repositorios principais.
 - Criar um fluxo simples de publicacao: alterar, validar, enviar ao GitHub e acompanhar deploy.

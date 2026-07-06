@@ -1,14 +1,18 @@
 # Primeiro envio para o GitHub
 
+> Documento historico. O repositorio atual ja esta conectado em
+> `https://github.com/PedroGerard/institui-platform.git`.
+> Nao usar este arquivo como guia de publicacao atual.
+
 Repositório recomendado:
 
 ```text
-PedroGerard/instituto-incentive-site
+PedroGerard/institui-platform
 ```
 
 Configuração recomendada no GitHub:
 
-- Nome: `instituto-incentive-site`
+- Nome: `institui-platform`
 - Visibilidade: privado
 - Não marcar README
 - Não marcar `.gitignore`
@@ -37,7 +41,7 @@ git commit -m "Primeira versão do site do Instituto Incentive"
 Conectar ao GitHub:
 
 ```powershell
-git remote add origin https://github.com/PedroGerard/instituto-incentive-site.git
+git remote add origin https://github.com/PedroGerard/institui-platform.git
 git push -u origin main
 ```
 
