@@ -10,7 +10,7 @@ Este documento orienta como rodar, validar, contribuir e preparar o INSTITUI+ a 
 - Branch de trabalho atual: `main`
 - GitHub Project: `INSTITUI+ Roadmap de Desenvolvimento`
 - Figma: `INSTITUI Design System e Modulos Operacionais`
-- Workflow principal de validacao: `.github/workflows/frontend.yml`
+- Workflow principal de validacao: `.github/workflows/platform.yml`
 
 ## Preparacao local
 

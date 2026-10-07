@@ -24,7 +24,6 @@ coverage/
 .git/
 .tmp/
 *.log
-dev-server*.log
 test_output*.txt
 **/storage/
 materiais/**/chrome-profile*/
