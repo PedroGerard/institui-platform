@@ -26,7 +26,7 @@ const socialProfiles: SocialProfile[] = [
 
 export const siteConfig = {
   name: "Instituto Incentive",
-  fullName: "Instituto Incentive de Inovacao, Desenvolvimento e Transformacao Social",
+  fullName: "Instituto Incentive de Inovação, Desenvolvimento e Transformação Social",
   cnpj: "04.347.564/0001-56",
   foundedAt: "2001",
   domain: "institutoincentive.org.br",
@@ -34,7 +34,7 @@ export const siteConfig = {
   email: "contato@institutoincentive.org.br",
   phone: {
     label: "+55 (88) 99925-2123",
-    href: "tel:+5588999252123",
+    href: "tel;+5588999252123",
   },
   address: {
     line: "Avenida José Milton de Morais, 394, Vila Nova, Pereiro/CE, CEP 63.460-000",

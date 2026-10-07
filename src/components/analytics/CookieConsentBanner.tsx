@@ -42,7 +42,7 @@ export function CookieConsentBanner() {
 
   return (
     <section
-      aria-label="Preferencias de cookies"
+      aria-label="Preferências de cookies"
       className="fixed inset-x-3 bottom-3 z-50 mx-auto max-h-[82svh] max-w-5xl overflow-y-auto rounded-lg border border-[var(--brand-border)] bg-white p-4 text-[var(--brand-text)] shadow-2xl sm:inset-x-4 sm:bottom-4 sm:p-5"
     >
       <div className="grid gap-4 md:grid-cols-[1fr_auto] md:items-center">
@@ -50,8 +50,8 @@ export function CookieConsentBanner() {
           <h2 className="text-base font-bold">Preferências de privacidade</h2>
           <p className="mt-2 text-sm leading-6 text-[var(--brand-muted)]">
             Usamos medições essenciais e sem cookies para entender o desempenho do site. As
-            ferramentas opcionais do Google Analytics/Tag Manager serão ativadas somente se você
-            aceitar, ajudando a medir campanhas, formulários e acessos gerados pelo Google Ad Grants.
+            ferramentas opcionais do Google Analytics e Google Tag Manager serão ativadas somente se você
+            aceitar, auxiliando na mensuração de campanhas de interesse público e acessos.
           </p>
           <Link
             href="/privacidade"

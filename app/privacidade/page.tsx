@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PublicFooter } from "@/components/layout/PublicFooter";
+import { PublicHeader } from "@/components/layout/PublicHeader";
+import { buildPageMetadata } from "@/lib/seo";
 import {
   ArrowRight,
   CheckCircle2,
@@ -8,55 +11,52 @@ import {
   Mail,
   ShieldCheck,
 } from "lucide-react";
-import { PublicFooter } from "@/components/layout/PublicFooter";
-import { PublicHeader } from "@/components/layout/PublicHeader";
-import { buildPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Politica de Privacidade",
+  title: "Política de Privacidade",
   description:
-    "Politica de privacidade do Instituto Incentive, com orientacoes sobre contato, finalidade institucional, transparencia e direitos dos titulares.",
+    "Diretrizes de privacidade, segurança e tratamento de dados pessoais no site e canais institucionais do Instituto Incentive.",
   path: "/privacidade",
 });
 
 const privacyTopics = [
   {
-    title: "Dados de contato",
-    text: "Quando uma pessoa envia mensagem ao Instituto, podemos tratar nome, e-mail, telefone, assunto e conteúdo informado voluntariamente.",
+    title: "Finalidade legítima",
+    text: "Os dados recebidos por formulários, e-mails ou mensagens destinam-se exclusivamente ao atendimento, prestação de informações institucionais, parcerias e projetos.",
   },
   {
-    title: "Finalidade institucional",
-    text: "As informações são utilizadas para responder solicitações, organizar relacionamentos institucionais, registrar demandas e apoiar a comunicação com parceiros e comunidade.",
+    title: "Minimização e segurança",
+    text: "Coletamos apenas as informações estritamente necessárias para cada finalidade, adotando práticas adequadas para proteger os dados contra acessos não autorizados.",
   },
   {
-    title: "Transparência e prestação de contas",
-    text: "Documentos públicos podem ser divulgados no site quando necessários para governança, cumprimento legal, controle social e publicidade institucional.",
+    title: "Não comercialização",
+    text: "O Instituto Incentive não comercializa, não aluga e não compartilha dados pessoais com terceiros para fins publicitários ou econômicos.",
   },
   {
-    title: "Segurança e acesso",
-    text: "O Instituto restringe o acesso às informações pessoais a pessoas autorizadas e mantém práticas de cuidado documental compatíveis com sua atuação.",
+    title: "Transparência ativa",
+    text: "Documentos públicos, relatórios e prestações de contas são publicados preservando a privacidade e os dados pessoais sensíveis de colaboradores e beneficiários.",
   },
 ];
 
 const rights = [
-  "Solicitar informação sobre o tratamento de seus dados pessoais.",
-  "Pedir correção de dados incompletos, inexatos ou desatualizados.",
-  "Solicitar exclusão ou revisão de informações quando aplicável.",
-  "Entrar em contato para dúvidas sobre privacidade e proteção de dados.",
+  "Confirmar a existência de tratamento de dados pessoais sob responsabilidade do Instituto.",
+  "Solicitar a correção de informações incompletas, inexatas ou desatualizadas.",
+  "Requerer a eliminação de dados pessoais tratados com consentimento prévio, observadas as obrigações legais e estatutárias.",
+  "Obter esclarecimentos sobre o uso compartilhado de dados com parceiros em projetos específicos.",
 ];
 
 const cookieUses = [
-  "Medir acessos, páginas mais visitadas e desempenho técnico do site.",
-  "Entender quais canais levam pessoas aos formulários, documentos e páginas de projetos.",
-  "Apoiar campanhas de interesse público, como Google Ad Grants, sem coletar dados sensíveis.",
-  "Melhorar conteúdo, navegação, acessibilidade e prestação de contas.",
+  "Medições essenciais agregadas para garantir o funcionamento técnico e a estabilidade da plataforma.",
+  "Ferramentas de análise opcionais ativadas exclusivamente mediante consentimento do usuário.",
+  "Monitoramento de desempenho e velocidade de carregamento para constante aprimoramento da acessibilidade.",
+  "Avaliação do alcance de campanhas institucionais e projetos sociais.",
 ];
 
 const measuredInteractions = [
-  "Envio do formulário de contato por e-mail.",
-  "Cliques em e-mail, telefone, redes sociais e chamadas de apoio.",
-  "Abertura ou download de documentos públicos em PDF.",
-  "Acesso a projetos em plataformas públicas de referência.",
+  "Envio de formulários de contato institucional.",
+  "Abertura e download de documentos públicos, atas e relatórios de transparência.",
+  "Cliques em canais oficiais de comunicação (e-mail, telefone e redes sociais).",
+  "Acesso a páginas de projetos e fontes de comprovação pública.",
 ];
 
 export default function PrivacyPage() {
@@ -74,8 +74,7 @@ export default function PrivacyPage() {
               Política de Privacidade do Instituto Incentive.
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-[var(--brand-muted)]">
-              Esta página apresenta, de forma objetiva, como o Instituto Incentive orienta o tratamento de informações
-              pessoais recebidas pelos canais institucionais e pelo site.
+              Esta página apresenta, de forma transparente e objetiva, as diretrizes do Instituto Incentive quanto à proteção e tratamento responsável de informações nos canais institucionais.
             </p>
           </div>
 
@@ -83,11 +82,10 @@ export default function PrivacyPage() {
             <ShieldCheck className="text-[var(--brand-teal)]" size={32} />
             <h2 className="mt-4 text-xl font-bold">Compromisso institucional</h2>
             <p className="mt-3 text-sm leading-7 text-[var(--brand-muted)]">
-              A proteção de dados acompanha os princípios de ética, transparência, respeito aos direitos humanos e
-              responsabilidade social que orientam a atuação do Instituto.
+              A proteção de dados integra os princípios de integridade, ética, transparência e respeito aos direitos fundamentais que orientam toda a governança do Instituto Incentive.
             </p>
             <p className="mt-4 inline-flex rounded-lg bg-[var(--brand-orange-soft)] px-3 py-2 text-xs font-bold uppercase text-[var(--brand-orange-dark)]">
-              Atualizada em 24 de junho de 2026
+              Atualizada em outubro de 2026
             </p>
           </div>
         </div>
@@ -112,8 +110,7 @@ export default function PrivacyPage() {
             Como solicitar informações ou correções.
           </h2>
           <p className="mt-4 text-base leading-8 text-[var(--brand-muted)]">
-            Pessoas que mantêm contato com o Instituto podem solicitar esclarecimentos sobre dados pessoais pelos canais
-            oficiais de atendimento.
+            Qualquer cidadão, parceiro ou participante de projetos pode esclarecer dúvidas sobre o tratamento de dados pelos canais oficiais de atendimento.
           </p>
         </div>
 
@@ -133,13 +130,7 @@ export default function PrivacyPage() {
             <p className="text-sm font-semibold uppercase text-[var(--brand-orange-dark)]">Cookies e medições</p>
             <h2 className="mt-3 text-3xl font-bold sm:text-4xl">Como usamos dados de navegação.</h2>
             <p className="mt-4 text-base leading-8 text-[var(--brand-muted)]">
-              O site utiliza recursos essenciais de funcionamento e medições agregadas para compreender o desempenho das
-              páginas. Ferramentas opcionais do Google Analytics ou Google Tag Manager só são carregadas após aceite do
-              visitante no aviso de privacidade.
-            </p>
-            <p className="mt-4 text-base leading-8 text-[var(--brand-muted)]">
-              O objetivo principal é melhorar a comunicação institucional, acompanhar campanhas de interesse público,
-              qualificar a experiência de navegação e ampliar o alcance das ações do Instituto.
+              O site utiliza recursos essenciais de funcionamento e métricas agregadas sem cookies para verificar estabilidade. Ferramentas opcionais de análise de audiência só são carregadas após autorização explícita.
             </p>
           </div>
 
@@ -161,10 +152,9 @@ export default function PrivacyPage() {
         <div className="mx-auto grid max-w-7xl gap-10 px-5 py-14 sm:px-8 lg:grid-cols-[0.85fr_1.15fr]">
           <div>
             <p className="text-sm font-semibold uppercase text-[var(--brand-orange-dark)]">Eventos de conversão</p>
-            <h2 className="mt-3 text-3xl font-bold sm:text-4xl">Quais interações podem ser medidas.</h2>
+            <h2 className="mt-3 text-3xl font-bold sm:text-4xl">Métricas de utilidade pública.</h2>
             <p className="mt-4 text-base leading-8 text-[var(--brand-muted)]">
-              As medições opcionais ajudam o Instituto a avaliar se o site está cumprindo sua função pública: informar,
-              facilitar contato, apoiar campanhas de interesse social e melhorar a navegação.
+              As medições têm o objetivo exclusivo de aprimorar a comunicação institucional, mensurar o alcance de ações e comprovar a efetividade da divulgação das iniciativas no território.
             </p>
           </div>
 
@@ -185,8 +175,7 @@ export default function PrivacyPage() {
             <FileText className="text-[var(--brand-teal)]" size={28} />
             <h2 className="mt-4 text-xl font-bold">Documentos públicos</h2>
             <p className="mt-3 text-sm leading-7 text-[var(--brand-muted)]">
-              Informações de transparência, certificações e documentos institucionais são publicadas para consulta
-              pública quando sua divulgação é necessária ou adequada à finalidade institucional.
+              Atos constitutivos, certidões e relatórios oficiais são divulgados de forma organizada no Portal da Transparência institucional.
             </p>
             <Link
               href="/transparencia"
@@ -199,10 +188,9 @@ export default function PrivacyPage() {
 
           <div className="rounded-lg border border-[var(--brand-border)] bg-white p-6">
             <Mail className="text-[var(--brand-teal)]" size={28} />
-            <h2 className="mt-4 text-xl font-bold">Canal de contato</h2>
+            <h2 className="mt-4 text-xl font-bold">Canal do titular</h2>
             <p className="mt-3 text-sm leading-7 text-[var(--brand-muted)]">
-              Para dúvidas sobre privacidade, atualização de dados ou solicitações relacionadas aos canais
-              institucionais, utilize o e-mail oficial do Instituto.
+              Para dúvidas, esclarecimentos sobre dados ou exercício de direitos, entre em contato pelo e-mail institucional.
             </p>
             <a
               href="mailto:contato@institutoincentive.org.br?subject=Privacidade%20e%20prote%C3%A7%C3%A3o%20de%20dados"

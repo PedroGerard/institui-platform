@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { PublicFooter } from "@/components/layout/PublicFooter";
 import { PublicHeader } from "@/components/layout/PublicHeader";
@@ -9,179 +8,112 @@ import {
   Briefcase,
   Building2,
   CheckCircle2,
+  Cpu,
   GraduationCap,
-  HandHeart,
-  HeartPulse,
+  Heart,
+  Home,
   Landmark,
   Leaf,
-  Palette,
-  Rocket,
-  Scale,
   ShieldCheck,
   Sprout,
   Users,
 } from "lucide-react";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Areas de Atuacao",
+  title: "Áreas de Atuação",
   description:
-    "Areas de atuacao do Instituto Incentive em inclusao social, direitos humanos, educacao, tecnologia, cultura, saude, agricultura familiar, meio ambiente e governanca.",
+    "Conheça os 8 eixos programáticos do Instituto Incentive em desenvolvimento territorial, proteção social, educação, cultura, sustentabilidade e inovação.",
   path: "/areas-de-atuacao",
 });
 
-const areas = [
+const programmaticAxes = [
   {
-    icon: HandHeart,
-    title: "Inclusão Social e Assistência Social",
-    description: "Ações voltadas à proteção social, fortalecimento comunitário e ampliação de oportunidades.",
+    icon: Heart,
+    axisNumber: "Eixo 01",
+    title: "Proteção Social, Assistência e Garantia de Direitos",
+    description: "Defesa dos direitos humanos, fortalecimento de vínculos familiares e acolhimento socioassistencial.",
     items: [
-      "Apoio a projetos sociais e ambientais voltados para populações em situação de vulnerabilidade.",
-      "Desenvolvimento de programas de assistência social e fortalecimento comunitário.",
-      "Promoção de inclusão digital e capacitação profissional para grupos marginalizados.",
-      "Proteção e defesa de direitos de crianças, adolescentes, idosos e outros grupos vulneráveis.",
-    ],
-  },
-  {
-    icon: Scale,
-    title: "Direitos Humanos e Diversidade",
-    description: "Defesa da dignidade, igualdade, diversidade e acesso universal a direitos fundamentais.",
-    items: [
-      "Combate à violência de gênero e proteção de vítimas.",
-      "Promoção da igualdade racial, cultural e de gênero.",
-      "Apoio e fortalecimento de comunidades LGBTQIAPN+.",
-      "Defesa do acesso universal a serviços de saúde, educação e oportunidades econômicas.",
-    ],
-  },
-  {
-    icon: GraduationCap,
-    title: "Educação, Pesquisa e Desenvolvimento",
-    description: "Formação, pesquisa, aprendizagem e inovação educacional para desenvolvimento social.",
-    items: [
-      "Formação e capacitação de professores e profissionais da educação.",
-      "Desenvolvimento de pesquisas científicas e tecnológicas.",
-      "Criação de programas educacionais voltados para a inclusão social e inovação.",
-      "Promoção do estágio e aprendizagem para jovens.",
-    ],
-  },
-  {
-    icon: Rocket,
-    title: "Tecnologia e Inovação",
-    description: "Soluções tecnológicas, transformação digital e empreendedorismo inovador.",
-    items: [
-      "Desenvolvimento de tecnologias sustentáveis e soluções inovadoras.",
-      "Promoção de cidades inteligentes e transformação digital.",
-      "Incentivo à capacitação em tecnologia e áreas emergentes.",
-      "Apoio a startups e fomento ao empreendedorismo tecnológico.",
-    ],
-  },
-  {
-    icon: Sprout,
-    title: "Agricultura Familiar e Desenvolvimento Rural Sustentável",
-    description: "Fortalecimento da economia rural, segurança alimentar e tecnologias sociais no campo.",
-    items: [
-      "Apoio a produtores rurais e incentivo à agricultura familiar.",
-      "Promoção de práticas agrícolas sustentáveis e segurança alimentar.",
-      "Desenvolvimento de tecnologias sociais voltadas para o campo.",
-      "Fomento à organização e fortalecimento da economia rural.",
-    ],
-  },
-  {
-    icon: Leaf,
-    title: "Meio Ambiente, Sustentabilidade e Preservação da Fauna e Flora",
-    description: "Educação ambiental, práticas sustentáveis e proteção de áreas naturais.",
-    items: [
-      "Desenvolvimento de programas de educação ambiental.",
-      "Promoção de práticas sustentáveis e proteção de áreas naturais.",
-      "Incentivo à reciclagem e redução de resíduos.",
-      "Criação e manutenção de parques ecológicos e jardins zoológicos.",
-    ],
-  },
-  {
-    icon: HeartPulse,
-    title: "Saúde e Bem-estar",
-    description: "Cuidado integral, saúde pública, prevenção e promoção de qualidade de vida.",
-    items: [
-      "Promoção de políticas públicas de saúde e programas de segurança alimentar.",
-      "Capacitação de profissionais da saúde e fortalecimento do SUS.",
-      "Apoio à saúde mental e bem-estar da população.",
-      "Implementação de programas de atenção básica e prevenção de doenças.",
-    ],
-  },
-  {
-    icon: Palette,
-    title: "Cultura, Esporte, Arte, Lazer e Recreação",
-    description: "Valorização cultural, economia criativa, esporte e lazer como caminhos de inclusão.",
-    items: [
-      "Apoio a artistas locais e incentivo à economia criativa.",
-      "Desenvolvimento de projetos culturais e preservação do patrimônio histórico.",
-      "Promoção de eventos esportivos e recreativos para inclusão social.",
-      "Incentivo ao lazer e bem-estar em comunidades vulneráveis.",
+      "Ações socioassistenciais gratuitas voltadas a indivíduos e famílias em vulnerabilidade social.",
+      "Promoção e defesa dos direitos de crianças, adolescentes, mulheres, idosos e pessoas com deficiência.",
+      "Articulação intersetorial com a rede socioassistencial e conselhos de direitos.",
     ],
   },
   {
     icon: Briefcase,
-    title: "Economia Solidária e Empreendedorismo",
-    description: "Inclusão produtiva, capacitação, acesso a oportunidades e negócios sustentáveis.",
+    axisNumber: "Eixo 02",
+    title: "Inclusão Socioprodutiva e Economia Popular e Solidária",
+    description: "Capacitação profissional, fomento ao empreendedorismo comunitário e geração de renda.",
     items: [
-      "Apoio a microempresas e empreendedores de baixa renda.",
-      "Promoção de capacitação profissional e inclusão produtiva.",
-      "Facilitação do acesso a crédito e serviços financeiros para pequenos negócios.",
-      "Incentivo a modelos de negócios sustentáveis e economia colaborativa.",
+      "Oficinas de capacitação técnica, inclusão produtiva e desenvolvimento de competências práticas.",
+      "Estímulo a empreendimentos econômicos solidários e arranjos produtivos locais.",
+      "Orientação para autonomia financeira de mulheres, jovens e trabalhadores informais.",
+    ],
+  },
+  {
+    icon: Sprout,
+    axisNumber: "Eixo 03",
+    title: "Desenvolvimento Rural Sustentável e Segurança Alimentar",
+    description: "Fortalecimento da agricultura familiar, convivência com o semiárido e soberania alimentar.",
+    items: [
+      "Incentivo a práticas agrícolas sustentáveis e adaptação climática no semiárido cearense.",
+      "Apoio a redes comunitárias de produção, beneficiamento e comercialização de alimentos.",
+      "Iniciativas de segurança alimentar e nutricional para comunidades rurais periurbanas.",
+    ],
+  },
+  {
+    icon: GraduationCap,
+    axisNumber: "Eixo 04",
+    title: "Educação, Formação Profissional, Cultura e Esporte",
+    description: "Democratização do acesso à cultura, formação continuada e desenvolvimento humano integral.",
+    items: [
+      "Oficinas culturais gratuitas, musicalização comunitária e valorização das tradições locais.",
+      "Cursos livres de qualificação e iniciação profissional para inserção no mercado de trabalho.",
+      "Incentivo ao esporte, lazer e expressões artísticas como ferramentas de inclusão cidadã.",
+    ],
+  },
+  {
+    icon: Leaf,
+    axisNumber: "Eixo 05",
+    title: "Meio Ambiente, Sustentabilidade e Tecnologias Socioambientais",
+    description: "Preservação da caatinga, gestão hídrica consciente e tecnologias ecológicas apropriadas.",
+    items: [
+      "Educação ambiental voltada à conservação do bioma caatinga e biodiversidade regional.",
+      "Disseminação de tecnologias sociais de convivência com o semiárido e reaproveitamento de recursos.",
+      "Projetos de arborização, recuperação ambiental e gestão responsável de resíduos.",
+    ],
+  },
+  {
+    icon: Home,
+    axisNumber: "Eixo 06",
+    title: "Habitação de Interesse Social e Desenvolvimento Territorial",
+    description: "Melhoria das condições de habitabilidade, planejamento comunitário e infraestrutura social.",
+    items: [
+      "Diagnósticos territoriais e apoio a iniciativas de melhoria habitacional comunitária.",
+      "Planejamento participativo voltado ao desenvolvimento urbano e rural integrado.",
+      "Valorização dos espaços públicos e infraestruturas comunitárias de convivência.",
+    ],
+  },
+  {
+    icon: Cpu,
+    axisNumber: "Eixo 07",
+    title: "Inovação, Tecnologia Social e Desenvolvimento Científico",
+    description: "Inclusão digital, soluções tecnológicas abertas e metodologias sociais contemporâneas.",
+    items: [
+      "Inclusão digital e letramento tecnológico para jovens e comunidades do semiárido.",
+      "Aplicação de metodologias sociais inovadoras para resolução de desafios públicos locais.",
+      "Intercâmbio com universidades, institutos federais e centros de pesquisa aplicada.",
     ],
   },
   {
     icon: Landmark,
-    title: "Gestão Organizacional e Governança",
-    description: "Apoio técnico para transparência, eficiência, compliance e planejamento institucional.",
+    axisNumber: "Eixo 08",
+    title: "Fortalecimento Institucional e Governança Social",
+    description: "Qualificação de lideranças comunitárias, transparência, captação e sustentabilidade do Terceiro Setor.",
     items: [
-      "Assessoria para instituições do terceiro setor em transparência e eficiência.",
-      "Desenvolvimento de projetos de gestão para órgãos públicos e privados.",
-      "Promoção de boas práticas em governança e compliance.",
-      "Consultoria em planejamento estratégico e administração pública.",
+      "Capacitação para gestores e associações em governança, compliance e MROSC (Lei 13.019/14).",
+      "Formação em elaboração de projetos, editais públicos e estratégias de sustentabilidade.",
+      "Fóruns de diálogo e articulação de redes comunitárias para fortalecimento da cidadania.",
     ],
-  },
-];
-
-const areaImages = [
-  {
-    src: "https://images.pexels.com/photos/8777800/pexels-photo-8777800.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    alt: "Amigos juntos em cumprimento celebrando diversidade.",
-  },
-  {
-    src: "https://images.pexels.com/photos/7479900/pexels-photo-7479900.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    alt: "Composicao com diversidade humana e tons de pele.",
-  },
-  {
-    src: "https://images.pexels.com/photos/33766496/pexels-photo-33766496.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    alt: "Estudante usando tablet em ambiente de aprendizagem.",
-  },
-  {
-    src: "https://images.pexels.com/photos/5474296/pexels-photo-5474296.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    alt: "Pessoa trabalhando em codigo no computador.",
-  },
-  {
-    src: "https://images.pexels.com/photos/35241295/pexels-photo-35241295.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    alt: "Paisagem rural do semiárido nordestino com vegetação seca.",
-  },
-  {
-    src: "https://images.pexels.com/photos/29223350/pexels-photo-29223350.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    alt: "Vegetação de caatinga com cactos e árvore seca.",
-  },
-  {
-    src: "https://images.pexels.com/photos/36665085/pexels-photo-36665085.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    alt: "Equipe de saude em ambiente hospitalar.",
-  },
-  {
-    src: "https://images.pexels.com/photos/9211779/pexels-photo-9211779.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    alt: "Apresentacao de danca colorida em celebracao cultural.",
-  },
-  {
-    src: "https://images.pexels.com/photos/36733360/pexels-photo-36733360.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    alt: "Profissionais em reuniao de negocios e empreendedorismo.",
-  },
-  {
-    src: "https://images.pexels.com/photos/36972168/pexels-photo-36972168.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    alt: "Equipe diversa em reuniao de planejamento e governanca.",
   },
 ];
 
@@ -190,86 +122,94 @@ export default function PracticeAreasPage() {
     <main className="min-h-screen bg-[var(--brand-surface)] text-[var(--brand-text)]">
       <PublicHeader />
 
-      <section id="conteudo-principal" className="bg-white">
+      <section id="conteudo-principal" className="border-b border-[var(--brand-border)] bg-white">
         <div className="mx-auto grid w-full max-w-7xl gap-10 px-5 py-14 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
-          <div className="min-w-0">
-            <p className="text-sm font-semibold uppercase text-[var(--brand-orange-dark)]">Áreas de atuação</p>
-            <h1 className="mt-3 text-4xl font-bold leading-tight sm:text-5xl">
-              Frentes de trabalho para inclusão, inovação e desenvolvimento sustentável.
+          <div>
+            <span className="inline-flex items-center gap-2 rounded-lg bg-[var(--brand-tint)] px-3 py-1.5 text-xs font-extrabold uppercase tracking-wider text-[var(--brand-teal)]">
+              Estrutura Programática
+            </span>
+            <h1 className="mt-3 text-4xl font-extrabold leading-tight text-[var(--brand-text)] sm:text-5xl">
+              8 Eixos Estratégicos de Atuação Territorial.
             </h1>
           </div>
-          <div className="min-w-0 space-y-5 text-base leading-8 text-[var(--brand-muted)]">
+          <div className="space-y-4 text-base leading-8 text-[var(--brand-muted)]">
             <p>
-              O Instituto Incentive organiza sua atuação em frentes multidisciplinares, conectando assistência social,
-              educação, direitos humanos, tecnologia, sustentabilidade, cultura e governança.
+              O Instituto Incentive organiza suas intervenções com base nos <strong>eixos programáticos estatutários</strong>, articulando assistência social, educação, trabalho, cultura, sustentabilidade, tecnologia e fortalecimento do Terceiro Setor.
             </p>
             <p className="rounded-lg border border-[var(--brand-border)] bg-[var(--brand-surface)] p-4 text-sm font-semibold leading-6 text-[var(--brand-text)]">
-              As áreas abaixo orientam projetos, parcerias, programas institucionais e iniciativas de impacto social.
+              Cada eixo orienta projetos, termos de colaboração, parcerias técnicas e investimentos sociais com foco em resultados mensuráveis no semiárido.
             </p>
           </div>
         </div>
       </section>
 
-      <section className="border-y border-[var(--brand-border)] bg-[var(--brand-text)] text-white">
-        <div className="mx-auto grid max-w-7xl gap-5 px-5 py-12 sm:px-8 md:grid-cols-3">
-          <div>
-            <Users className="text-[var(--brand-orange-light)]" size={30} />
-            <h2 className="mt-4 text-2xl font-bold">10 áreas</h2>
+      <section className="border-b border-[var(--brand-border)] bg-[var(--brand-text)] text-white">
+        <div className="mx-auto grid max-w-7xl gap-6 px-5 py-12 sm:px-8 md:grid-cols-3">
+          <div className="rounded-xl border border-white/10 bg-white/[0.06] p-6">
+            <Users className="text-[var(--brand-orange-light)]" size={32} />
+            <h2 className="mt-4 text-2xl font-extrabold">8 Eixos Integrados</h2>
             <p className="mt-2 text-sm leading-6 text-[var(--brand-light-text)]">
-              Um campo amplo de atuação social, ambiental, educacional, cultural e institucional.
+              Uma matriz programática abrangente que conecta as demandas reais das comunidades às oportunidades de desenvolvimento.
             </p>
           </div>
-          <div>
-            <ShieldCheck className="text-[var(--brand-orange-light)]" size={30} />
-            <h2 className="mt-4 text-2xl font-bold">Direitos e inclusão</h2>
+          <div className="rounded-xl border border-white/10 bg-white/[0.06] p-6">
+            <ShieldCheck className="text-[var(--brand-orange-light)]" size={32} />
+            <h2 className="mt-4 text-2xl font-extrabold">Direitos e Inclusão</h2>
             <p className="mt-2 text-sm leading-6 text-[var(--brand-light-text)]">
-              Prioridade para populações vulneráveis, diversidade, equidade e cidadania.
+              Prioridade absoluta para populações em situação de vulnerabilidade, juventude, mulheres e trabalhadores rurais.
             </p>
           </div>
-          <div>
-            <Building2 className="text-[var(--brand-orange-light)]" size={30} />
-            <h2 className="mt-4 text-2xl font-bold">Parcerias</h2>
+          <div className="rounded-xl border border-white/10 bg-white/[0.06] p-6">
+            <Building2 className="text-[var(--brand-orange-light)]" size={32} />
+            <h2 className="mt-4 text-2xl font-extrabold">Articulação em Redes</h2>
             <p className="mt-2 text-sm leading-6 text-[var(--brand-light-text)]">
-              Cooperação com poder público, empresas, organizações sociais e comunidades.
+              Cooperação técnica permanente com poder público, empresas socialmente responsáveis e organizações comunitárias.
             </p>
           </div>
         </div>
       </section>
 
       <section className="mx-auto max-w-7xl px-5 py-16 sm:px-8">
-        <div className="grid gap-5 lg:grid-cols-2">
-          {areas.map((area, index) => {
-            const Icon = area.icon;
-            const visual = areaImages[index];
+        <div className="grid gap-6 md:grid-cols-2">
+          {programmaticAxes.map((axis) => {
+            const Icon = axis.icon;
 
             return (
-              <article key={area.title} className="overflow-hidden rounded-lg border border-[var(--brand-border)] bg-white shadow-sm">
-                <div className="relative h-52 bg-[var(--brand-tint)]">
-                  <Image
-                    src={visual.src}
-                    alt={visual.alt}
-                    fill
-                    sizes="(max-width: 1024px) 100vw, 50vw"
-                    className="object-cover"
-                  />
-                  <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,104,113,0.04)_0%,rgba(0,63,68,0.68)_100%)]" />
-                  <div className="absolute bottom-4 left-4 flex h-12 w-12 items-center justify-center rounded-lg bg-white/95 text-[var(--brand-teal)] shadow-sm">
-                    <Icon size={24} aria-hidden="true" />
+              <article
+                key={axis.axisNumber}
+                className="flex flex-col justify-between rounded-xl border border-[var(--brand-border)] bg-white p-6 shadow-sm transition duration-200 hover:border-[var(--brand-teal)] hover:shadow-md"
+              >
+                <div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[var(--brand-tint)] text-[var(--brand-teal)]">
+                      <Icon size={24} />
+                    </div>
+                    <span className="rounded-lg bg-[var(--brand-orange-soft)] px-3 py-1 text-xs font-bold uppercase text-[var(--brand-orange-dark)]">
+                      {axis.axisNumber}
+                    </span>
                   </div>
-                </div>
 
-                <div className="p-6">
-                  <h2 className="text-xl font-bold text-[var(--brand-text)]">{area.title}</h2>
-                  <p className="mt-2 text-sm leading-6 text-[var(--brand-muted)]">{area.description}</p>
+                  <h2 className="mt-5 text-xl font-extrabold text-[var(--brand-text)]">{axis.title}</h2>
+                  <p className="mt-2 text-sm leading-6 text-[var(--brand-muted)]">{axis.description}</p>
 
-                  <div className="mt-5 grid gap-3">
-                    {area.items.map((item) => (
+                  <div className="mt-5 space-y-3">
+                    {axis.items.map((item) => (
                       <div key={item} className="flex gap-3 text-sm leading-6 text-[var(--brand-muted)]">
                         <CheckCircle2 className="mt-0.5 shrink-0 text-[var(--brand-teal)]" size={17} />
                         <span>{item}</span>
                       </div>
                     ))}
                   </div>
+                </div>
+
+                <div className="mt-6 border-t border-[var(--brand-border-soft)] pt-4">
+                  <Link
+                    href="/projetos"
+                    className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[var(--brand-teal)] transition hover:text-[var(--brand-teal-dark)]"
+                  >
+                    Ver projetos relacionados
+                    <ArrowRight size={14} />
+                  </Link>
                 </div>
               </article>
             );
@@ -278,22 +218,23 @@ export default function PracticeAreasPage() {
       </section>
 
       <section className="border-t border-[var(--brand-border)] bg-[var(--brand-tint)]">
-        <div className="mx-auto flex max-w-7xl flex-col gap-5 px-5 py-10 sm:px-8 md:flex-row md:items-center md:justify-between">
+        <div className="mx-auto flex max-w-7xl flex-col gap-6 px-5 py-12 sm:px-8 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="text-2xl font-bold">Quer desenvolver uma iniciativa com o Instituto?</h2>
+            <h2 className="text-2xl font-extrabold text-[var(--brand-text)]">Deseja estruturar uma parceria programática?</h2>
             <p className="mt-2 text-sm leading-6 text-[var(--brand-muted)]">
-              Entre em contato para conversar sobre projetos, parcerias e oportunidades de colaboração.
+              Entre em contato para apresentar propostas de convênios, cooperação técnica ou financiamento de iniciativas.
             </p>
           </div>
           <Link
             href="/contato"
-            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--brand-teal)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[var(--brand-teal-dark)] sm:w-auto"
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--brand-teal)] px-6 py-3.5 text-sm font-bold text-white transition hover:bg-[var(--brand-teal-dark)]"
           >
-            Entrar em contato
+            Falar com a Equipe
             <ArrowRight size={18} />
           </Link>
         </div>
       </section>
+
       <PublicFooter />
     </main>
   );

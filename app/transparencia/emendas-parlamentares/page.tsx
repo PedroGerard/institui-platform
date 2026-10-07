@@ -1,63 +1,29 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { TrackedAnchor } from "@/components/analytics/TrackedAnchor";
+import { PublicFooter } from "@/components/layout/PublicFooter";
+import { PublicHeader } from "@/components/layout/PublicHeader";
+import { buildPageMetadata } from "@/lib/seo";
+import { siteConfig } from "@/lib/site-config";
 import {
-  ArrowLeft,
   ArrowUpRight,
   ClipboardList,
   Download,
   Mail,
   TableProperties,
 } from "lucide-react";
-import { PublicFooter } from "@/components/layout/PublicFooter";
-import { PublicHeader } from "@/components/layout/PublicHeader";
-import { buildPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "Emendas Parlamentares",
   description:
-    "Posicao documental do Instituto Incentive sobre emendas parlamentares e transferencias especiais, com declaracoes anuais de 2020 a 2025.",
+    "Declarações anuais e prestação de contas pública sobre o recebimento e execução de emendas parlamentares pelo Instituto Incentive.",
   path: "/transparencia/emendas-parlamentares",
 });
 
-const summaryCards = [
-  {
-    label: "Período de cobertura",
-    value: "2020-2025",
-    note: "Exercícios com posição anual documentada e publicada.",
-  },
-  {
-    label: "Documentos anuais",
-    value: "6",
-    note: "Documentos anuais de inexistência de recebimento disponíveis para consulta.",
-  },
-  {
-    label: "Situação atual",
-    value: "Sem recebimento",
-    note: "Não houve identificação de emendas parlamentares ou transferências especiais recebidas.",
-  },
-];
-
 const annualDeclarations = [
   {
-    year: "2020",
-    number: "001/2026",
-    href: "/documentos/transparencia/emendas-parlamentares/declaracao-inexistencia-emendas-2020.pdf",
-  },
-  {
-    year: "2021",
-    number: "002/2026",
-    href: "/documentos/transparencia/emendas-parlamentares/declaracao-inexistencia-emendas-2021.pdf",
-  },
-  {
-    year: "2022",
-    number: "003/2026",
-    href: "/documentos/transparencia/emendas-parlamentares/declaracao-inexistencia-emendas-2022.pdf",
-  },
-  {
-    year: "2023",
-    number: "004/2026",
-    href: "/documentos/transparencia/emendas-parlamentares/declaracao-inexistencia-emendas-2023.pdf",
+    year: "2025",
+    number: "006/2026",
+    href: "/documentos/transparencia/emendas-parlamentares/declaracao-inexistencia-emendas-2025.pdf",
   },
   {
     year: "2024",
@@ -65,9 +31,24 @@ const annualDeclarations = [
     href: "/documentos/transparencia/emendas-parlamentares/declaracao-inexistencia-emendas-2024.pdf",
   },
   {
-    year: "2025",
-    number: "006/2026",
-    href: "/documentos/transparencia/emendas-parlamentares/declaracao-inexistencia-emendas-2025.pdf",
+    year: "2023",
+    number: "004/2026",
+    href: "/documentos/transparencia/emendas-parlamentares/declaracao-inexistencia-emendas-2023.pdf",
+  },
+  {
+    year: "2022",
+    number: "003/2026",
+    href: "/documentos/transparencia/emendas-parlamentares/declaracao-inexistencia-emendas-2022.pdf",
+  },
+  {
+    year: "2021",
+    number: "002/2026",
+    href: "/documentos/transparencia/emendas-parlamentares/declaracao-inexistencia-emendas-2021.pdf",
+  },
+  {
+    year: "2020",
+    number: "001/2026",
+    href: "/documentos/transparencia/emendas-parlamentares/declaracao-inexistencia-emendas-2020.pdf",
   },
 ];
 
@@ -78,14 +59,7 @@ const amendmentRecords: Array<{
   received: string;
   application: string;
   status: string;
-}> = annualDeclarations.map((declaration) => ({
-  year: declaration.year,
-  source: "Não houve recebimento",
-  object: "—",
-  received: "R$ 0,00",
-  application: "Não aplicável",
-  status: "Declaração publicada",
-}));
+}> = [];
 
 export default function ParliamentaryAmendmentsPage() {
   return (
@@ -93,120 +67,73 @@ export default function ParliamentaryAmendmentsPage() {
       <PublicHeader />
 
       <section id="conteudo-principal" className="border-b border-[var(--brand-border)] bg-white">
-        <div className="mx-auto w-full max-w-7xl px-5 py-14 sm:px-8">
-          <Link
-            href="/transparencia"
-            className="inline-flex items-center gap-2 text-sm font-bold text-[var(--brand-teal)] transition hover:text-[var(--brand-teal-dark)]"
-          >
-            <ArrowLeft size={17} />
-            Voltar para Transparência
-          </Link>
-
-          <div className="mt-8 grid w-full gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
-            <div className="min-w-0">
-              <p className="text-sm font-semibold uppercase text-[var(--brand-orange-dark)]">
-                Emendas Parlamentares
-              </p>
-              <h1 className="mt-3 text-4xl font-bold leading-tight sm:text-5xl">
-                Declarações anuais sobre emendas parlamentares e transferências especiais.
-              </h1>
-            </div>
-            <div className="min-w-0 space-y-5 text-base leading-8 text-[var(--brand-muted)]">
-              <p>
-                O Instituto Incentive publica nesta seção as declarações anuais referentes ao recebimento de emendas
-                parlamentares e transferências especiais nos exercícios de 2020 a 2025.
-              </p>
-              <p className="rounded-lg border border-[var(--brand-border)] bg-[var(--brand-surface)] p-4 text-sm font-semibold leading-6 text-[var(--brand-text)]">
-                Para o período informado, não houve recebimento de recursos dessa natureza pelo CNPJ do Instituto.
-              </p>
-            </div>
+        <div className="mx-auto grid w-full max-w-7xl gap-10 px-5 py-14 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
+          <div>
+            <span className="inline-flex items-center gap-2 rounded-lg bg-[var(--brand-tint)] px-3 py-1.5 text-xs font-extrabold uppercase tracking-wider text-[var(--brand-teal)]">
+              Prestação de Contas Pública
+            </span>
+            <h1 className="mt-3 text-4xl font-extrabold leading-tight text-[var(--brand-text)] sm:text-5xl">
+              Emendas Parlamentares.
+            </h1>
+          </div>
+          <div className="space-y-4 text-base leading-8 text-[var(--brand-muted)]">
+            <p>
+              Esta página consolida as informações sobre o recebimento, destinação e execução de <strong>emendas parlamentares federais, estaduais e municipais</strong> destinadas ao Instituto Incentive.
+            </p>
+            <p className="rounded-lg border border-[var(--brand-border)] bg-[var(--brand-surface)] p-4 text-sm font-semibold leading-6 text-[var(--brand-text)]">
+              Nos exercícios de <strong>2020 a 2025</strong>, o valor total recebido a título de emendas foi de <strong>R$ 0,00</strong>, formalizado mediante declarações anuais emitidas pela Diretoria Executiva.
+            </p>
           </div>
         </div>
       </section>
 
-      <section className="border-b border-[var(--brand-border)] bg-[var(--brand-surface)]">
-        <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
-          <div className="grid w-full gap-5 md:grid-cols-3">
-            {summaryCards.map((card) => (
-              <article key={card.label} className="rounded-lg border border-[var(--brand-border)] bg-white p-5 shadow-sm">
-                <p className="text-sm font-bold uppercase text-[var(--brand-orange-dark)]">{card.label}</p>
-                <p className="mt-3 text-3xl font-bold text-[var(--brand-teal)]">{card.value}</p>
-                <p className="mt-3 text-sm leading-6 text-[var(--brand-muted)]">{card.note}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="border-b border-[var(--brand-border)] bg-white">
-        <div className="mx-auto max-w-7xl px-5 py-10 sm:px-8">
-          <div className="rounded-lg border border-[var(--brand-border-strong)] bg-[var(--brand-tint)] p-6 shadow-sm">
-            <p className="text-sm font-semibold uppercase text-[var(--brand-orange-dark)]">Aviso de Transparência</p>
-            <h2 className="mt-3 text-2xl font-bold text-[var(--brand-text)]">
-              Inexistência de recebimento declarada para 2020 a 2025.
-            </h2>
-            <div className="mt-4 space-y-4 text-sm leading-7 text-[var(--brand-muted)]">
-              <p>
-                Até a presente data, o Instituto Incentive de Inovação, Desenvolvimento e Transformação Social não
-                recebeu recursos oriundos de emendas parlamentares ou transferências especiais (Emendas PIX) nos
-                exercícios de 2020 a 2025, conforme declarações anuais publicadas nesta seção.
-              </p>
+      <section className="bg-white py-14">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-extrabold uppercase text-[var(--brand-orange-dark)]">Tabela Consolidada de Execução</p>
+              <h2 className="mt-2 text-2xl font-extrabold sm:text-3xl">Histórico de Recursos Públicos por Emenda</h2>
             </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-white">
-        <div className="mx-auto max-w-7xl px-5 py-14 sm:px-8">
-          <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-            <div className="min-w-0 max-w-3xl">
-              <p className="text-sm font-semibold uppercase text-[var(--brand-orange-dark)]">Tabela pública</p>
-              <h2 className="mt-3 text-3xl font-bold sm:text-4xl">Recebimento de emendas por exercício.</h2>
-              <p className="mt-4 text-base leading-8 text-[var(--brand-muted)]">
-                Nos exercícios de 2020 a 2025, o valor recebido foi R$ 0,00, conforme declarações anuais disponibilizadas
-                em PDF.
-              </p>
-            </div>
-            <span className="inline-flex w-fit items-center gap-2 rounded-lg bg-[var(--brand-tint)] px-4 py-3 text-sm font-bold text-[var(--brand-teal)]">
-              <TableProperties size={18} />
-              Documentos em PDF
+            <span className="inline-flex w-fit items-center gap-2 rounded-lg bg-[var(--brand-tint)] px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-[var(--brand-teal)]">
+              <TableProperties size={16} />
+              Transparência Ativa
             </span>
           </div>
 
-          <div className="mt-8 w-full overflow-hidden rounded-lg border border-[var(--brand-border)]">
+          <div className="mt-8 overflow-hidden rounded-xl border border-[var(--brand-border)] shadow-sm">
             <div className="overflow-x-auto">
               <table className="min-w-[960px] w-full border-collapse bg-white text-left text-sm">
                 <thead className="bg-[var(--brand-tint)] text-xs uppercase text-[var(--brand-teal)]">
                   <tr>
-                    <th className="px-4 py-4 font-bold">Ano</th>
-                    <th className="px-4 py-4 font-bold">Fonte/Instrumento</th>
-                    <th className="px-4 py-4 font-bold">Objeto</th>
-                    <th className="px-4 py-4 font-bold">Valor recebido</th>
-                    <th className="px-4 py-4 font-bold">Aplicação</th>
-                    <th className="px-4 py-4 font-bold">Status</th>
+                    <th className="px-5 py-4 font-extrabold">Exercício</th>
+                    <th className="px-5 py-4 font-extrabold">Parlamentar / Origem</th>
+                    <th className="px-5 py-4 font-extrabold">Objeto do Plano de Trabalho</th>
+                    <th className="px-5 py-4 font-extrabold">Valor Repassado</th>
+                    <th className="px-5 py-4 font-extrabold">Destinação</th>
+                    <th className="px-5 py-4 font-extrabold">Situação</th>
                   </tr>
                 </thead>
                 <tbody>
                   {amendmentRecords.length > 0 ? (
                     amendmentRecords.map((record) => (
-                      <tr key={`${record.year}-${record.source}`} className="border-t border-[var(--brand-border)]">
-                        <td className="px-4 py-4 font-semibold">{record.year}</td>
-                        <td className="px-4 py-4">{record.source}</td>
-                        <td className="px-4 py-4">{record.object}</td>
-                        <td className="px-4 py-4 font-semibold">{record.received}</td>
-                        <td className="px-4 py-4">{record.application}</td>
-                        <td className="px-4 py-4">{record.status}</td>
+                      <tr key={`${record.year}-${record.source}`} className="border-t border-[var(--brand-border-soft)]">
+                        <td className="px-5 py-4 font-bold">{record.year}</td>
+                        <td className="px-5 py-4">{record.source}</td>
+                        <td className="px-5 py-4">{record.object}</td>
+                        <td className="px-5 py-4 font-bold">{record.received}</td>
+                        <td className="px-5 py-4">{record.application}</td>
+                        <td className="px-5 py-4">{record.status}</td>
                       </tr>
                     ))
                   ) : (
-                    <tr className="border-t border-[var(--brand-border)]">
-                      <td colSpan={6} className="px-4 py-10 text-center">
-                        <ClipboardList className="mx-auto text-[var(--brand-teal)]" size={36} />
-                        <p className="mt-4 text-lg font-bold text-[var(--brand-text)]">
-                          Não houve recebimento declarado para o período informado.
+                    <tr className="border-t border-[var(--brand-border-soft)]">
+                      <td colSpan={6} className="px-6 py-12 text-center">
+                        <ClipboardList className="mx-auto text-[var(--brand-teal)]" size={40} />
+                        <p className="mt-4 text-base font-extrabold text-[var(--brand-text)]">
+                          Não houve recebimento de emendas parlamentares nos exercícios de 2020 a 2025.
                         </p>
-                        <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-[var(--brand-muted)]">
-                          A inexistência de recebimento foi formalizada por meio de declarações anuais.
+                        <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-[var(--brand-muted)]">
+                          A inexistência de repasses foi atestada individualmente por meio de declarações anuais registradas.
                         </p>
                       </td>
                     </tr>
@@ -218,65 +145,53 @@ export default function ParliamentaryAmendmentsPage() {
         </div>
       </section>
 
-      <section className="border-y border-[var(--brand-border)] bg-[var(--brand-surface)]">
-        <div className="mx-auto max-w-7xl px-5 py-14 sm:px-8">
-          <div className="min-w-0 max-w-3xl">
-            <p className="text-sm font-semibold uppercase text-[var(--brand-orange-dark)]">Cobertura anual</p>
-            <h2 className="mt-3 text-3xl font-bold sm:text-4xl">Declarações anuais disponíveis para consulta.</h2>
+      <section className="border-y border-[var(--brand-border)] bg-[var(--brand-surface)] py-16">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8">
+          <div className="max-w-3xl">
+            <p className="text-sm font-extrabold uppercase text-[var(--brand-orange-dark)]">Declarações Oficiais em PDF</p>
+            <h2 className="mt-2 text-3xl font-extrabold sm:text-4xl">Documentos por Exercício Anual</h2>
             <p className="mt-4 text-base leading-8 text-[var(--brand-muted)]">
-              Cada documento formaliza a inexistência de recebimento de emendas parlamentares ou transferências
-              especiais pelo Instituto Incentive no respectivo exercício.
+              Consulte e faça o download das declarações formais de inexistência de emendas parlamentares emitidas pelo Instituto.
             </p>
           </div>
 
-          <div className="mt-10 grid w-full gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {annualDeclarations.map((declaration) => (
-              <article key={declaration.year} className="min-w-0 rounded-lg border border-[var(--brand-border)] bg-white p-5 shadow-sm">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-3xl font-bold text-[var(--brand-teal)]">{declaration.year}</p>
-                    <p className="mt-2 text-sm font-bold text-[var(--brand-text)]">
-                      Declaração nº {declaration.number}
-                    </p>
+          <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {annualDeclarations.map((dec) => (
+              <article key={dec.year} className="flex flex-col justify-between rounded-xl border border-[var(--brand-border)] bg-white p-6 shadow-sm">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-3xl font-extrabold text-[var(--brand-teal)]">{dec.year}</span>
+                    <span className="rounded-lg bg-[var(--brand-tint)] px-3 py-1 text-xs font-bold uppercase text-[var(--brand-teal)]">
+                      Publicada
+                    </span>
                   </div>
-                  <span className="rounded-lg bg-[var(--brand-tint)] px-3 py-2 text-xs font-bold text-[var(--brand-teal)]">
-                    Publicada
-                  </span>
-                </div>
-                <div className="mt-5 space-y-3 text-sm leading-6 text-[var(--brand-muted)]">
-                  <p>
-                    <strong className="text-[var(--brand-text)]">Situação:</strong> Não houve recebimento de emendas
-                    parlamentares.
-                  </p>
-                  <p>
-                    <strong className="text-[var(--brand-text)]">Última atualização:</strong> 19/06/2026
-                  </p>
-                  <p>
-                    <strong className="text-[var(--brand-text)]">Responsável:</strong> Pedro Gerard de Souza Jucá -
-                    Diretor Executivo
+                  <h3 className="mt-3 text-base font-extrabold text-[var(--brand-text)]">Declaração nº {dec.number}</h3>
+                  <p className="mt-2 text-sm text-[var(--brand-muted)]">
+                    Atesta a não destinação ou recebimento de emendas parlamentares no exercício.
                   </p>
                 </div>
-                <div className="mt-6 flex flex-wrap gap-3">
+
+                <div className="mt-6 flex flex-wrap gap-2 border-t border-[var(--brand-border-soft)] pt-4">
                   <TrackedAnchor
-                    href={declaration.href}
+                    href={dec.href}
                     target="_blank"
                     rel="noreferrer"
                     eventName="document_open"
-                    eventProperties={{ area: "parliamentary_amendments", year: declaration.year, document: declaration.number }}
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--brand-teal)] px-4 py-3 text-sm font-bold text-white transition hover:bg-[var(--brand-teal-dark)] sm:w-auto"
+                    eventProperties={{ area: "parliamentary_amendments", year: dec.year, document: dec.number }}
+                    className="inline-flex items-center gap-2 rounded-lg bg-[var(--brand-teal)] px-4 py-2.5 text-xs font-bold text-white transition hover:bg-[var(--brand-teal-dark)]"
                   >
                     Visualizar PDF
-                    <ArrowUpRight size={16} />
+                    <ArrowUpRight size={14} />
                   </TrackedAnchor>
                   <TrackedAnchor
-                    href={declaration.href}
+                    href={dec.href}
                     download
                     eventName="document_download"
-                    eventProperties={{ area: "parliamentary_amendments", year: declaration.year, document: declaration.number }}
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-[var(--brand-border-strong)] bg-white px-4 py-3 text-sm font-bold text-[var(--brand-text)] transition hover:border-[var(--brand-teal)] hover:text-[var(--brand-teal)] sm:w-auto"
+                    eventProperties={{ area: "parliamentary_amendments", year: dec.year, document: dec.number }}
+                    className="inline-flex items-center gap-2 rounded-lg border border-[var(--brand-border-strong)] bg-white px-4 py-2.5 text-xs font-bold text-[var(--brand-text)] transition hover:border-[var(--brand-teal)]"
                   >
-                    Baixar PDF
-                    <Download size={16} />
+                    Baixar
+                    <Download size={14} />
                   </TrackedAnchor>
                 </div>
               </article>
@@ -285,22 +200,22 @@ export default function ParliamentaryAmendmentsPage() {
         </div>
       </section>
 
-      <section className="bg-[var(--brand-text)] text-white">
-        <div className="mx-auto grid w-full max-w-7xl gap-8 px-5 py-12 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
-          <div className="min-w-0">
-            <h2 className="text-2xl font-bold">Solicitação de informações</h2>
-            <p className="mt-3 text-sm leading-6 text-[var(--brand-light-text)]">
-              Pedidos, correções ou complementações sobre emendas parlamentares podem ser encaminhados ao canal oficial.
+      <section className="bg-[var(--brand-text)] text-white py-12">
+        <div className="mx-auto grid max-w-7xl gap-8 px-5 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+          <div>
+            <h2 className="text-2xl font-extrabold">Canal de Transparência sobre Emendas</h2>
+            <p className="mt-2 text-sm leading-6 text-[var(--brand-light-text)]">
+              Para dúvidas, auditorias ou solicitações relacionadas a emendas e transferências, envie uma mensagem para o canal oficial.
             </p>
           </div>
           <TrackedAnchor
             href="mailto:contato@institutoincentive.org.br?subject=Solicita%C3%A7%C3%A3o%20sobre%20emendas%20parlamentares"
             eventName="contact_channel_click"
             eventProperties={{ channel: "email", page: "parliamentary_amendments" }}
-            className="flex items-center gap-4 rounded-lg border border-white/15 bg-white/10 p-4 text-white transition hover:bg-white/15"
+            className="flex items-center gap-4 rounded-xl border border-white/15 bg-white/10 p-5 text-white transition hover:bg-white/15"
           >
-            <Mail className="shrink-0 text-[var(--brand-orange-light)]" size={22} />
-            <span className="break-all text-sm font-semibold sm:text-base">contato@institutoincentive.org.br</span>
+            <Mail className="shrink-0 text-[var(--brand-orange-light)]" size={24} />
+            <span className="break-all text-sm font-bold sm:text-base">{siteConfig.email}</span>
           </TrackedAnchor>
         </div>
       </section>

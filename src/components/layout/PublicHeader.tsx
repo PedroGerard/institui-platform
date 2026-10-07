@@ -9,8 +9,8 @@ import { PublicBrand } from "./PublicBrand";
 
 const primaryNavLinks = [
   { href: "/", label: "Início" },
-  { href: "/quem-somos", label: "Quem somos" },
-  { href: "/areas-de-atuacao", label: "Áreas de atuação" },
+  { href: "/quem-somos", label: "Quem Somos" },
+  { href: "/areas-de-atuacao", label: "Áreas de Atuação" },
   { href: "/projetos", label: "Projetos" },
   { href: "/certificacoes-reconhecimentos", label: "Certificações" },
   { href: "/contato", label: "Contato" },
@@ -20,12 +20,12 @@ const transparencyLinks = [
   {
     href: "/transparencia",
     label: "Portal da Transparência",
-    description: "Documentos, governança e prestação de contas.",
+    description: "Atos constitutivos, certidões, balanços e governança institucional.",
   },
   {
     href: "/transparencia/emendas-parlamentares",
     label: "Emendas Parlamentares",
-    description: "Declarações anuais e posição pública de recebimento.",
+    description: "Declarações anuais e prestação de contas pública de recursos.",
   },
 ];
 

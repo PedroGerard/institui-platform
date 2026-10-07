@@ -1,180 +1,160 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { TrackedAnchor } from "@/components/analytics/TrackedAnchor";
+import { PublicFooter } from "@/components/layout/PublicFooter";
+import { PublicHeader } from "@/components/layout/PublicHeader";
+import { buildPageMetadata } from "@/lib/seo";
 import {
   ArrowRight,
-  ArrowUpRight,
   Award,
   BadgeCheck,
-  CalendarDays,
   Download,
   FileText,
   SearchCheck,
 } from "lucide-react";
-import { PublicFooter } from "@/components/layout/PublicFooter";
-import { PublicHeader } from "@/components/layout/PublicHeader";
-import { buildPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Certificacoes e Reconhecimentos",
+  title: "Certificações e Reconhecimentos",
   description:
-    "Certificados, cadastros e reconhecimentos obtidos pelo Instituto Incentive, incluindo cultura, CADASTUR e economia solidaria.",
+    "Conheça os certificados, cadastros públicos e reconhecimentos obtidos pelo Instituto Incentive junto ao Ministério da Cultura, CADASTUR e DCSOL.",
   path: "/certificacoes-reconhecimentos",
 });
 
 const certifications = [
   {
     title: "Cadastro Nacional de Pontos e Pontões de Cultura",
-    type: "Reconhecimento cultural",
-    issuer: "Cadastro Nacional de Pontos e Pontões de Cultura",
+    type: "Reconhecimento Cultural",
+    issuer: "Ministério da Cultura (MinC) / Secretaria da Cidadania e Diversidade Cultural",
     description:
-      "Reconhecimento da atuação cultural e comunitária do Instituto Incentive no campo da cultura viva, da formação e da participação social.",
+      "Certificado de inserção e reconhecimento no Cadastro Nacional de Pontos e Pontões de Cultura do Governo Federal, atestando a realização de ações culturais continuadas de relevância pública.",
     href: "/documentos/certificacoes/cadastro-nacional-pontos-pontoes-cultura.pdf",
   },
   {
     title: "Certificado CADASTUR - Organizadora de Eventos",
-    type: "Certificação em eventos",
-    issuer: "CADASTUR",
+    type: "Certificação Setorial",
+    issuer: "Ministério do Turismo / CADASTUR",
     description:
-      "Certificação que reconhece a atuação institucional na organização de eventos, fortalecendo a capacidade de execução de ações culturais, educativas e comunitárias.",
+      "Certificação oficial que habilita o Instituto Incentive como organizadora de eventos técnicos, sociais, culturais e comunitários, em conformidade com os padrões do setor de turismo.",
     href: "/documentos/certificacoes/certificado-cadastur-organizadora-eventos.pdf",
   },
   {
     title: "Certificado CADASTUR - Prestador Especializado em Segmentos",
-    type: "Certificação setorial",
-    issuer: "CADASTUR",
+    type: "Certificação Especializada",
+    issuer: "Ministério do Turismo / CADASTUR",
     description:
-      "Certificação que amplia o reconhecimento do Instituto como prestador especializado em segmentos estratégicos ligados a experiências, eventos e desenvolvimento territorial.",
+      "Certificação que qualifica o Instituto como prestador especializado em segmentos de turismo cívico, cultural, comunitário e pedagógico no território.",
     href: "/documentos/certificacoes/certificado-cadastur-prestador-especializado-segmentos.pdf",
   },
   {
     title: "Declaração de Empreendimento Econômico Solidário - DCSOL",
-    type: "Reconhecimento em economia solidária",
-    issuer: "DCSOL",
+    type: "Economia Solidária",
+    issuer: "Departamento de Fomento à Economia Solidária (DCSOL)",
     description:
-      "Declaração que evidencia a vinculação do Instituto Incentive a iniciativas de economia solidária, inclusão produtiva e desenvolvimento social sustentável.",
+      "Documento que comprova a vinculação do Instituto Incentive aos princípios da economia popular e solidária, inclusão socioprodutiva e governança democrática.",
     href: "/documentos/certificacoes/declaracao-empreendimento-economico-solidario-dcsol.pdf",
   },
 ];
-
-const pageUpdatedAt = "18 de junho de 2026";
-const availableCount = certifications.length;
 
 export default function CertificationsAndRecognitionPage() {
   return (
     <main className="min-h-screen bg-[var(--brand-surface)] text-[var(--brand-text)]">
       <PublicHeader />
 
-      <section id="conteudo-principal" className="bg-white">
+      <section id="conteudo-principal" className="border-b border-[var(--brand-border)] bg-white">
         <div className="mx-auto grid w-full max-w-7xl gap-10 px-5 py-14 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
-          <div className="min-w-0">
-            <p className="text-sm font-semibold uppercase text-[var(--brand-orange-dark)]">
-              Certificações e Reconhecimentos
-            </p>
-            <h1 className="mt-3 text-4xl font-bold leading-tight sm:text-5xl">
-              Certificados, cadastros e reconhecimentos obtidos pelo Instituto Incentive.
+          <div>
+            <span className="inline-flex items-center gap-2 rounded-lg bg-[var(--brand-tint)] px-3 py-1.5 text-xs font-extrabold uppercase tracking-wider text-[var(--brand-teal)]">
+              Qualificação Institucional
+            </span>
+            <h1 className="mt-3 text-4xl font-extrabold leading-tight text-[var(--brand-text)] sm:text-5xl">
+              Certificações e Reconhecimentos.
             </h1>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <a
-                href="#certificacoes"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--brand-teal)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[var(--brand-teal-dark)] sm:w-auto"
-              >
-                Ver certificações
-                <ArrowRight size={18} />
-              </a>
+          </div>
+          <div className="space-y-4 text-base leading-8 text-[var(--brand-muted)]">
+            <p>
+              Esta página reúne os <strong>certificados setoriais, cadastros públicos e reconhecimentos oficiais</strong> obtidos pelo Instituto Incentive perante órgãos do Governo Federal e conselhos competentes.
+            </p>
+            <div className="flex flex-wrap gap-3">
               <Link
                 href="/transparencia"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-[var(--brand-border-strong)] bg-white px-5 py-3 text-sm font-semibold text-[var(--brand-text)] transition hover:border-[var(--brand-teal)] hover:text-[var(--brand-teal)] sm:w-auto"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--brand-teal)] px-5 py-3 text-sm font-bold text-white transition hover:bg-[var(--brand-teal-dark)]"
               >
-                Ver Transparência
-                <ArrowUpRight size={18} />
+                Ver Portal da Transparência
+                <ArrowRight size={18} />
               </Link>
             </div>
           </div>
-          <div className="min-w-0 space-y-5 text-base leading-8 text-[var(--brand-muted)]">
-            <p>
-              Esta seção reúne reconhecimentos formais, certificações setoriais, cadastros públicos e declarações
-              obtidas pelo Instituto Incentive em suas áreas de atuação.
-            </p>
-            <p className="rounded-lg border border-[var(--brand-border)] bg-[var(--brand-surface)] p-4 text-sm font-semibold leading-6 text-[var(--brand-text)]">
-              Certidões fiscais, alvarás, CNPJ, estatuto, atas e demonstrações financeiras permanecem organizados na
-              área de Transparência, pois são documentos de regularidade e prestação de contas.
-            </p>
-            <p className="inline-flex items-center gap-2 rounded-lg bg-[var(--brand-orange-soft)] px-4 py-3 text-sm font-bold text-[var(--brand-orange-dark)]">
-              <CalendarDays size={18} />
-              Página revisada em {pageUpdatedAt}
-            </p>
+        </div>
+      </section>
+
+      <section className="border-b border-[var(--brand-border)] bg-[var(--brand-text)] text-white py-12">
+        <div className="mx-auto grid w-full max-w-7xl gap-6 px-5 sm:px-8 md:grid-cols-4">
+          <div className="rounded-xl border border-white/10 bg-white/[0.06] p-6">
+            <Award className="text-[var(--brand-orange-light)]" size={30} />
+            <p className="mt-4 text-3xl font-extrabold">4</p>
+            <p className="mt-2 text-sm text-[var(--brand-light-text)]">Certificações e cadastros oficiais</p>
+          </div>
+          <div className="rounded-xl border border-white/10 bg-white/[0.06] p-6">
+            <FileText className="text-[var(--brand-orange-light)]" size={30} />
+            <p className="mt-4 text-3xl font-extrabold">100%</p>
+            <p className="mt-2 text-sm text-[var(--brand-light-text)]">Documentos em PDF disponíveis</p>
+          </div>
+          <div className="rounded-xl border border-white/10 bg-white/[0.06] p-6">
+            <BadgeCheck className="text-[var(--brand-orange-light)]" size={30} />
+            <p className="mt-4 text-3xl font-extrabold">Federal</p>
+            <p className="mt-2 text-sm text-[var(--brand-light-text)]">Reconhecimento em ministérios</p>
+          </div>
+          <div className="rounded-xl border border-white/10 bg-white/[0.06] p-6">
+            <SearchCheck className="text-[var(--brand-orange-light)]" size={30} />
+            <p className="mt-4 text-3xl font-extrabold">Público</p>
+            <p className="mt-2 text-sm text-[var(--brand-light-text)]">Consulta livre no site oficial</p>
           </div>
         </div>
       </section>
 
-      <section className="border-y border-[var(--brand-border)] bg-[var(--brand-text)] text-white">
-        <div className="mx-auto grid w-full max-w-7xl gap-5 px-5 py-12 sm:px-8 md:grid-cols-4">
-          <article className="rounded-lg border border-white/10 bg-white/[0.07] p-5">
-            <Award className="text-[var(--brand-orange-light)]" size={30} />
-            <p className="mt-4 text-3xl font-bold">{certifications.length}</p>
-            <p className="mt-2 text-sm leading-6 text-[var(--brand-light-text)]">certificações e reconhecimentos listados</p>
-          </article>
-          <article className="rounded-lg border border-white/10 bg-white/[0.07] p-5">
-            <FileText className="text-[var(--brand-orange-light)]" size={30} />
-            <p className="mt-4 text-3xl font-bold">{availableCount}</p>
-            <p className="mt-2 text-sm leading-6 text-[var(--brand-light-text)]">arquivos em PDF disponíveis</p>
-          </article>
-          <article className="rounded-lg border border-white/10 bg-white/[0.07] p-5">
-            <BadgeCheck className="text-[var(--brand-orange-light)]" size={30} />
-            <p className="mt-4 text-3xl font-bold">4</p>
-            <p className="mt-2 text-sm leading-6 text-[var(--brand-light-text)]">frentes de reconhecimento institucional</p>
-          </article>
-          <article className="rounded-lg border border-white/10 bg-white/[0.07] p-5">
-            <SearchCheck className="text-[var(--brand-orange-light)]" size={30} />
-            <p className="mt-4 text-3xl font-bold">Público</p>
-            <p className="mt-2 text-sm leading-6 text-[var(--brand-light-text)]">consulta direta pelo site institucional</p>
-          </article>
-        </div>
-      </section>
-
-      <section id="certificacoes" className="mx-auto max-w-7xl px-5 py-16 sm:px-8">
-        <div className="mb-8 max-w-3xl">
-          <p className="text-sm font-semibold uppercase text-[var(--brand-orange-dark)]">Acervo institucional</p>
-          <h2 className="mt-3 text-3xl font-bold sm:text-4xl">
-            Reconhecimentos obtidos pelo Instituto.
-          </h2>
+      <section className="mx-auto max-w-7xl px-5 py-16 sm:px-8">
+        <div className="max-w-3xl">
+          <p className="text-sm font-extrabold uppercase text-[var(--brand-orange-dark)]">Acervo Oficial</p>
+          <h2 className="mt-2 text-3xl font-extrabold sm:text-4xl">Certificados e Registros Ativos</h2>
           <p className="mt-4 text-base leading-8 text-[var(--brand-muted)]">
-            A lista abaixo reúne conquistas, registros e certificações formais do Instituto Incentive. Itens
-            administrativos de regularidade estão organizados separadamente no Portal da Transparência.
+            Abaixo estão discriminados os registros formais que comprovam a aptidão técnica e institucional da organização:
           </p>
         </div>
 
-        <div className="grid w-full gap-5 lg:grid-cols-2">
-          {certifications.map((certification) => (
-              <article key={certification.title} className="min-w-0 rounded-lg border border-[var(--brand-border)] bg-white p-6 shadow-sm">
-                <div className="flex flex-wrap items-center gap-3">
-                  <span className="inline-flex items-center gap-2 rounded-lg bg-[var(--brand-tint)] px-3 py-2 text-xs font-bold uppercase text-[var(--brand-teal)]">
+        <div className="mt-10 grid gap-6 md:grid-cols-2">
+          {certifications.map((cert) => (
+            <article key={cert.title} className="flex flex-col justify-between rounded-xl border border-[var(--brand-border)] bg-white p-6 shadow-sm transition hover:border-[var(--brand-teal)] hover:shadow-md">
+              <div>
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <span className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--brand-tint)] px-3 py-1.5 text-xs font-bold uppercase text-[var(--brand-teal)]">
                     <BadgeCheck size={16} />
-                    {certification.type}
+                    {cert.type}
                   </span>
-                  <span className="rounded-lg bg-[var(--brand-orange-soft)] px-3 py-2 text-xs font-bold uppercase text-[var(--brand-orange-dark)]">
-                    Documento em PDF
+                  <span className="rounded-lg bg-[var(--brand-orange-soft)] px-3 py-1.5 text-xs font-bold uppercase text-[var(--brand-orange-dark)]">
+                    PDF Autenticado
                   </span>
                 </div>
 
-                <h3 className="mt-5 text-2xl font-bold text-[var(--brand-text)]">{certification.title}</h3>
-                <p className="mt-2 text-sm font-semibold text-[var(--brand-muted)]">{certification.issuer}</p>
-                <p className="mt-4 text-sm leading-7 text-[var(--brand-muted)]">{certification.description}</p>
+                <h3 className="mt-4 text-xl font-extrabold text-[var(--brand-text)]">{cert.title}</h3>
+                <p className="mt-1.5 text-sm font-bold text-[var(--brand-teal)]">{cert.issuer}</p>
+                <p className="mt-3 text-sm leading-6 text-[var(--brand-muted)]">{cert.description}</p>
+              </div>
 
+              <div className="mt-6 border-t border-[var(--brand-border-soft)] pt-4">
                 <TrackedAnchor
-                  href={certification.href}
+                  href={cert.href}
                   target="_blank"
                   rel="noreferrer"
                   eventName="document_open"
-                  eventProperties={{ area: "certifications", document: certification.title }}
-                  className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--brand-teal)] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[var(--brand-teal-dark)] sm:w-auto"
+                  eventProperties={{ area: "certifications", document: cert.title }}
+                  className="inline-flex items-center gap-2 rounded-lg bg-[var(--brand-teal)] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[var(--brand-teal-dark)]"
                 >
-                  Abrir certificado
-                  <Download size={17} />
+                  Abrir Certificado em PDF
+                  <Download size={16} />
                 </TrackedAnchor>
-              </article>
-            ))}
+              </div>
+            </article>
+          ))}
         </div>
       </section>
 

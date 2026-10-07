@@ -18,7 +18,7 @@ import {
 export const metadata: Metadata = buildPageMetadata({
   title: "Acessibilidade",
   description:
-    "Recursos e praticas de acessibilidade digital do site do Instituto Incentive, com foco em navegacao, contraste, leitura e contato.",
+    "Recursos e práticas de acessibilidade digital do site do Instituto Incentive, com foco em navegação, contraste, leitura e usabilidade inclusiva.",
   path: "/acessibilidade",
 });
 
@@ -26,30 +26,30 @@ const accessibilityPractices = [
   {
     icon: Keyboard,
     title: "Navegação por teclado",
-    text: "O site possui atalho para ir diretamente ao conteúdo principal e foco visível nos elementos interativos.",
+    text: "O site possui atalho direto para o conteúdo principal, ordem lógica de tabulação e foco visível em todos os elementos interativos.",
   },
   {
     icon: Eye,
-    title: "Contraste e leitura",
-    text: "A paleta institucional foi aplicada com atenção a contraste, legibilidade e leitura em telas pequenas.",
+    title: "Contraste e legibilidade",
+    text: "A paleta de cores institucional segue parâmetros de contraste para facilitar a leitura em telas diversas e sob luz solar.",
   },
   {
     icon: Type,
     title: "Textos objetivos",
-    text: "As páginas priorizam linguagem clara, títulos descritivos e organização por blocos de conteúdo.",
+    text: "Páginas estruturadas com hierarquia semântica de títulos (H1 a H3) e redação clara e direta.",
   },
   {
     icon: MousePointerClick,
     title: "Ações identificáveis",
-    text: "Links, botões e documentos foram organizados para deixar claro o que será aberto ou baixado.",
+    text: "Botões e links com rótulos descritivos que esclarecem o destino ou a ação executada.",
   },
 ];
 
 const continuousImprovements = [
-  "Revisar textos alternativos de imagens sempre que novos materiais forem publicados.",
-  "Manter documentos em PDF com nomes claros e, sempre que possível, versões acessíveis.",
-  "Testar páginas em celulares, navegação por teclado e leitores de tela.",
-  "Receber correções da comunidade por meio do canal oficial de contato.",
+  "Revisão contínua de textos alternativos (alt text) em todas as imagens e gráficos publicados.",
+  "Disponibilização de documentos em PDF pesquisáveis e com estrutura de cabeçalhos.",
+  "Testes periódicos em dispositivos móveis, leitores de tela e navegadores variados.",
+  "Abertura a sugestões e apontamentos da comunidade através dos canais de contato.",
 ];
 
 export default function AccessibilityPage() {
@@ -62,17 +62,15 @@ export default function AccessibilityPage() {
           <div>
             <p className="text-sm font-semibold uppercase text-[var(--brand-orange-dark)]">Acessibilidade</p>
             <h1 className="mt-3 text-4xl font-bold leading-tight sm:text-5xl">
-              Um site mais claro, navegável e acessível para todos.
+              Uma experiência digital clara, navegável e acessível para todos.
             </h1>
           </div>
           <div className="space-y-5 text-base leading-8 text-[var(--brand-muted)]">
             <p>
-              O Instituto Incentive busca manter uma experiência digital simples, responsiva e inclusiva, facilitando o
-              acesso a informações institucionais, projetos, transparência e canais de contato.
+              O Instituto Incentive prioriza uma navegação inclusiva e transparente, assegurando que pessoas com diferentes necessidades possam acessar informações institucionais, projetos, documentos e canais de contato com autonomia.
             </p>
             <p className="rounded-lg border border-[var(--brand-border)] bg-[var(--brand-surface)] p-4 text-sm font-semibold leading-6 text-[var(--brand-text)]">
-              A acessibilidade digital é uma prática contínua. Sempre que novos conteúdos, documentos e funcionalidades
-              são publicados, a estrutura do site passa por revisão.
+              A conformidade com diretrizes de acessibilidade na web (WCAG) é tratada como compromisso contínuo e evolutivo.
             </p>
           </div>
         </div>
@@ -97,10 +95,9 @@ export default function AccessibilityPage() {
       <section className="mx-auto grid max-w-7xl gap-10 px-5 py-14 sm:px-8 lg:grid-cols-[0.85fr_1.15fr]">
         <div>
           <ShieldCheck className="text-[var(--brand-teal)]" size={34} />
-          <h2 className="mt-4 text-3xl font-bold">Melhorias permanentes.</h2>
+          <h2 className="mt-4 text-3xl font-bold">Compromisso com melhorias permanentes.</h2>
           <p className="mt-4 text-base leading-8 text-[var(--brand-muted)]">
-            O site evolui com testes, revisão de conteúdo e participação dos usuários. Quando alguém encontra
-            dificuldade de acesso, o Instituto pode avaliar e corrigir a experiência.
+            Caso identifique qualquer barreira de acessibilidade ou inconsistência na navegação, envie sua mensagem para que possamos efetuar a correção necessária.
           </p>
           <a
             href={buildMailto("Acessibilidade no site do Instituto Incentive")}
@@ -126,7 +123,7 @@ export default function AccessibilityPage() {
           <div>
             <h2 className="text-2xl font-bold">Canal oficial de contato</h2>
             <p className="mt-2 text-sm leading-6 text-[var(--brand-muted)]">
-              Envie dúvidas, sugestões ou pedidos de correção para {siteConfig.email}.
+              Dúvidas ou sugestões de acessibilidade podem ser enviadas diretamente para {siteConfig.email}.
             </p>
           </div>
           <Link

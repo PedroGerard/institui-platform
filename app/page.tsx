@@ -1,494 +1,397 @@
-import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { TrackedAnchor } from "@/components/analytics/TrackedAnchor";
 import { PublicFooter } from "@/components/layout/PublicFooter";
 import { PublicHeader } from "@/components/layout/PublicHeader";
 import { siteConfig } from "@/lib/site-config";
-import { buildPageMetadata } from "@/lib/seo";
 import {
   ArrowRight,
   ArrowUpRight,
   Award,
+  Briefcase,
   CheckCircle2,
-  FileSearch,
+  Compass,
   Globe,
   GraduationCap,
+  Heart,
+  HeartHandshake,
   Landmark,
-  Leaf,
+  Lightbulb,
   Mail,
   MapPin,
-  Music2,
   Phone,
   ShieldCheck,
   Sparkles,
-  Users,
 } from "lucide-react";
-
-export const metadata: Metadata = buildPageMetadata({
-  title: "Instituto Incentive",
-  description:
-    "Organizacao da sociedade civil de Pereiro/CE dedicada a educacao, cultura, inclusao social, sustentabilidade, inovacao e transparencia.",
-  path: "/",
-});
 
 const heroSlides = [
   {
-    image: "https://images.pexels.com/photos/35450789/pexels-photo-35450789.jpeg?auto=compress&cs=tinysrgb&w=2200",
-    alt: "Paisagem de sertão e caatinga com cactos ao pôr do sol",
+    src: "/images/instituto-incentive-hero.png",
+    alt: "Comunidade e ações de desenvolvimento territorial do Instituto Incentive",
   },
   {
-    image: "https://images.pexels.com/photos/28938647/pexels-photo-28938647.jpeg?auto=compress&cs=tinysrgb&w=2200",
-    alt: "Barco de pesca tradicional na praia de Aracati, Ceará",
+    src: "https://images.pexels.com/photos/8777800/pexels-photo-8777800.jpeg?auto=compress&cs=tinysrgb&w=1600",
+    alt: "Pessoas unidas em ação comunitária no território",
   },
   {
-    image: "https://images.pexels.com/photos/29355909/pexels-photo-29355909.jpeg?auto=compress&cs=tinysrgb&w=2200",
-    alt: "Pôr do sol sobre barcos de pesca nas águas do Ceará",
-  },
-  {
-    image: "https://images.pexels.com/photos/30827646/pexels-photo-30827646.jpeg?auto=compress&cs=tinysrgb&w=2200",
-    alt: "Palmeiras refletidas em lagoa no Ceará",
-  },
-  {
-    image: "https://images.pexels.com/photos/9211779/pexels-photo-9211779.jpeg?auto=compress&cs=tinysrgb&w=2200",
-    alt: "Celebração cultural brasileira com dança e cores",
+    src: "https://images.pexels.com/photos/33766496/pexels-photo-33766496.jpeg?auto=compress&cs=tinysrgb&w=1600",
+    alt: "Inclusão digital e capacitação de jovens no semiárido",
   },
 ];
 
-const impactHighlights = [
+const pillars = [
   {
-    label: "Desde 2001",
-    text: "Atuação social com origem em Pereiro, Ceará.",
+    icon: Compass,
+    title: "Desenvolvimento Territorial",
+    text: "Soluções integradas e perenes desenhadas com base nas vocações, desafios e saberes das comunidades do semiárido cearense.",
   },
   {
-    label: "10 áreas",
-    text: "Educação, cultura, inclusão, tecnologia, sustentabilidade e governança.",
-  },
-  {
-    label: "Transparência",
-    text: "Informação pública organizada para fortalecer confiança e controle social.",
-  },
-];
-
-const focusAreas = [
-  {
-    icon: GraduationCap,
-    title: "Educação e inclusão",
-    text: "Projetos que ampliam oportunidades de aprendizagem, formação profissional e protagonismo comunitário.",
-    image: "https://images.pexels.com/photos/8777800/pexels-photo-8777800.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    alt: "Crianças em ação comunitária durante atividade social",
-  },
-  {
-    icon: Music2,
-    title: "Cultura e território",
-    text: "Iniciativas culturais que valorizam identidades locais, economia criativa e acesso democrático à arte.",
-    image: "https://images.pexels.com/photos/9211779/pexels-photo-9211779.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    alt: "Apresentação cultural brasileira com artistas em trajes coloridos",
-  },
-  {
-    icon: Leaf,
-    title: "Sustentabilidade",
-    text: "Ações para educação ambiental, desenvolvimento rural sustentável e proteção de recursos naturais.",
-    image: "https://images.pexels.com/photos/35450739/pexels-photo-35450739.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    alt: "Paisagem semiárida com mandacaru e vegetação de caatinga",
+    icon: Lightbulb,
+    title: "Inovação e Tecnologia Social",
+    text: "Metodologias contemporâneas e replicáveis para enfrentar desigualdades em educação, trabalho, cultura e inclusão socioprodutiva.",
   },
   {
     icon: ShieldCheck,
-    title: "Governança social",
-    text: "Apoio à organização de projetos, transparência, parcerias e boas práticas no Terceiro Setor.",
-    image: "https://images.pexels.com/photos/7441079/pexels-photo-7441079.jpeg?auto=compress&cs=tinysrgb&w=1200",
-    alt: "Profissionais colaborando em uma reunião institucional",
+    title: "Governança e Integridade",
+    text: "Compliance estatutário rigoroso, segregação de funções, dupla autorização e transparência ativa permanente para controle social.",
+  },
+  {
+    icon: HeartHandshake,
+    title: "Articulação em Redes",
+    text: "Cooperação multissetorial conectando governos, empresas com responsabilidade social, universidades e organizações de base.",
   },
 ];
 
-const steps = [
-  "Mapear necessidades do território e oportunidades de parceria",
-  "Estruturar projetos com metas, documentação e governança",
-  "Mobilizar redes públicas, privadas e comunitárias",
-  "Acompanhar resultados com transparência e foco em impacto",
+const featuredAxes = [
+  {
+    icon: Heart,
+    axisNumber: "Eixo 01",
+    title: "Proteção Social e Garantia de Direitos",
+    desc: "Acolhimento socioassistencial gratuito e defesa de direitos para públicos em vulnerabilidade.",
+  },
+  {
+    icon: Briefcase,
+    axisNumber: "Eixo 02",
+    title: "Inclusão Socioprodutiva e Renda",
+    desc: "Formação técnica, economia solidária e geração de renda para mulheres e jovens.",
+  },
+  {
+    icon: GraduationCap,
+    axisNumber: "Eixo 04",
+    title: "Educação, Cultura e Esporte",
+    desc: "Oficinas culturais, musicalização comunitária e qualificação profissional acessível.",
+  },
+  {
+    icon: Landmark,
+    axisNumber: "Eixo 08",
+    title: "Fortalecimento do Terceiro Setor",
+    desc: "Capacitação de lideranças associativas em governança, captação de recursos e compliance.",
+  },
 ];
 
 const featuredProjects = [
   {
+    id: "7510",
     title: "Sons do Sertão",
-    text: "Formação musical comunitária com oficinas gratuitas de violão, recital público e acervo permanente.",
+    axis: "Cultura e Formação",
     image: "/images/projects/7510.png",
+    text: "12 oficinas gratuitas de violão para crianças e adolescentes no Bairro Vila Nova em Pereiro/CE, com recital público e acervo de 10 violões.",
   },
   {
+    id: "7429",
     title: "Beleza Criativa",
-    text: "Capacitação em manicure e pedicure para fortalecer autonomia, empreendedorismo e geração de renda.",
+    axis: "Inclusão Produtiva",
     image: "/images/projects/7429.jpg",
+    text: "Capacitação prática em técnicas de manicure e pedicure para mulheres e jovens, impulsionando a autonomia financeira e o microempreendedorismo.",
   },
   {
-    title: "Conexão Profissional",
-    text: "Formação inicial em instalação elétrica predial para ampliar oportunidades de trabalho e renda.",
-    image: "/images/projects/7512.jpg",
+    id: "6738",
+    title: "I Fórum de Lideranças Associativas",
+    axis: "Fortalecimento Institucional",
+    image: "/images/projects/6738.jpg",
+    text: "Encontro formativo para capacitar associações comunitárias em governança, legalidade, MROSC e estratégias contemporâneas de captação.",
   },
 ];
 
-const audiences = [
-  {
-    icon: FileSearch,
-    title: "Projetos bem estruturados",
-    text: "Organização de propostas, narrativas, evidências e materiais para fortalecer iniciativas sociais.",
-  },
-  {
-    icon: Landmark,
-    title: "Parcerias responsáveis",
-    text: "Conexão entre poder público, empresas, sociedade civil e comunidades com foco em interesse público.",
-  },
-  {
-    icon: Users,
-    title: "Comunidades protagonistas",
-    text: "Ações que valorizam autonomia, participação social, diversidade e desenvolvimento local.",
-  },
-];
-
-const trustSignals = [
-  {
-    icon: ShieldCheck,
-    title: "Transparência ativa",
-    text: "Documentos institucionais, emendas e informações públicas organizadas para consulta social.",
-    href: "/transparencia",
-  },
-  {
-    icon: Award,
-    title: "Reconhecimentos publicados",
-    text: "Cadastros, certificados e declarações institucionais disponíveis para verificação.",
-    href: "/certificacoes-reconhecimentos",
-  },
-  {
-    icon: MapPin,
-    title: "Origem em Pereiro/CE",
-    text: "Atuação territorial com endereço, CNPJ e canais oficiais visíveis no site.",
-    href: "/contato",
-  },
-];
-
-export default function Home() {
+export default function HomePage() {
   return (
     <main className="min-h-screen bg-[var(--brand-surface)] text-[var(--brand-text)]">
       <PublicHeader />
 
-      <section id="conteudo-principal" className="relative min-h-[76svh] overflow-hidden bg-[var(--brand-teal-deep)]">
-        {heroSlides.map((slide, index) => (
-          <Image
-            key={slide.image}
-            src={slide.image}
-            alt=""
-            aria-hidden="true"
-            fill
-            priority={index === 0}
-            sizes="100vw"
-            className="hero-carousel-slide object-cover object-center"
-            style={{ animationDelay: `${index * 8}s` }}
-          />
-        ))}
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,63,68,0.96)_0%,rgba(0,104,113,0.84)_44%,rgba(0,104,113,0.30)_75%,rgba(0,104,113,0.10)_100%)]" />
-
-        <div className="relative mx-auto flex min-h-[76svh] w-full max-w-7xl items-center px-4 py-12 sm:px-8 sm:py-16">
-          <div className="min-w-0 max-w-4xl">
-            <div className="mb-6 inline-flex max-w-full items-start gap-2 rounded-lg border border-white/25 bg-white/12 px-3 py-2 text-xs font-bold leading-5 text-white backdrop-blur sm:items-center sm:text-sm">
-              <Sparkles size={17} className="mt-0.5 shrink-0 sm:mt-0" />
-              <span className="min-w-0 break-words">Inovação, desenvolvimento e transformação social desde 2001</span>
+      {/* HERO SECTION */}
+      <section id="conteudo-principal" className="relative overflow-hidden bg-[var(--brand-text)] text-white">
+        <div className="absolute inset-0 overflow-hidden">
+          {heroSlides.map((slide, index) => (
+            <div
+              key={slide.src}
+              className="hero-carousel-slide absolute inset-0"
+              style={{ animationDelay: `${index * 8}s` }}
+            >
+              <Image
+                src={slide.src}
+                alt={slide.alt}
+                fill
+                priority={index === 0}
+                sizes="100vw"
+                className="object-cover object-center opacity-40"
+              />
             </div>
+          ))}
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,63,68,0.95)_0%,rgba(0,104,113,0.80)_52%,rgba(0,63,68,0.30)_100%)]" />
+        </div>
 
-            <h1 className="max-w-4xl text-3xl font-extrabold leading-[1.08] text-white sm:text-5xl lg:text-6xl">
-              Transformação social com educação, cultura e inovação no território.
+        <div className="relative mx-auto grid min-h-[70svh] max-w-7xl items-center gap-10 px-5 py-20 sm:px-8 lg:grid-cols-[1.1fr_0.9fr]">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-lg border border-white/20 bg-white/10 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-white backdrop-blur">
+              <Sparkles size={16} className="text-[var(--brand-orange-light)]" />
+              Desenvolvimento Territorial • Inovação Social
+            </div>
+            <h1 className="mt-5 text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
+              Transformação Social com Raízes no Semiárido.
             </h1>
-
-            <p className="mt-6 max-w-2xl text-base leading-7 text-[var(--brand-light-surface)] sm:text-xl sm:leading-8">
-              O Instituto Incentive fortalece pessoas, comunidades e organizações por meio de projetos inclusivos,
-              parcerias responsáveis e uma gestão comprometida com transparência.
+            <p className="mt-6 max-w-2xl text-lg leading-8 text-[var(--brand-light-surface)]">
+              O <strong>Instituto Incentive</strong> é uma Organização da Sociedade Civil (OSC) fundada em 2001 em Pereiro/CE, dedicada a estruturar soluções integradas de educação, cultura, inclusão socioprodutiva e fortalecimento comunitário.
             </p>
-
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-9 flex flex-col gap-3.5 sm:flex-row">
               <Link
                 href="/projetos"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--brand-orange)] px-5 py-3 text-sm font-bold text-[var(--brand-text)] shadow-sm shadow-[rgba(0,0,0,0.20)] transition hover:bg-[var(--brand-orange-light)] sm:w-auto"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--brand-teal)] px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-[rgba(0,0,0,0.25)] transition hover:bg-[var(--brand-teal-dark)]"
               >
-                Conheça os projetos
+                Conhecer Projetos
                 <ArrowRight size={18} />
               </Link>
               <Link
-                href="/areas-de-atuacao"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-white/32 bg-white/14 px-5 py-3 text-sm font-bold text-white backdrop-blur transition hover:bg-white/22 sm:w-auto"
-              >
-                Áreas de atuação
-              </Link>
-              <Link
                 href="/transparencia"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-white/32 bg-white/14 px-5 py-3 text-sm font-bold text-white backdrop-blur transition hover:bg-white/22 sm:w-auto"
+                className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/30 bg-white/10 px-6 py-3.5 text-sm font-bold text-white backdrop-blur transition hover:bg-white/20"
               >
-                Transparência
+                Portal da Transparência
               </Link>
             </div>
+          </div>
 
-            <div className="mt-10 grid gap-3 sm:grid-cols-3">
-              {impactHighlights.map((item) => (
-                <div key={item.label} className="rounded-lg border border-white/18 bg-white/12 p-4 backdrop-blur">
-                  <p className="text-xl font-extrabold text-[var(--brand-orange-light)] sm:text-2xl">{item.label}</p>
-                  <p className="mt-2 text-sm leading-6 text-white">{item.text}</p>
-                </div>
-              ))}
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="rounded-xl border border-white/15 bg-white/10 p-5 backdrop-blur">
+              <span className="text-3xl font-extrabold text-[var(--brand-orange-light)]">2001</span>
+              <p className="mt-1 text-sm font-bold">Fundação Oficial</p>
+              <p className="mt-1 text-xs text-[var(--brand-light-text)]">25 anos de atuação comunitária em Pereiro/CE e no Vale do Jaguaribe.</p>
+            </div>
+            <div className="rounded-xl border border-white/15 bg-white/10 p-5 backdrop-blur">
+              <span className="text-3xl font-extrabold text-[var(--brand-orange-light)]">8</span>
+              <p className="mt-1 text-sm font-bold">Eixos Programáticos</p>
+              <p className="mt-1 text-xs text-[var(--brand-light-text)]">Matriz multidisciplinar aprovada no novo Estatuto Social.</p>
+            </div>
+            <div className="rounded-xl border border-white/15 bg-white/10 p-5 backdrop-blur">
+              <span className="text-3xl font-extrabold text-[var(--brand-orange-light)]">100%</span>
+              <p className="mt-1 text-sm font-bold">Gratuidade Pública</p>
+              <p className="mt-1 text-xs text-[var(--brand-light-text)]">Serviços socioassistenciais e formação cultural sem exigência de filiação.</p>
+            </div>
+            <div className="rounded-xl border border-white/15 bg-white/10 p-5 backdrop-blur">
+              <span className="text-3xl font-extrabold text-[var(--brand-orange-light)]">Ativa</span>
+              <p className="mt-1 text-sm font-bold">Transparência Digital</p>
+              <p className="mt-1 text-xs text-[var(--brand-light-text)]">Atos constitutivos, certidões e balanços de livre acesso.</p>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="border-b border-[var(--brand-border)] bg-white">
-        <div className="mx-auto grid max-w-7xl gap-4 px-5 py-8 sm:px-8 lg:grid-cols-3">
-          {trustSignals.map((signal) => {
-            const Icon = signal.icon;
-
-            return (
-              <Link
-                key={signal.title}
-                href={signal.href}
-                className="group flex items-start gap-4 rounded-lg border border-[var(--brand-border)] bg-[var(--brand-surface)] p-5 transition hover:border-[var(--brand-teal)] hover:bg-white"
-              >
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[var(--brand-tint)] text-[var(--brand-teal)] transition group-hover:bg-[var(--brand-teal)] group-hover:text-white">
-                  <Icon size={22} />
-                </span>
-                <span>
-                  <span className="block text-base font-extrabold text-[var(--brand-text)]">{signal.title}</span>
-                  <span className="mt-2 block text-sm leading-6 text-[var(--brand-muted)]">{signal.text}</span>
-                </span>
-              </Link>
-            );
-          })}
-        </div>
-      </section>
-
-      <section id="sobre" className="bg-white">
-        <div className="mx-auto grid max-w-7xl gap-10 px-5 py-16 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
-          <div>
-            <p className="text-sm font-bold uppercase text-[var(--brand-orange-dark)]">Sobre o Instituto</p>
-            <h2 className="mt-3 text-3xl font-extrabold text-[var(--brand-text)] sm:text-4xl">
-              Um agente de mudança nascido em Pereiro para conectar oportunidades e reduzir desigualdades.
-            </h2>
-          </div>
-          <div className="space-y-5 text-base leading-8 text-[var(--brand-muted)]">
-            <p>
-              O Instituto Incentive de Inovação, Desenvolvimento e Transformação Social atua para promover inclusão,
-              educação, tecnologia, sustentabilidade, cultura, empreendedorismo e defesa de direitos.
-            </p>
-            <p>
-              A organização trabalha com uma abordagem colaborativa, formando parcerias com instituições públicas,
-              empresas, organizações da sociedade civil e lideranças comunitárias.
-            </p>
-            <Link
-              href="/quem-somos"
-              className="inline-flex items-center gap-2 text-sm font-bold text-[var(--brand-teal)] transition hover:text-[var(--brand-teal-dark)]"
-            >
-              Ver trajetória completa
-              <ArrowUpRight size={17} />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      <section id="atuacao" className="border-y border-[var(--brand-border)] bg-[var(--brand-surface)]">
-        <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8">
+      {/* PILARES INSTITUCIONAIS */}
+      <section className="bg-white py-16">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8">
           <div className="max-w-3xl">
-            <p className="text-sm font-bold uppercase text-[var(--brand-orange-dark)]">Atuação</p>
-            <h2 className="mt-3 text-3xl font-extrabold text-[var(--brand-text)] sm:text-4xl">
-              Frentes integradas para criar impacto social com identidade, método e presença territorial.
+            <p className="text-sm font-extrabold uppercase text-[var(--brand-orange-dark)]">Compromisso Institucional</p>
+            <h2 className="mt-2 text-3xl font-extrabold sm:text-4xl">
+              Pilares que Orientam Nossa Estratégia de Impacto.
             </h2>
+            <p className="mt-4 text-base leading-8 text-[var(--brand-muted)]">
+              A atuação do Instituto Incentive afasta-se de modelos assistencialistas genéricos para construir autonomia, capacidades comunitárias e soluções sustentáveis no território:
+            </p>
           </div>
 
-          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {focusAreas.map((area) => {
-              const Icon = area.icon;
+          <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {pillars.map((pillar) => {
+              const Icon = pillar.icon;
 
               return (
-                <article key={area.title} className="overflow-hidden rounded-lg border border-[var(--brand-border)] bg-white shadow-sm">
-                  <div className="relative h-44 bg-[var(--brand-tint)]">
-                    <Image
-                      src={area.image}
-                      alt={area.alt}
-                      fill
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                      className="object-cover"
-                    />
-                    <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,104,113,0.05)_0%,rgba(0,63,68,0.52)_100%)]" />
-                    <div className="absolute bottom-4 left-4 flex h-12 w-12 items-center justify-center rounded-lg bg-white text-[var(--brand-teal)] shadow-sm">
-                      <Icon size={24} />
-                    </div>
+                <article key={pillar.title} className="rounded-xl border border-[var(--brand-border)] bg-[var(--brand-surface)] p-6 shadow-sm transition duration-200 hover:border-[var(--brand-teal)] hover:shadow-md">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[var(--brand-tint)] text-[var(--brand-teal)]">
+                    <Icon size={24} />
                   </div>
-                  <div className="p-5">
-                    <h3 className="text-lg font-extrabold text-[var(--brand-text)]">{area.title}</h3>
-                    <p className="mt-3 text-sm leading-6 text-[var(--brand-muted)]">{area.text}</p>
-                  </div>
+                  <h3 className="mt-5 text-lg font-extrabold text-[var(--brand-text)]">{pillar.title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-[var(--brand-muted)]">{pillar.text}</p>
                 </article>
               );
             })}
           </div>
-
-          <Link
-            href="/areas-de-atuacao"
-            className="mt-8 inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--brand-teal)] px-5 py-3 text-sm font-bold text-white transition hover:bg-[var(--brand-teal-dark)]"
-          >
-            Ver todas as áreas
-            <ArrowRight size={18} />
-          </Link>
         </div>
       </section>
 
-      <section className="bg-[var(--brand-text)] text-white">
-        <div className="mx-auto grid max-w-7xl gap-10 px-5 py-16 sm:px-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
-          <div>
-            <p className="text-sm font-bold uppercase text-[var(--brand-orange-light)]">Como o impacto acontece</p>
-            <h2 className="mt-3 text-3xl font-extrabold sm:text-4xl">
-              Um caminho claro para transformar diagnóstico, parceria e execução em resultado social.
-            </h2>
-            <p className="mt-5 text-base leading-8 text-[var(--brand-light-text)]">
-              O Incentive organiza ideias, documentação, redes de apoio e comunicação pública para que cada iniciativa
-              tenha mais consistência, alcance e confiança.
-            </p>
-          </div>
-
-          <ol className="grid gap-3">
-            {steps.map((step, index) => (
-              <li key={step} className="flex items-center gap-4 rounded-lg border border-white/[0.12] bg-white/[0.07] p-4">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--brand-orange-light)] text-sm font-extrabold text-[var(--brand-text)]">
-                  {index + 1}
-                </span>
-                <span className="text-sm font-semibold leading-6 text-[var(--brand-light-surface)] sm:text-base">{step}</span>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
-
-      <section className="bg-white">
-        <div className="mx-auto grid max-w-7xl gap-6 px-5 py-16 sm:px-8 lg:grid-cols-3">
-          {audiences.map((audience) => {
-            const Icon = audience.icon;
-
-            return (
-              <article key={audience.title} className="rounded-lg border border-[var(--brand-border)] bg-[var(--brand-surface)] p-6">
-                <Icon className="text-[var(--brand-teal)]" size={28} />
-                <h3 className="mt-4 text-xl font-extrabold text-[var(--brand-text)]">{audience.title}</h3>
-                <p className="mt-3 text-sm leading-6 text-[var(--brand-muted)]">{audience.text}</p>
-              </article>
-            );
-          })}
-        </div>
-      </section>
-
-      <section className="border-y border-[var(--brand-border)] bg-[var(--brand-tint)]">
-        <div className="mx-auto grid max-w-7xl gap-8 px-5 py-12 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
-          <div>
-            <Award className="text-[var(--brand-teal)]" size={34} />
-            <h2 className="mt-4 text-3xl font-extrabold text-[var(--brand-text)] sm:text-4xl">
-              Certificações e reconhecimentos que fortalecem a atuação institucional.
-            </h2>
-            <p className="mt-4 text-base leading-8 text-[var(--brand-muted)]">
-              O Instituto organiza certificados, cadastros públicos e reconhecimentos setoriais obtidos para evidenciar
-              capacidades, trajetórias e frentes de atuação reconhecidas.
-            </p>
-          </div>
-
-          <div className="grid gap-3 sm:grid-cols-2">
+      {/* EIXOS PROGRAMÁTICOS EM DESTAQUE */}
+      <section className="border-y border-[var(--brand-border)] bg-[var(--brand-surface)] py-16">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8">
+          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-sm font-extrabold uppercase text-[var(--brand-orange-dark)]">Áreas de Atuação</p>
+              <h2 className="mt-2 text-3xl font-extrabold sm:text-4xl">
+                8 Eixos Estratégicos de Desenvolvimento.
+              </h2>
+            </div>
             <Link
-              href="/certificacoes-reconhecimentos"
-              className="rounded-lg border border-[var(--brand-border)] bg-white p-5 text-[var(--brand-text)] shadow-sm transition hover:border-[var(--brand-teal)]"
+              href="/areas-de-atuacao"
+              className="inline-flex items-center gap-2 text-sm font-bold text-[var(--brand-teal)] hover:text-[var(--brand-teal-dark)]"
             >
-              <h3 className="text-lg font-extrabold">Certificações e Reconhecimentos</h3>
-              <p className="mt-3 text-sm leading-6 text-[var(--brand-muted)]">
-                Consulte cadastros, certificados setoriais e declarações de reconhecimento obtidas pelo Instituto.
-              </p>
-              <span className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-[var(--brand-teal)]">
-                Ver documentos
-                <ArrowRight size={17} />
-              </span>
-            </Link>
-            <Link
-              href="/transparencia"
-              className="rounded-lg border border-[var(--brand-border)] bg-white p-5 text-[var(--brand-text)] shadow-sm transition hover:border-[var(--brand-teal)]"
-            >
-              <h3 className="text-lg font-extrabold">Portal da Transparência</h3>
-              <p className="mt-3 text-sm leading-6 text-[var(--brand-muted)]">
-                Acesse documentos institucionais, emendas, governança e prestação de contas.
-              </p>
-              <span className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-[var(--brand-teal)]">
-                Acompanhar transparência
-                <ArrowRight size={17} />
-              </span>
+              Ver todos os 8 eixos
+              <ArrowRight size={16} />
             </Link>
           </div>
+
+          <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {featuredAxes.map((axis) => {
+              const Icon = axis.icon;
+
+              return (
+                <article key={axis.axisNumber} className="rounded-xl border border-[var(--brand-border)] bg-white p-6 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--brand-tint)] text-[var(--brand-teal)]">
+                      <Icon size={20} />
+                    </div>
+                    <span className="rounded-md bg-[var(--brand-orange-soft)] px-2.5 py-0.5 text-xs font-bold uppercase text-[var(--brand-orange-dark)]">
+                      {axis.axisNumber}
+                    </span>
+                  </div>
+                  <h3 className="mt-4 text-base font-extrabold text-[var(--brand-text)]">{axis.title}</h3>
+                  <p className="mt-2 text-xs leading-5 text-[var(--brand-muted)]">{axis.desc}</p>
+                </article>
+              );
+            })}
+          </div>
         </div>
       </section>
 
-      <section className="border-t border-[var(--brand-border)] bg-[var(--brand-surface)]">
-        <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8">
-          <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+      {/* PROJETOS EM DESTAQUE */}
+      <section className="bg-white py-16">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8">
+          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div className="max-w-2xl">
-              <p className="text-sm font-bold uppercase text-[var(--brand-orange-dark)]">Projetos</p>
-              <h2 className="mt-3 text-3xl font-extrabold text-[var(--brand-text)] sm:text-4xl">
-                Iniciativas que conectam formação, cultura e desenvolvimento social.
+              <p className="text-sm font-extrabold uppercase text-[var(--brand-orange-dark)]">Projetos no Território</p>
+              <h2 className="mt-2 text-3xl font-extrabold text-[var(--brand-text)] sm:text-4xl">
+                Ações Concretas de Cultura, Trabalho e Formação.
               </h2>
             </div>
             <Link
               href="/projetos"
               className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--brand-teal)] px-5 py-3 text-sm font-bold text-white transition hover:bg-[var(--brand-teal-dark)]"
             >
-              Ver todos os projetos
+              Ver Todos os Projetos
               <ArrowRight size={18} />
             </Link>
           </div>
 
-          <div className="mt-10 grid gap-5 md:grid-cols-3">
+          <div className="mt-10 grid gap-6 md:grid-cols-3">
             {featuredProjects.map((project) => {
-              const isLogoImage = project.image === "/images/projects/7510.png";
+              const isLogo = project.image === "/images/projects/7510.png";
 
               return (
-                <Link
-                  key={project.title}
-                  href="/projetos"
-                  className="group overflow-hidden rounded-lg border border-[var(--brand-border)] bg-white shadow-sm transition hover:border-[var(--brand-teal)]"
+                <article
+                  key={project.id}
+                  className="flex flex-col justify-between overflow-hidden rounded-xl border border-[var(--brand-border)] bg-white shadow-sm transition hover:border-[var(--brand-teal)] hover:shadow-md"
                 >
-                  <div className={isLogoImage ? "relative h-52 bg-white" : "relative h-52 bg-[var(--brand-tint)]"}>
-                    <Image
-                      src={project.image}
-                      alt={`Imagem do projeto ${project.title}`}
-                      fill
-                      sizes="(max-width: 768px) 100vw, 33vw"
-                      className={
-                        isLogoImage
-                          ? "object-contain p-2 transition duration-300 group-hover:scale-[1.03]"
-                          : "object-cover transition duration-300 group-hover:scale-[1.03]"
-                      }
-                    />
+                  <div>
+                    <div className={isLogo ? "relative h-52 bg-white flex items-center justify-center p-4" : "relative h-52 bg-[var(--brand-tint)]"}>
+                      <Image
+                        src={project.image}
+                        alt={`Projeto ${project.title}`}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                        className={isLogo ? "object-contain p-2" : "object-cover"}
+                      />
+                    </div>
+                    <div className="p-6">
+                      <span className="rounded-md bg-[var(--brand-tint)] px-2.5 py-1 text-xs font-bold uppercase text-[var(--brand-teal)]">
+                        {project.axis}
+                      </span>
+                      <h3 className="mt-3 text-xl font-extrabold text-[var(--brand-text)]">{project.title}</h3>
+                      <p className="mt-2 text-sm leading-6 text-[var(--brand-muted)]">{project.text}</p>
+                    </div>
                   </div>
-                  <div className="p-5">
-                    <h3 className="text-xl font-extrabold text-[var(--brand-text)]">{project.title}</h3>
-                    <p className="mt-3 text-sm leading-6 text-[var(--brand-muted)]">{project.text}</p>
+                  <div className="p-6 pt-0">
+                    <Link
+                      href="/projetos"
+                      className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[var(--brand-teal)] hover:text-[var(--brand-teal-dark)]"
+                    >
+                      Ver detalhes
+                      <ArrowRight size={14} />
+                    </Link>
                   </div>
-                </Link>
+                </article>
               );
             })}
           </div>
         </div>
       </section>
 
-      <section id="contato" className="border-t border-[var(--brand-border)] bg-[var(--brand-tint)]">
-        <div className="mx-auto grid max-w-7xl gap-10 px-5 py-16 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+      {/* BLOCO DE TRANSPARÊNCIA E CERTIFICAÇÕES */}
+      <section className="border-t border-[var(--brand-border)] bg-[var(--brand-surface)] py-16">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8">
+          <div className="grid gap-8 lg:grid-cols-2">
+            <div className="rounded-xl border border-[var(--brand-border)] bg-white p-8 shadow-sm">
+              <ShieldCheck className="text-[var(--brand-teal)]" size={36} />
+              <h2 className="mt-4 text-2xl font-extrabold text-[var(--brand-text)]">Portal da Transparência</h2>
+              <p className="mt-2 text-sm leading-7 text-[var(--brand-muted)]">
+                Acesse o Estatuto Social reformado, atas de eleição e posse, certidões negativas de débitos, demonstrações financeiras e declarações de emendas parlamentares.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Link
+                  href="/transparencia"
+                  className="inline-flex items-center gap-2 rounded-lg bg-[var(--brand-teal)] px-5 py-3 text-sm font-bold text-white transition hover:bg-[var(--brand-teal-dark)]"
+                >
+                  Acessar Documentos
+                  <ArrowRight size={16} />
+                </Link>
+                <Link
+                  href="/transparencia/emendas-parlamentares"
+                  className="inline-flex items-center gap-2 rounded-lg border border-[var(--brand-border-strong)] bg-white px-5 py-3 text-sm font-bold text-[var(--brand-text)] transition hover:border-[var(--brand-teal)]"
+                >
+                  Emendas Parlamentares
+                </Link>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-[var(--brand-border)] bg-white p-8 shadow-sm">
+              <Award className="text-[var(--brand-teal)]" size={36} />
+              <h2 className="mt-4 text-2xl font-extrabold text-[var(--brand-text)]">Certificações e Qualificação</h2>
+              <p className="mt-2 text-sm leading-7 text-[var(--brand-muted)]">
+                O Instituto Incentive é reconhecido no Cadastro Nacional de Pontos de Cultura (MinC), possui certificações CADASTUR e declaração do DCSOL em Economia Solidária.
+              </p>
+              <div className="mt-6">
+                <Link
+                  href="/certificacoes-reconhecimentos"
+                  className="inline-flex items-center gap-2 rounded-lg bg-[var(--brand-teal)] px-5 py-3 text-sm font-bold text-white transition hover:bg-[var(--brand-teal-dark)]"
+                >
+                  Ver Certificações Oficiais
+                  <ArrowRight size={16} />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CONTATO E REDES */}
+      <section id="contato" className="border-t border-[var(--brand-border)] bg-[var(--brand-tint)] py-16">
+        <div className="mx-auto grid max-w-7xl gap-10 px-5 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
           <div>
-            <p className="text-sm font-bold uppercase text-[var(--brand-orange-dark)]">Contato</p>
-            <h2 className="mt-3 text-3xl font-extrabold text-[var(--brand-text)] sm:text-4xl">
-              Vamos conversar sobre projetos, parcerias e impacto social.
+            <p className="text-sm font-extrabold uppercase text-[var(--brand-orange-dark)]">Relacionamento Institucional</p>
+            <h2 className="mt-2 text-3xl font-extrabold text-[var(--brand-text)] sm:text-4xl">
+              Vamos dialogar sobre projetos, parcerias e impacto social.
             </h2>
-            <p className="mt-5 text-base leading-8 text-[var(--brand-muted)]">
-              Use os canais oficiais para falar sobre iniciativas, documentação institucional, parcerias e ações no
-              território.
+            <p className="mt-4 text-base leading-8 text-[var(--brand-muted)]">
+              Utilize os canais oficiais do Instituto Incentive para apresentar editais, propostas de cooperação ou solicitar informações públicas.
             </p>
 
             {siteConfig.socialProfiles.length > 0 ? (
-              <div className="mt-7">
-                <p className="text-sm font-bold uppercase text-[var(--brand-orange-dark)]">Redes sociais</p>
-                <div className="mt-3 flex flex-wrap gap-3">
+              <div className="mt-8">
+                <p className="text-xs font-extrabold uppercase tracking-wider text-[var(--brand-orange-dark)]">Redes Sociais Oficiais</p>
+                <div className="mt-3 flex flex-wrap gap-2.5">
                   {siteConfig.socialProfiles.map((channel) => (
                     <TrackedAnchor
                       key={channel.name}
@@ -497,10 +400,10 @@ export default function Home() {
                       rel="noreferrer"
                       eventName="social_link_click"
                       eventProperties={{ network: channel.name, page: "home" }}
-                      className="inline-flex items-center gap-2 rounded-lg border border-[var(--brand-border-strong)] bg-white px-4 py-3 text-sm font-bold text-[var(--brand-text)] transition hover:border-[var(--brand-teal)]"
+                      className="inline-flex items-center gap-2 rounded-lg border border-[var(--brand-border-strong)] bg-white px-4 py-2.5 text-xs font-bold text-[var(--brand-text)] shadow-sm transition hover:border-[var(--brand-teal)]"
                     >
                       {channel.label ?? channel.name}
-                      <ArrowUpRight size={16} className="text-[var(--brand-teal)]" />
+                      <ArrowUpRight size={14} className="text-[var(--brand-teal)]" />
                     </TrackedAnchor>
                   ))}
                 </div>
@@ -508,14 +411,14 @@ export default function Home() {
             ) : null}
           </div>
 
-          <div className="grid gap-3">
+          <div className="grid gap-3.5">
             <TrackedAnchor
               href={siteConfig.url}
               target="_blank"
               rel="noreferrer"
               eventName="contact_channel_click"
               eventProperties={{ channel: "site", page: "home" }}
-              className="flex items-center gap-4 rounded-lg border border-[var(--brand-border-strong)] bg-white p-4 text-[var(--brand-text)] transition hover:border-[var(--brand-teal)]"
+              className="flex items-center gap-4 rounded-xl border border-[var(--brand-border-strong)] bg-white p-4 text-[var(--brand-text)] shadow-sm transition hover:border-[var(--brand-teal)]"
             >
               <Globe className="shrink-0 text-[var(--brand-teal)]" size={22} />
               <span className="break-all text-sm font-bold sm:text-base">{siteConfig.domain}</span>
@@ -524,7 +427,7 @@ export default function Home() {
               href={`mailto:${siteConfig.email}`}
               eventName="contact_channel_click"
               eventProperties={{ channel: "email", page: "home" }}
-              className="flex items-center gap-4 rounded-lg border border-[var(--brand-border-strong)] bg-white p-4 text-[var(--brand-text)] transition hover:border-[var(--brand-teal)]"
+              className="flex items-center gap-4 rounded-xl border border-[var(--brand-border-strong)] bg-white p-4 text-[var(--brand-text)] shadow-sm transition hover:border-[var(--brand-teal)]"
             >
               <Mail className="shrink-0 text-[var(--brand-teal)]" size={22} />
               <span className="break-all text-sm font-bold sm:text-base">{siteConfig.email}</span>
@@ -533,20 +436,20 @@ export default function Home() {
               href={siteConfig.phone.href}
               eventName="contact_channel_click"
               eventProperties={{ channel: "phone", page: "home" }}
-              className="flex items-center gap-4 rounded-lg border border-[var(--brand-border-strong)] bg-white p-4 text-[var(--brand-text)] transition hover:border-[var(--brand-teal)]"
+              className="flex items-center gap-4 rounded-xl border border-[var(--brand-border-strong)] bg-white p-4 text-[var(--brand-text)] shadow-sm transition hover:border-[var(--brand-teal)]"
             >
               <Phone className="shrink-0 text-[var(--brand-teal)]" size={22} />
               <span className="text-sm font-bold sm:text-base">{siteConfig.phone.label}</span>
             </TrackedAnchor>
-            <div className="flex items-start gap-4 rounded-lg border border-[var(--brand-border-strong)] bg-white p-4 text-[var(--brand-text)]">
+            <div className="flex items-start gap-4 rounded-xl border border-[var(--brand-border-strong)] bg-white p-4 text-[var(--brand-text)] shadow-sm">
               <MapPin className="mt-1 shrink-0 text-[var(--brand-teal)]" size={22} />
-              <span className="text-sm font-bold leading-6 sm:text-base">
+              <span className="text-sm font-semibold leading-6 sm:text-base">
                 {siteConfig.address.line}
               </span>
             </div>
-            <div className="mt-2 flex items-start gap-3 text-sm leading-6 text-[var(--brand-muted)]">
-              <CheckCircle2 className="mt-0.5 shrink-0 text-[var(--brand-teal)]" size={18} />
-              <span>Comunicação institucional alinhada ao domínio oficial {siteConfig.domain}.</span>
+            <div className="mt-2 flex items-center gap-2 text-xs font-bold text-[var(--brand-muted)]">
+              <CheckCircle2 className="shrink-0 text-[var(--brand-teal)]" size={16} />
+              <span>Domínio oficial e canais de atendimento verificados.</span>
             </div>
           </div>
         </div>

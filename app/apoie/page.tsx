@@ -1,17 +1,16 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { TrackedAnchor } from "@/components/analytics/TrackedAnchor";
 import { PublicFooter } from "@/components/layout/PublicFooter";
 import { PublicHeader } from "@/components/layout/PublicHeader";
-import { buildMailto, siteConfig } from "@/lib/site-config";
 import { buildPageMetadata } from "@/lib/seo";
+import { buildMailto, siteConfig } from "@/lib/site-config";
 import {
   ArrowRight,
   Building2,
   CheckCircle2,
-  HeartHandshake,
-  Mail,
+  Handshake,
+  Lightbulb,
   Megaphone,
   ShieldCheck,
   Sparkles,
@@ -21,41 +20,60 @@ import {
 export const metadata: Metadata = buildPageMetadata({
   title: "Apoie o Instituto",
   description:
-    "Apoie o Instituto Incentive por meio de parcerias, voluntariado, divulgação institucional, patrocínios responsáveis e projetos de impacto social.",
+    "Faça parte da transformação social e do desenvolvimento territorial no semiárido cearense. Saiba como apoiar, patrocinar e ser parceiro do Instituto Incentive.",
   path: "/apoie",
 });
 
-const supportImage =
-  "https://images.pexels.com/photos/6647019/pexels-photo-6647019.jpeg?auto=compress&cs=tinysrgb&w=1800";
-
 const supportWays = [
   {
-    icon: Building2,
-    title: "Parcerias institucionais",
-    text: "Empresas, órgãos públicos, universidades e organizações podem cocriar projetos, ações territoriais e programas de formação.",
-  },
-  {
     icon: Users,
-    title: "Voluntariado e mentoria",
-    text: "Profissionais podem contribuir com oficinas, mentorias, apoio técnico, formação, comunicação, tecnologia ou gestão.",
+    title: "Pessoa Física e Cidadania",
+    badge: "Doação e Engajamento",
+    text: "Contribuições de cidadãos comprometidos com o fortalecimento comunitário, a democratização do acesso à cultura e o combate às desigualdades no semiárido.",
+    cta: "Quero Contribuir como Pessoa Física",
   },
   {
-    icon: HeartHandshake,
-    title: "Doações e patrocínios responsáveis",
-    text: "Apoios financeiros, materiais ou técnicos são tratados com registro, finalidade definida, transparência e prestação de contas.",
+    icon: Building2,
+    title: "Empresas e Investimento Social (ESG)",
+    badge: "Responsabilidade Social",
+    text: "Parcerias com empresas para destinação de recursos via incentivo fiscal ou aporte direto, gerando valor compartilhado e impacto territorial mensurável.",
+    cta: "Parceria Corporativa / ESG",
+  },
+  {
+    icon: Sparkles,
+    title: "Patrocínio a Projetos Específicos",
+    badge: "Cultura e Qualificação",
+    text: "Apoio direto a iniciativas como o Sons do Sertão, Beleza Criativa, Conexão Profissional ou workshops comunitários no Vale do Jaguaribe.",
+    cta: "Patrocinar Projeto Específico",
+  },
+  {
+    icon: Handshake,
+    title: "Cooperação Institucional e Convênios",
+    badge: "Setor Público e OSCs",
+    text: "Acordos de cooperação técnica, termos de fomento e parcerias com universidades, prefeituras, órgãos governamentais e federações.",
+    cta: "Propor Parceria Institucional",
+  },
+  {
+    icon: Lightbulb,
+    title: "Voluntariado e Mentoria Técnica",
+    badge: "Capital Humano",
+    text: "Profissionais de áreas como educação, tecnologia, saúde, direito e gestão que desejam ministrar oficinas e mentorar lideranças e jovens.",
+    cta: "Inscrever-se para Voluntariado",
   },
   {
     icon: Megaphone,
-    title: "Divulgação da causa",
-    text: "Compartilhar projetos, campanhas e oportunidades ajuda o Instituto a alcançar mais pessoas, parceiros e comunidades.",
+    title: "Apresentar Oportunidade ou Edital",
+    badge: "Redes e Editais",
+    text: "Indicação de chamadas públicas, editais socioambientais e redes de financiamento alinhadas aos eixos programáticos do Instituto.",
+    cta: "Apresentar Oportunidade",
   },
 ];
 
 const safeguards = [
-  "Todo apoio deve ter finalidade institucional clara.",
-  "Parcerias e doações passam por validação documental.",
-  "Informações públicas ficam disponíveis no Portal da Transparência.",
-  "Dados pessoais são tratados conforme a Política de Privacidade.",
+  "Todo apoio financeiro ou material possui destinação e plano de trabalho vinculados aos objetivos estatutários.",
+  "As doações e termos de parceria são formalizados com documentação e emissão de recibos institucionais.",
+  "A prestação de contas dos recursos é publicada periodicamente no Portal da Transparência.",
+  "Garantia de conformidade com a legislação de incentivos fiscais, MROSC e LGPD.",
 ];
 
 export default function SupportPage() {
@@ -63,89 +81,106 @@ export default function SupportPage() {
     <main className="min-h-screen bg-[var(--brand-surface)] text-[var(--brand-text)]">
       <PublicHeader />
 
-      <section id="conteudo-principal" className="relative overflow-hidden bg-[var(--brand-text)] text-white">
-        <Image
-          src={supportImage}
-          alt="Pessoas unindo as mãos em gesto de cooperação"
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover object-center opacity-55"
-        />
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,63,68,0.96)_0%,rgba(0,104,113,0.82)_48%,rgba(0,104,113,0.24)_100%)]" />
-
-        <div className="relative mx-auto grid min-h-[62svh] max-w-7xl gap-10 px-5 py-16 sm:px-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
+      <section id="conteudo-principal" className="border-b border-[var(--brand-border)] bg-white">
+        <div className="mx-auto grid max-w-7xl gap-10 px-5 py-14 sm:px-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
           <div>
-            <div className="mb-6 inline-flex items-center gap-2 rounded-lg border border-white/25 bg-white/12 px-3 py-2 text-sm font-bold text-white backdrop-blur">
-              <Sparkles size={17} />
-              Fortaleça projetos de impacto social
-            </div>
-            <h1 className="text-4xl font-extrabold leading-tight sm:text-5xl lg:text-6xl">
-              Apoie o Instituto Incentive.
+            <span className="inline-flex items-center gap-2 rounded-lg bg-[var(--brand-tint)] px-3 py-1.5 text-xs font-extrabold uppercase tracking-wider text-[var(--brand-teal)]">
+              Rede de Parcerias e Impacto
+            </span>
+            <h1 className="mt-3 text-4xl font-extrabold leading-tight text-[var(--brand-text)] sm:text-5xl">
+              Apoie a Transformação Territorial no Semiárido.
             </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-[var(--brand-light-surface)]">
-              Sua organização, empresa ou rede pode contribuir para ampliar oportunidades de educação, cultura,
-              inovação, inclusão social e desenvolvimento sustentável no território.
+            <p className="mt-6 text-lg leading-8 text-[var(--brand-muted)]">
+              Sua organização, empresa ou contribuição individual potencializa ações reais de <strong>educação, formação profissional, cultura, inclusão produtiva e desenvolvimento sustentável</strong> em Pereiro e região.
             </p>
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-8 flex flex-wrap gap-3">
               <TrackedAnchor
-                href={buildMailto("Quero apoiar o Instituto Incentive")}
+                href={buildMailto("Proposta de Apoio ou Parceria ao Instituto Incentive")}
                 eventName="support_contact_click"
                 eventProperties={{ source: "support_hero", intent: "support" }}
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--brand-orange)] px-5 py-3 text-sm font-bold text-[var(--brand-text)] shadow-sm transition hover:bg-[var(--brand-orange-light)]"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--brand-teal)] px-6 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-[var(--brand-teal-dark)]"
               >
-                Quero apoiar
+                Conversar com a Equipe de Parcerias
                 <ArrowRight size={18} />
               </TrackedAnchor>
               <Link
                 href="/transparencia"
-                className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/32 bg-white/14 px-5 py-3 text-sm font-bold text-white backdrop-blur transition hover:bg-white/22"
+                className="inline-flex items-center justify-center gap-2 rounded-lg border border-[var(--brand-border-strong)] bg-white px-5 py-3.5 text-sm font-bold text-[var(--brand-text)] transition hover:border-[var(--brand-teal)] hover:text-[var(--brand-teal)]"
               >
-                Ver transparência
+                Consultar Transparência
               </Link>
             </div>
           </div>
 
-          <div className="rounded-lg border border-white/18 bg-white/12 p-5 backdrop-blur">
-            <p className="text-sm font-bold uppercase text-[var(--brand-orange-light)]">Contato oficial</p>
-            <div className="mt-4 grid gap-3 text-sm font-semibold text-white">
-              <TrackedAnchor
-                href={`mailto:${siteConfig.email}`}
-                eventName="contact_channel_click"
-                eventProperties={{ channel: "email", page: "support" }}
-                className="flex items-center gap-3 rounded-lg bg-white/10 p-4 transition hover:bg-white/15"
-              >
-                <Mail size={18} className="text-[var(--brand-orange-light)]" />
-                <span className="break-all">{siteConfig.email}</span>
-              </TrackedAnchor>
-              <div className="rounded-lg bg-white/10 p-4">
-                <p>{siteConfig.fullName}</p>
-                <p className="mt-1 text-[var(--brand-light-surface)]">CNPJ {siteConfig.cnpj}</p>
-                <p className="mt-1 text-[var(--brand-light-surface)]">{siteConfig.address.line}</p>
+          <div className="rounded-xl border border-[var(--brand-border)] bg-[var(--brand-tint)] p-6 sm:p-8">
+            <p className="text-xs font-extrabold uppercase tracking-wider text-[var(--brand-orange-dark)]">Canal Oficial de Relacionamento</p>
+            <h2 className="mt-2 text-xl font-extrabold text-[var(--brand-text)]">Informações Institucionais</h2>
+            <div className="mt-5 space-y-3 text-sm font-semibold text-[var(--brand-text)]">
+              <div className="rounded-lg bg-white p-4 shadow-sm">
+                <span className="block text-xs font-bold uppercase text-[var(--brand-muted)]">Organização</span>
+                <span className="mt-1 block font-extrabold text-[var(--brand-teal)]">{siteConfig.fullName}</span>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="rounded-lg bg-white p-4 shadow-sm">
+                  <span className="block text-xs font-bold uppercase text-[var(--brand-muted)]">CNPJ</span>
+                  <span className="mt-1 block font-extrabold">{siteConfig.cnpj}</span>
+                </div>
+                <div className="rounded-lg bg-white p-4 shadow-sm">
+                  <span className="block text-xs font-bold uppercase text-[var(--brand-muted)]">Sede</span>
+                  <span className="mt-1 block font-extrabold">Pereiro/CE</span>
+                </div>
+              </div>
+              <div className="rounded-lg bg-white p-4 shadow-sm">
+                <span className="block text-xs font-bold uppercase text-[var(--brand-muted)]">E-mail para Convênios e Parcerias</span>
+                <span className="mt-1 block break-all font-extrabold text-[var(--brand-teal)]">{siteConfig.email}</span>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="bg-white">
-        <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8">
+      <section className="bg-[var(--brand-surface)] py-16">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8">
           <div className="max-w-3xl">
-            <p className="text-sm font-bold uppercase text-[var(--brand-orange-dark)]">Formas de apoio</p>
-            <h2 className="mt-3 text-3xl font-extrabold sm:text-4xl">
-              Caminhos responsáveis para colaborar com a missão institucional.
+            <p className="text-sm font-extrabold uppercase text-[var(--brand-orange-dark)]">Modalidades de Colaboração</p>
+            <h2 className="mt-2 text-3xl font-extrabold sm:text-4xl">
+              Caminhos para Somar Forças com o Instituto.
             </h2>
+            <p className="mt-4 text-base leading-8 text-[var(--brand-muted)]">
+              Estruturamos modelos flexíveis e transparentes de cooperação adequados a diferentes perfis de apoiadores:
+            </p>
           </div>
 
-          <div className="mt-10 grid gap-5 md:grid-cols-2">
+          <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {supportWays.map((item) => {
               const Icon = item.icon;
 
               return (
-                <article key={item.title} className="rounded-lg border border-[var(--brand-border)] bg-[var(--brand-surface)] p-6">
-                  <Icon className="text-[var(--brand-teal)]" size={30} />
-                  <h3 className="mt-5 text-xl font-extrabold">{item.title}</h3>
-                  <p className="mt-3 text-sm leading-7 text-[var(--brand-muted)]">{item.text}</p>
+                <article key={item.title} className="flex flex-col justify-between rounded-xl border border-[var(--brand-border)] bg-white p-6 shadow-sm transition duration-200 hover:border-[var(--brand-teal)] hover:shadow-md">
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[var(--brand-tint)] text-[var(--brand-teal)]">
+                        <Icon size={24} />
+                      </div>
+                      <span className="rounded-lg bg-[var(--brand-orange-soft)] px-3 py-1 text-xs font-bold uppercase text-[var(--brand-orange-dark)]">
+                        {item.badge}
+                      </span>
+                    </div>
+                    <h3 className="mt-5 text-xl font-extrabold text-[var(--brand-text)]">{item.title}</h3>
+                    <p className="mt-3 text-sm leading-6 text-[var(--brand-muted)]">{item.text}</p>
+                  </div>
+
+                  <div className="mt-6 border-t border-[var(--brand-border-soft)] pt-4">
+                    <TrackedAnchor
+                      href={buildMailto(`Apoio: ${item.title}`)}
+                      eventName="support_contact_click"
+                      eventProperties={{ category: item.title }}
+                      className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[var(--brand-teal)] transition hover:text-[var(--brand-teal-dark)]"
+                    >
+                      {item.cta}
+                      <ArrowRight size={14} />
+                    </TrackedAnchor>
+                  </div>
                 </article>
               );
             })}
@@ -153,42 +188,43 @@ export default function SupportPage() {
         </div>
       </section>
 
-      <section className="border-y border-[var(--brand-border)] bg-[var(--brand-tint)]">
-        <div className="mx-auto grid max-w-7xl gap-8 px-5 py-14 sm:px-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
+      <section className="border-y border-[var(--brand-border)] bg-white py-16">
+        <div className="mx-auto grid max-w-7xl gap-10 px-5 sm:px-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
           <div>
-            <ShieldCheck className="text-[var(--brand-teal)]" size={34} />
-            <h2 className="mt-4 text-3xl font-extrabold">Compromisso com governança e transparência.</h2>
+            <ShieldCheck className="text-[var(--brand-teal)]" size={36} />
+            <h2 className="mt-4 text-3xl font-extrabold text-[var(--brand-text)]">
+              Governança, Integridade e Prestação de Contas.
+            </h2>
             <p className="mt-4 text-base leading-8 text-[var(--brand-muted)]">
-              O Instituto Incentive busca organizar cada apoio com rastreabilidade, documentação e comunicação pública
-              compatíveis com sua natureza institucional.
+              Todo recurso investido no Instituto Incentive é submetido a rigorosos mecanismos de governança, dupla autorização e transparência pública permanente.
             </p>
           </div>
-          <div className="grid gap-3">
-            {safeguards.map((item) => (
-              <div key={item} className="flex items-start gap-3 rounded-lg border border-[var(--brand-border)] bg-white p-4">
+          <div className="grid gap-3.5">
+            {safeguards.map((safeguard) => (
+              <div key={safeguard} className="flex items-start gap-3 rounded-xl border border-[var(--brand-border)] bg-[var(--brand-surface)] p-4 shadow-sm">
                 <CheckCircle2 className="mt-0.5 shrink-0 text-[var(--brand-teal)]" size={20} />
-                <p className="text-sm font-semibold leading-6">{item}</p>
+                <p className="text-sm font-semibold leading-6 text-[var(--brand-text)]">{safeguard}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="bg-[var(--brand-text)] text-white">
-        <div className="mx-auto flex max-w-7xl flex-col gap-5 px-5 py-12 sm:px-8 lg:flex-row lg:items-center lg:justify-between">
+      <section className="bg-[var(--brand-text)] text-white py-14">
+        <div className="mx-auto flex max-w-7xl flex-col gap-6 px-5 sm:px-8 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-2xl">
-            <h2 className="text-2xl font-extrabold">Vamos conversar sobre a melhor forma de colaborar?</h2>
-            <p className="mt-3 text-sm leading-6 text-[var(--brand-light-text)]">
-              Envie uma mensagem com o tipo de apoio, instituição, cidade e objetivo da parceria.
+            <h2 className="text-2xl font-extrabold">Vamos construir uma iniciativa conjunta?</h2>
+            <p className="mt-2 text-sm leading-6 text-[var(--brand-light-text)]">
+              Entre em contato direto com nossa diretoria para apresentar demandas territoriais ou desenhar programas de cooperação.
             </p>
           </div>
           <TrackedAnchor
-            href={buildMailto("Apoio institucional ao Instituto Incentive")}
+            href={buildMailto("Proposta de Parceria Estratégica")}
             eventName="support_contact_click"
-            eventProperties={{ source: "support_footer", intent: "partnership" }}
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--brand-orange)] px-5 py-3 text-sm font-bold text-[var(--brand-text)] transition hover:bg-[var(--brand-orange-light)]"
+            eventProperties={{ source: "support_bottom_cta" }}
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--brand-teal)] px-6 py-3.5 text-sm font-bold text-white transition hover:bg-[var(--brand-teal-dark)]"
           >
-            Enviar proposta de apoio
+            Apresentar Proposta
             <ArrowRight size={18} />
           </TrackedAnchor>
         </div>
