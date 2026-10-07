@@ -1,0 +1,9 @@
+﻿{
+    "Branch":  "codex/melhorar-transparencia-emendas-20260715",
+    "StatusCount":  1,
+    "Status":  [
+                   " M app/transparencia/emendas-parlamentares/page.tsx"
+               ],
+    "FileExists":  true,
+    "HasNewTransparencyText":  true
+}

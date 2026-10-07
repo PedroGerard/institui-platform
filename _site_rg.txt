@@ -1,0 +1,173 @@
+﻿src\components\analytics\GoogleMeasurement.tsx:8:} from "@/lib/cookie-consent";
+src\components\analytics\GoogleMeasurement.tsx:19:  window.dataLayer = window.dataLayer ?? [];
+src\components\analytics\GoogleMeasurement.tsx:23:      window.dataLayer?.push(args);
+src\components\analytics\GoogleMeasurement.tsx:26:  const consentStatus = hasConsent ? "granted" : "denied";
+src\components\analytics\GoogleMeasurement.tsx:28:  window.gtag("consent", "update", {
+src\components\analytics\GoogleMeasurement.tsx:29:    ad_personalization: consentStatus,
+src\components\analytics\GoogleMeasurement.tsx:30:    ad_storage: consentStatus,
+src\components\analytics\GoogleMeasurement.tsx:31:    ad_user_data: consentStatus,
+src\components\analytics\GoogleMeasurement.tsx:32:    analytics_storage: consentStatus,
+src\components\analytics\GoogleMeasurement.tsx:35:  window.dataLayer.push({
+src\components\analytics\GoogleMeasurement.tsx:36:    event: hasConsent ? "cookie_consent_accepted" : "cookie_consent_rejected",
+src\components\analytics\GoogleMeasurement.tsx:37:    analytics_storage: consentStatus,
+src\components\analytics\GoogleMeasurement.tsx:43:  const gtmContainerId = process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID?.trim();
+src\components\analytics\GoogleMeasurement.tsx:71:        id="google-consent-default"
+src\components\analytics\GoogleMeasurement.tsx:75:            window.dataLayer = window.dataLayer || [];
+src\components\analytics\GoogleMeasurement.tsx:76:            function gtag(){dataLayer.push(arguments);}
+src\components\analytics\GoogleMeasurement.tsx:77:            gtag('consent', 'default', {
+src\components\analytics\GoogleMeasurement.tsx:107:                j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+src\components\analytics\GoogleMeasurement.tsx:109:                })(window,document,'script','dataLayer','${gtmContainerId}');
+src\components\analytics\GoogleMeasurement.tsx:127:                window.dataLayer = window.dataLayer || [];
+src\components\analytics\GoogleMeasurement.tsx:128:                function gtag(){dataLayer.push(arguments);}
+src\components\analytics\CookieConsentBanner.tsx:9:} from "@/lib/cookie-consent";
+src\components\analytics\CookieConsentBanner.tsx:32:  const consent = useSyncExternalStore(subscribeToConsent, getStoredConsent, () => "loading");
+src\components\analytics\CookieConsentBanner.tsx:39:  if (consent !== "pending") {
+src\components\analytics\CookieConsentBanner.tsx:45:      aria-label="Preferencias de cookies"
+src\components\analytics\CookieConsentBanner.tsx:52:            Usamos medições essenciais e sem cookies para entender o desempenho do site. As
+src\components\analytics\CookieConsentBanner.tsx:54:            aceitar, ajudando a medir campanhas, formulários e acessos gerados pelo Google Ad Grants.
+app\apoie\page.tsx:35:    text: "Empresas, órgãos públicos, universidades e organizações podem cocriar projetos, ações territoriais e programas de formação.",
+app\apoie\page.tsx:40:    text: "Profissionais podem contribuir com oficinas, mentorias, apoio técnico, formação, comunicação, tecnologia ou gestão.",
+app\apoie\page.tsx:57:  "Informações públicas ficam disponíveis no Portal da Transparência.",
+app\apoie\page.tsx:58:  "Dados pessoais são tratados conforme a Política de Privacidade.",
+app\apoie\page.tsx:113:                href={`mailto:${siteConfig.email}`}
+app\apoie\page.tsx:180:            <h2 className="text-2xl font-extrabold">Vamos conversar sobre a melhor forma de colaborar?</h2>
+app\acessibilidade\page.tsx:21:    "Recursos e praticas de acessibilidade digital do site do Instituto Incentive, com foco em navegacao, contraste, leitura e contato.",
+app\acessibilidade\page.tsx:52:  "Receber correções da comunidade por meio do canal oficial de contato.",
+app\acessibilidade\page.tsx:71:              acesso a informações institucionais, projetos, transparência e canais de contato.
+app\acessibilidade\page.tsx:127:            <h2 className="text-2xl font-bold">Canal oficial de contato</h2>
+app\acessibilidade\page.tsx:133:            href="/contato"
+app\acessibilidade\page.tsx:136:            Ir para contato
+src\components\contact-form.tsx:23:    dataLayer?: Array<Record<string, unknown>>;
+src\components\contact-form.tsx:57:        "O envio direto ainda esta sendo ativado. Use contato@institutoincentive.org.br por enquanto.",
+src\components\contact-form.tsx:68:    const form = event.currentTarget;
+src\components\contact-form.tsx:69:    const data = new FormData(form);
+src\components\contact-form.tsx:98:    window.dataLayer?.push({
+src\components\contact-form.tsx:99:      event: "lead_form_submit",
+src\components\contact-form.tsx:100:      form_name: "contact",
+src\components\contact-form.tsx:101:      form_destination: "contato",
+src\components\contact-form.tsx:104:    form.reset();
+src\components\contact-form.tsx:108:    setFeedback("Mensagem enviada com sucesso. O Instituto Incentive recebeu seu contato.");
+src\components\contact-form.tsx:123:      <form
+src\components\contact-form.tsx:198:      </form>
+src\lib\analytics.ts:10:  "lead_form_submit",
+src\lib\analytics.ts:20:    dataLayer?: unknown[];
+src\lib\analytics.ts:45:  window.dataLayer?.push({ event: eventName, ...properties });
+app\certificacoes-reconhecimentos\page.tsx:31:      "Reconhecimento da atuação cultural e comunitária do Instituto Incentive no campo da cultura viva, da formação e da participação social.",
+app\certificacoes-reconhecimentos\page.tsx:96:              Esta seção reúne reconhecimentos formais, certificações setoriais, cadastros públicos e declarações
+app\certificacoes-reconhecimentos\page.tsx:143:            A lista abaixo reúne conquistas, registros e certificações formais do Instituto Incentive. Itens
+app\globals.css:95:  transform: scale(1.04);
+app\globals.css:97:  will-change: opacity, transform;
+app\globals.css:108:    transform: scale(1.04);
+app\globals.css:114:    transform: scale(1.09);
+app\globals.css:119:    transform: scale(1.04);
+app\globals.css:127:    transform: none;
+app\globals.css:309:  transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+app\globals.css:316:  transform: translateY(-2px);
+app\globals.css:416:  text-transform: uppercase;
+app\layout.tsx:23:    description: "Projetos, transparencia e transformacao social com origem em Pereiro/CE.",
+app\layout.tsx:40:    description: "Projetos, transparencia e transformacao social com origem em Pereiro/CE.",
+src\lib\cookie-consent.ts:1:export const COOKIE_CONSENT_STORAGE_KEY = "incentive_cookie_consent";
+src\lib\cookie-consent.ts:3:export const COOKIE_CONSENT_CHANGED_EVENT = "incentive-cookie-consent-changed";
+app\manifest.ts:9:      "Instituto Incentive de Inovacao, Desenvolvimento e Transformacao Social.",
+app\api\contact\route.ts:62:        { message: "Informe um e-mail valido." },
+app\api\contact\route.ts:84:    const to = process.env.CONTACT_TO_EMAIL || "contato@institutoincentive.org.br";
+app\api\contact\route.ts:93:    const formData = new FormData();
+app\api\contact\route.ts:94:    formData.append("secret", turnstileSecret);
+app\api\contact\route.ts:95:    formData.append("response", turnstileToken);
+app\api\contact\route.ts:102:      formData.append("remoteip", remoteIp);
+app\api\contact\route.ts:107:      body: formData,
+app\contato\page.tsx:28:    href: `mailto:${siteConfig.email}`,
+app\contato\page.tsx:42:    const formData = new FormData(event.currentTarget);
+app\contato\page.tsx:43:    const name = String(formData.get("name") || "").trim();
+app\contato\page.tsx:44:    const email = String(formData.get("email") || "").trim();
+app\contato\page.tsx:45:    const subject = String(formData.get("subject") || "Contato pelo site").trim();
+app\contato\page.tsx:46:    const message = String(formData.get("message") || "").trim();
+app\contato\page.tsx:49:    trackSiteEvent("lead_form_submit", {
+app\contato\page.tsx:50:      form: "contact",
+app\contato\page.tsx:143:              Compartilhe seu contato, o tema da conversa e uma breve descri????o da demanda.
+app\contato\page.tsx:153:import { ContactForm } from "@/components/contact-form";
+app\contato\layout.tsx:7:    "Canais oficiais de contato do Instituto Incentive para projetos, parcerias, transparencia e comunicacao institucional.",
+app\contato\layout.tsx:8:  path: "/contato",
+app\page.tsx:69:    text: "Informação pública organizada para fortalecer confiança e controle social.",
+app\page.tsx:77:    text: "Projetos que ampliam oportunidades de aprendizagem, formação profissional e protagonismo comunitário.",
+app\page.tsx:151:    text: "Documentos institucionais, emendas e informações públicas organizadas para consulta social.",
+app\page.tsx:164:    href: "/contato",
+app\page.tsx:193:              <span className="min-w-0 break-words">Inovação, desenvolvimento e transformação social desde 2001</span>
+app\page.tsx:197:              Transformação social com educação, cultura e inovação no território.
+app\page.tsx:273:              O Instituto Incentive de Inovação, Desenvolvimento e Transformação Social atua para promover inclusão,
+app\page.tsx:277:              A organização trabalha com uma abordagem colaborativa, formando parcerias com instituições públicas,
+app\page.tsx:343:              Um caminho claro para transformar diagnóstico, parceria e execução em resultado social.
+app\page.tsx:430:                Iniciativas que conectam formação, cultura e desenvolvimento social.
+app\page.tsx:476:      <section id="contato" className="border-t border-[var(--brand-border)] bg-[var(--brand-tint)]">
+app\page.tsx:524:              href={`mailto:${siteConfig.email}`}
+app\areas-de-atuacao\page.tsx:69:    description: "Soluções tecnológicas, transformação digital e empreendedorismo inovador.",
+app\areas-de-atuacao\page.tsx:72:      "Promoção de cidades inteligentes e transformação digital.",
+app\areas-de-atuacao\page.tsx:285:              Entre em contato para conversar sobre projetos, parcerias e oportunidades de colaboração.
+app\areas-de-atuacao\page.tsx:289:            href="/contato"
+app\areas-de-atuacao\page.tsx:292:            Entrar em contato
+src\components\layout\PublicFooter.tsx:25:  { href: "/contato", label: "Contato" },
+src\components\layout\PublicFooter.tsx:37:  { href: "/contato", label: "Contato" },
+src\components\layout\PublicFooter.tsx:63:                Inovação, Desenvolvimento e Transformação Social
+src\components\layout\PublicFooter.tsx:138:              href={`mailto:${siteConfig.email}`}
+app\quem-somos\page.tsx:105:      "Mais de duas décadas transformando vulnerabilidade em autonomia, dignidade e inclusão social.",
+app\quem-somos\page.tsx:120:              Uma trajetória dedicada à inovação, inclusão e transformação social.
+app\quem-somos\page.tsx:124:                O Instituto Incentive de Inovação, Desenvolvimento e Transformação Social nasceu em 2001, no município de
+app\quem-somos\page.tsx:129:                Criado por um grupo de pessoas comprometidas com a transformação social, o Instituto Incentive atua como
+app\quem-somos\page.tsx:183:              à consolidação de uma agenda ampla de inovação, desenvolvimento e transformação social.
+app\quem-somos\page.tsx:251:              Ser reconhecido como uma referência regional em transformação social, inovação e desenvolvimento
+app\privacidade\page.tsx:18:    "Politica de privacidade do Instituto Incentive, com orientacoes sobre contato, finalidade institucional, transparencia e direitos dos titulares.",
+app\privacidade\page.tsx:24:    title: "Dados de contato",
+app\privacidade\page.tsx:25:    text: "Quando uma pessoa envia mensagem ao Instituto, podemos tratar nome, e-mail, telefone, assunto e conteúdo informado voluntariamente.",
+app\privacidade\page.tsx:29:    text: "As informações são utilizadas para responder solicitações, organizar relacionamentos institucionais, registrar demandas e apoiar a comunicação com parceiros e comunidade.",
+app\privacidade\page.tsx:37:    text: "O Instituto restringe o acesso às informações pessoais a pessoas autorizadas e mantém práticas de cuidado documental compatíveis com sua atuação.",
+app\privacidade\page.tsx:42:  "Solicitar informação sobre o tratamento de seus dados pessoais.",
+app\privacidade\page.tsx:44:  "Solicitar exclusão ou revisão de informações quando aplicável.",
+app\privacidade\page.tsx:45:  "Entrar em contato para dúvidas sobre privacidade e proteção de dados.",
+app\privacidade\page.tsx:48:const cookieUses = [
+app\privacidade\page.tsx:50:  "Entender quais canais levam pessoas aos formulários, documentos e páginas de projetos.",
+app\privacidade\page.tsx:56:  "Envio do formulário de contato por e-mail.",
+app\privacidade\page.tsx:59:  "Acesso a projetos em plataformas públicas de referência.",
+app\privacidade\page.tsx:77:              Esta página apresenta, de forma objetiva, como o Instituto Incentive orienta o tratamento de informações
+app\privacidade\page.tsx:112:            Como solicitar informações ou correções.
+app\privacidade\page.tsx:115:            Pessoas que mantêm contato com o Instituto podem solicitar esclarecimentos sobre dados pessoais pelos canais
+app\privacidade\page.tsx:147:            {cookieUses.map((item) => (
+app\privacidade\page.tsx:166:              As medições opcionais ajudam o Instituto a avaliar se o site está cumprindo sua função pública: informar,
+app\privacidade\page.tsx:167:              facilitar contato, apoiar campanhas de interesse social e melhorar a navegação.
+app\privacidade\page.tsx:188:              Informações de transparência, certificações e documentos institucionais são publicadas para consulta
+app\privacidade\page.tsx:202:            <h2 className="mt-4 text-xl font-bold">Canal de contato</h2>
+app\privacidade\page.tsx:208:              href="mailto:contato@institutoincentive.org.br?subject=Privacidade%20e%20prote%C3%A7%C3%A3o%20de%20dados"
+app\privacidade\page.tsx:211:              contato@institutoincentive.org.br
+src\lib\seo.ts:7:  "Instituto Incentive de Inovacao, Desenvolvimento e Transformacao Social: organizacao da sociedade civil de Pereiro/CE com projetos de educacao, cultura, inclusao, sustentabilidade e transparencia.";
+src\lib\seo.ts:37:  { path: "/contato", priority: 0.75, changeFrequency: "monthly" },
+src\lib\site-config.ts:29:  fullName: "Instituto Incentive de Inovacao, Desenvolvimento e Transformacao Social",
+src\lib\site-config.ts:34:  email: "contato@institutoincentive.org.br",
+src\lib\site-config.ts:53:  return `mailto:${siteConfig.email}?${params.toString()}`;
+src\components\layout\PublicHeader.tsx:16:  { href: "/contato", label: "Contato" },
+app\transparencia\page.tsx:18:    "Portal da Transparencia do Instituto Incentive com documentos institucionais, certidoes, governanca, relatorios, contas e informacoes publicas.",
+app\transparencia\page.tsx:25:    description: "Atos constitutivos, registro público e identificação formal do Instituto.",
+app\transparencia\page.tsx:28:        title: "Estatuto Social Reformado - RPJ",
+app\transparencia\page.tsx:29:        href: "/documentos/transparencia/estatuto-social-reformado-rpj.pdf",
+app\transparencia\page.tsx:42:    title: "Licenças e conformidade",
+app\transparencia\page.tsx:54:        title: "Certificado de conformidade simplificado",
+app\transparencia\page.tsx:55:        href: "/documentos/transparencia/certificado-conformidade-simplificado.pdf",
+app\transparencia\page.tsx:130:              solicitação de informações.
+app\transparencia\page.tsx:161:                Os anexos abaixo estão publicados por finalidade para consulta, verificação e prestação de informações
+app\transparencia\page.tsx:208:            <h2 className="mt-4 text-2xl font-bold">Solicitação de informações</h2>
+app\transparencia\page.tsx:210:              Pedidos de informação sobre documentos institucionais, regularidade, parcerias ou prestação de contas
+app\transparencia\page.tsx:211:              podem ser encaminhados ao canal oficial de contato do Instituto.
+app\transparencia\page.tsx:217:              href="mailto:contato@institutoincentive.org.br?subject=Solicitação%20de%20informações%20-%20Transparência"
+app\transparencia\page.tsx:221:              <span className="break-all text-sm font-semibold sm:text-base">contato@institutoincentive.org.br</span>
+app\projetos\page.tsx:22:    "Projetos do Instituto Incentive em cultura, formacao profissional, governanca comunitaria e fortalecimento institucional em Pereiro/CE.",
+app\projetos\page.tsx:31:    axis: "Cultura e formação artística",
+app\projetos\page.tsx:53:    value: "Não informado",
+app\projetos\page.tsx:69:    value: "Não informado",
+app\projetos\page.tsx:85:    value: "Não informado",
+app\projetos\page.tsx:87:      "Encontro formativo para fortalecer associações e organizações da sociedade civil por meio de governança, gestão transparente, legalidade e captação de recursos.",
+app\projetos\page.tsx:101:    value: "Não informado",
+app\projetos\page.tsx:103:      "Ação formativa sobre gestão organizacional, sustentabilidade institucional, elaboração de projetos, políticas públicas e mecanismos de financiamento.",
+app\projetos\page.tsx:123:            Os projetos reúnem ações de formação cultural, qualificação profissional, economia criativa e fortalecimento
+app\transparencia\emendas-parlamentares\page.tsx:89:  "Olá, gostaria de solicitar informações/documentos sobre a página de emendas parlamentares do Instituto Incentive.",
+app\transparencia\emendas-parlamentares\page.tsx:91:const requestHref = `mailto:contato@institutoincentive.org.br?subject=${requestSubject}&body=${requestBody}`;
+app\transparencia\emendas-parlamentares\page.tsx:135:              Solicitar informações complementares <Mail className="h-4 w-4" aria-hidden="true" />
+app\transparencia\emendas-parlamentares\page.tsx:323:                <h2 className="text-2xl font-black">Solicitação de informações</h2>
+app\transparencia\emendas-parlamentares\page.tsx:329:                contato@institutoincentive.org.br <Mail className="h-4 w-4" aria-hidden="true" />

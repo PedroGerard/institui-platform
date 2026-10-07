@@ -1,0 +1,6 @@
+BRANCH=codex/melhorar-transparencia-emendas-20260715
+STATUS_COUNT=1
+STATUS= M app/transparencia/emendas-parlamentares/page.tsx
+DIFF=app/transparencia/emendas-parlamentares/page.tsx
+FILE_EXISTS=True
+HAS_NEW_TEXT=True

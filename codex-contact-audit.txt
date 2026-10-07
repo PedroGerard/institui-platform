@@ -1,0 +1,13 @@
+﻿## main...origin/main [ahead 1]
+a1269ca feat: aprimorar portal de emendas parlamentares
+page_exists=True
+env_example=False
+contact_related_files:
+app\contato\layout.tsx
+app\contato\page.tsx
+src\components\analytics\CookieConsentBanner.tsx
+src\components\analytics\GoogleMeasurement.tsx
+src\components\analytics\TrackedAnchor.tsx
+src\components\layout\PublicBrand.tsx
+src\components\layout\PublicFooter.tsx
+src\components\layout\PublicHeader.tsx

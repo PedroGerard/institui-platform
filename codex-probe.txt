@@ -1,0 +1,5 @@
+﻿STATUS:
+## main...origin/main
+FILES:
+C:\Users\user\Documents\instituto-incentive-site\app\transparencia\page.tsx
+C:\Users\user\Documents\instituto-incentive-site\app\transparencia\emendas-parlamentares\page.tsx
