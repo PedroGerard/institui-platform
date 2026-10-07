@@ -1,4 +1,4 @@
-name: Platform
+name: Site
 
 on:
   workflow_dispatch:
@@ -14,14 +14,14 @@ permissions:
   contents: read
 
 concurrency:
-  group: platform-${{ github.workflow }}-${{ github.ref }}
+  group: site-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   validate:
-    name: Validate ERP platform
+    name: Validate institutional site
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 15
     env:
       NEXT_TELEMETRY_DISABLED: "1"
 
@@ -32,12 +32,15 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: "24"
           cache: npm
           cache-dependency-path: package-lock.json
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Validate platform
-        run: npm run ci
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build

@@ -1,0 +1,20 @@
+# Local-only folders that must never be uploaded in manual Vercel deploys.
+instituto-platform/
+instituto-incentive-site/
+brand-manual-temp/
+git-meta-test/
+git-upload-meta/
+.agents/
+.codex/
+.tmp/
+
+# Local artifacts and secrets.
+.env
+.env.*
+*.log
+dev-*.log
+test_output*.txt
+
+# Documentation and audit workspaces are kept in Git when useful, but are not
+# needed in the production deployment package.
+materiais/

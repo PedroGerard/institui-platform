@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1800 420" role="img" aria-label="Paleta de cores do Instituto Incentive">
+  <rect width="1800" height="420" fill="#f6f6f6" />
+  <rect width="600" height="420" fill="#ff9507" />
+  <rect x="600" width="600" height="420" fill="#006871" />
+  <rect x="1200" width="600" height="420" fill="#f6f6f6" />
+
+  <g font-family="Arial, Helvetica, sans-serif" font-weight="700" text-anchor="middle">
+    <text x="300" y="184" fill="#006871" font-size="72">#ff9507</text>
+    <text x="300" y="244" fill="#006871" font-size="34">Cor Principal</text>
+
+    <text x="900" y="184" fill="#ffffff" font-size="72">#006871</text>
+    <text x="900" y="244" fill="#ffffff" font-size="34">Cor Principal</text>
+
+    <text x="1500" y="184" fill="#006871" font-size="72">#f6f6f6</text>
+    <text x="1500" y="244" fill="#006871" font-size="34">Cor Secundaria</text>
+  </g>
+</svg>
