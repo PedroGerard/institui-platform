@@ -1,3 +1,4 @@
+﻿import VLibras from '@/components/VLibras';
 import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -123,7 +124,8 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
         />
-      </body>
+        <VLibras />`n  </body>
     </html>
   );
 }
+
