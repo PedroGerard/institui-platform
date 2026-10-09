@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Search, FileText, Filter } from 'lucide-react';
-import Header from '@/components/Header';
+import Navbar from '@/components/Navbar';
 
 interface ContratoTransparencia {
   id: string;
@@ -55,7 +55,7 @@ export default function TransparenciaPage() {
 
   return (
     <>
-      <Header />
+      <Navbar />
       <main className="min-h-screen bg-slate-50 py-12 text-slate-800">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="border-b border-slate-200 pb-8">
