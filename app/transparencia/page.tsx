@@ -1,7 +1,7 @@
 ﻿'use client';
 
 import { useState } from 'react';
-import { Search, FileText, Filter } from 'lucide-react';
+import { Search, FileText, Filter, Download } from 'lucide-react';
 
 interface ContratoTransparencia {
   id: string;
@@ -42,7 +42,7 @@ export default function TransparenciaPage() {
   const [filterModalidade, setFilterModalidade] = useState('TODOS');
 
   const filteredContratos = contratosData.filter((item) => {
-    const matchesSearch = 
+    const matchesSearch =
       item.objeto.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.numInstrumento.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.orgaoConcedente.toLowerCase().includes(searchTerm.toLowerCase());
@@ -160,10 +160,11 @@ export default function TransparenciaPage() {
                           href={item.linkArquivo}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center justify-center rounded-lg bg-slate-100 p-2 text-slate-700 hover:bg-emerald-500 hover:text-white transition-all"
+                          className="inline-flex items-center gap-1 rounded-lg bg-emerald-500 px-3 py-1.5 text-[11px] font-semibold text-white shadow-sm hover:bg-emerald-600 transition-all"
                           title="Acessar documento na íntegra"
                         >
-                          <FileText className="h-4 w-4" />
+                          <FileText className="h-3.5 w-3.5" />
+                          PDF
                         </a>
                       </td>
                     </tr>
