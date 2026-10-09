@@ -1,7 +1,7 @@
 ﻿'use client';
 
 import { useState } from 'react';
-import { Search, FileText, Filter, Download } from 'lucide-react';
+import { Search, FileText, Filter } from 'lucide-react';
 
 interface ContratoTransparencia {
   id: string;
@@ -33,7 +33,7 @@ const contratosData: ContratoTransparencia[] = [
     valorTotal: 'R$ 5.000,00',
     dataAssinatura: '22/05/2026',
     situacao: 'Em Execução (Vigência: 8 meses)',
-    linkArquivo: '/TERMO DE EXECUÇÃO CULTURAL N027-2026-SECULT.pdf',
+    linkArquivo: '/termo-027-2026.pdf',
   },
 ];
 
@@ -160,8 +160,8 @@ export default function TransparenciaPage() {
                           href={item.linkArquivo}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 rounded-lg bg-emerald-500 px-3 py-1.5 text-[11px] font-semibold text-white shadow-sm hover:bg-emerald-600 transition-all"
-                          title="Acessar documento na íntegra"
+                          className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 transition-all shadow-sm"
+                          title="Baixar / Visualizar Documento"
                         >
                           <FileText className="h-3.5 w-3.5" />
                           PDF
